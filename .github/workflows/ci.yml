@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  dotnet:
+    name: .NET build and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release
+      - name: Unit tests
+        run: dotnet test tests/AthleteDay.UnitTests --no-build -c Release
+      # Testcontainers starts a throwaway SQL Server 2022 container on the runner.
+      - name: Integration tests (real SQL Server)
+        run: dotnet test tests/AthleteDay.IntegrationTests --no-build -c Release
+
+  angular:
+    name: Angular build and tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web/dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/dashboard/package-lock.json
+      - run: npm ci
+      - run: npx ng build
+      - run: npx ng test --watch=false
+
+  docker:
+    name: Docker images build
+    runs-on: ubuntu-latest
+    needs: [dotnet, angular]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose build

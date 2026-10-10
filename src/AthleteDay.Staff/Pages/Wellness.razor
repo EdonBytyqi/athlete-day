@@ -1,0 +1,86 @@
+@page "/wellness"
+@inject StaffApi Api
+@inject PersonaState Persona
+
+<PageTitle>Morning check · Athlete Day</PageTitle>
+
+<RoleGate Role="@Roles.Athlete">
+    <h1>Good morning, @Persona.Current.User</h1>
+    <p class="lead">Three quick questions. Your coach and physio see the answers; the kitchen does not.</p>
+
+    <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="wellness" class="form">
+        <DataAnnotationsValidator />
+        <ServerValidator @ref="_server" />
+        <ValidationMessage For="() => _model.AthleteId" />
+
+        <div class="row">
+            <label>
+                Date
+                <InputDate @bind-Value="_model.Date" />
+                <ValidationMessage For="() => _model.Date" />
+            </label>
+            <label>
+                Sleep last night (hours)
+                <InputNumber @bind-Value="_model.SleepHours" step="0.5" min="0" max="14" />
+                <ValidationMessage For="() => _model.SleepHours" />
+            </label>
+        </div>
+
+        <fieldset>
+            <legend>Muscle soreness</legend>
+            <InputRadioGroup @bind-Value="_model.Soreness">
+                @for (var i = 1; i <= 5; i++)
+                {
+                    <label class="pill"><InputRadio Value="i" /> @i @(i == 1 ? "none" : i == 5 ? "very sore" : "")</label>
+                }
+            </InputRadioGroup>
+            <ValidationMessage For="() => _model.Soreness" />
+        </fieldset>
+
+        <fieldset>
+            <legend>Mood</legend>
+            <InputRadioGroup @bind-Value="_model.Mood">
+                @for (var i = 1; i <= 5; i++)
+                {
+                    <label class="pill"><InputRadio Value="i" /> @i @(i == 1 ? "very low" : i == 5 ? "great" : "")</label>
+                }
+            </InputRadioGroup>
+            <ValidationMessage For="() => _model.Mood" />
+        </fieldset>
+
+        <div class="actions">
+            <span></span>
+            <button type="submit" disabled="@(_busy || _model.AthleteId == 0)">Send check-in</button>
+        </div>
+    </EditForm>
+
+    <ResultBanner Error="@_error" Success="@_success" />
+</RoleGate>
+
+@code {
+    private readonly WellnessCheckRequest _model = new();
+    private ServerValidator? _server;
+    private bool _busy;
+    private string? _error;
+    private string? _success;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The athlete persona's user name is their code; find their own record.
+        var athletes = await Api.GetAthletesAsync();
+        _error = athletes.Error;
+        _model.AthleteId = athletes.Value?.FirstOrDefault(a => a.Code == Persona.Current.User)?.Id ?? 0;
+    }
+
+    private async Task SubmitAsync()
+    {
+        _busy = true;
+        _error = _success = null;
+        var result = await Api.SubmitWellnessAsync(_model);
+        _busy = false;
+
+        if (result.FieldErrors is { } errors) _server!.Show(errors);
+        else if (result.Error is { } error) _error = error;
+        else _success = "Thanks! Your check-in is saved and your readiness on the dashboard is updated.";
+    }
+}

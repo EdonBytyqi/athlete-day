@@ -1,0 +1,26 @@
+@implements IDisposable
+@inject PersonaState Persona
+
+@if (Persona.Is(Role))
+{
+    @ChildContent
+}
+else
+{
+    <div class="notice">
+        <strong>Not for the @Persona.Current.Role role.</strong>
+        This form belongs to the @Role. Switch persona at the top right to try it.
+        The API enforces the same rule, so hiding the form is a convenience, not the protection.
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public string Role { get; set; } = "";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized() => Persona.Changed += OnPersonaChanged;
+
+    private void OnPersonaChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Persona.Changed -= OnPersonaChanged;
+}

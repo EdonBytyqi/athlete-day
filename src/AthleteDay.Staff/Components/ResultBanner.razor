@@ -1,0 +1,13 @@
+@if (Error is not null)
+{
+    <div class="banner error" role="alert">@Error</div>
+}
+else if (Success is not null)
+{
+    <div class="banner success" role="status">@Success</div>
+}
+
+@code {
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public string? Success { get; set; }
+}

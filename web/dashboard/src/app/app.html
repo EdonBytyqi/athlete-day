@@ -1,0 +1,36 @@
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <div>
+      <strong>Athlete Day</strong>
+      <span class="brand-sub">Performance hub</span>
+    </div>
+  </div>
+
+  <nav class="tabs" aria-label="Screens">
+    @for (screen of persona.screens(); track screen) {
+      <a [routerLink]="['/', screen]" routerLinkActive="active">{{ labels[screen] }}</a>
+    }
+    <a [href]="staffUrl" target="_blank" rel="noopener">Staff input ↗</a>
+  </nav>
+
+  <div class="topbar-right">
+    <span class="live" [class]="'live ' + realtime.state()" [title]="'Realtime: ' + realtime.state()">
+      {{ realtime.state() === 'live' ? 'Live' : realtime.state() === 'connecting' ? 'Connecting' : 'Offline' }}
+    </span>
+    <label class="persona">
+      <span>Viewing as</span>
+      <select (change)="persona.switchTo($any($event.target).value)">
+        @for (p of personas; track p.user) {
+          <option [value]="p.user" [selected]="p.user === persona.current().user">{{ p.label }}</option>
+        }
+      </select>
+    </label>
+  </div>
+</header>
+
+<main class="page">
+  <router-outlet />
+</main>
+
+<footer class="foot">Synthetic data only · demo identities, not real sign-in</footer>

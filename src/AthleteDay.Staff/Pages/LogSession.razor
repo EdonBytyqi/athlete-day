@@ -1,0 +1,95 @@
+@page "/sessions/new"
+@inject StaffApi Api
+
+<PageTitle>Log session · Athlete Day</PageTitle>
+
+<RoleGate Role="@Roles.Coach">
+    <h1>Log a training session</h1>
+
+    <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="log-session" class="form">
+        <DataAnnotationsValidator />
+        <ServerValidator @ref="_server" />
+
+        <AthletePicker @bind-Value="_model.AthleteId" />
+
+        <div class="row">
+            <label>
+                Date
+                <InputDate @bind-Value="_model.Date" />
+                <ValidationMessage For="() => _model.Date" />
+            </label>
+            <label>
+                Type
+                <InputSelect @bind-Value="_model.Type">
+                    @foreach (var type in Enum.GetValues<SessionType>())
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </InputSelect>
+            </label>
+        </div>
+
+        <div class="row">
+            <label>
+                Duration (minutes)
+                <InputNumber @bind-Value="_model.DurationMinutes" min="5" max="300" />
+                <ValidationMessage For="() => _model.DurationMinutes" />
+            </label>
+            <label>
+                RPE (how hard was it?)
+                <InputSelect @bind-Value="_model.Rpe">
+                    @for (var i = 1; i <= 10; i++)
+                    {
+                        <option value="@i">@i · @RpeLabel(i)</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => _model.Rpe" />
+            </label>
+        </div>
+
+        <label>
+            Notes (optional, no health details)
+            <InputTextArea @bind-Value="_model.Notes" rows="2" />
+            <ValidationMessage For="() => _model.Notes" />
+        </label>
+
+        <div class="actions">
+            <span class="preview">Session load: <strong>@(_model.Rpe * _model.DurationMinutes) AU</strong></span>
+            <button type="submit" disabled="@_busy">Save session</button>
+        </div>
+    </EditForm>
+
+    <ResultBanner Error="@_error" Success="@_success" />
+</RoleGate>
+
+@code {
+    private LogSessionRequest _model = new();
+    private ServerValidator? _server;
+    private bool _busy;
+    private string? _error;
+    private string? _success;
+
+    // Borg CR-10 wording, the scale behind session-RPE.
+    private static string RpeLabel(int rpe) => rpe switch
+    {
+        1 => "very easy", 2 => "easy", 3 => "moderate", 4 => "somewhat hard", 5 or 6 => "hard",
+        7 or 8 => "very hard", 9 => "extremely hard", _ => "maximal"
+    };
+
+    private async Task SubmitAsync()
+    {
+        _busy = true;
+        _error = _success = null;
+        var result = await Api.LogSessionAsync(_model);
+        _busy = false;
+
+        if (result.FieldErrors is { } errors) _server!.Show(errors);
+        else if (result.Error is { } error) _error = error;
+        else
+        {
+            var s = result.Value!;
+            _success = $"Saved: {s.Type} for {s.AthleteCode}, {s.DurationMinutes} min at RPE {s.Rpe} = {s.Load} AU. The dashboard updates live.";
+            _model = new LogSessionRequest { AthleteId = _model.AthleteId, Date = _model.Date };
+        }
+    }
+}

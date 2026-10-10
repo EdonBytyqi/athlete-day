@@ -1,0 +1,52 @@
+# One command to run everything: docker compose up --build
+#   Dashboard (Angular)   http://localhost:8080
+#   Staff input (Blazor)  http://localhost:8081
+#   API + OpenAPI (Scalar) http://localhost:5080/scalar
+# Demo-only credentials below; never reuse them anywhere real.
+
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "AthleteDay!Demo2026"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --skipApiVersionCheck --loose
+
+  api:
+    build:
+      context: .
+      dockerfile: src/AthleteDay.Api/Dockerfile
+    environment:
+      ConnectionStrings__Sql: "Server=sql;Database=AthleteDay;User Id=sa;Password=AthleteDay!Demo2026;TrustServerCertificate=True"
+      # Azurite's well-known development account key (public, documented by Microsoft).
+      Storage__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;"
+      Demo__ResetOnStartup: "true"
+    ports:
+      - "5080:8080"
+    depends_on:
+      sql:
+        condition: service_healthy
+      azurite:
+        condition: service_started
+
+  dashboard:
+    build: ./web/dashboard
+    ports:
+      - "8080:80"
+    depends_on: [api]
+
+  staff:
+    build:
+      context: .
+      dockerfile: src/AthleteDay.Staff/Dockerfile
+    ports:
+      - "8081:80"
+    depends_on: [api]

@@ -1,0 +1,44 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject PersonaState Persona
+
+<header class="topbar">
+    <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+            <strong>Athlete Day</strong>
+            <span class="brand-sub">Staff input</span>
+        </div>
+    </div>
+    <label class="persona">
+        <span>Signed in as</span>
+        <select value="@Persona.Current.User" @onchange="e => Persona.Switch(e.Value!.ToString()!)">
+            @foreach (var p in PersonaState.All)
+            {
+                <option value="@p.User">@p.Label</option>
+            }
+        </select>
+    </label>
+</header>
+
+<nav class="tabs" aria-label="Forms">
+    <NavLink href="" Match="NavLinkMatch.All">Overview</NavLink>
+    @if (Persona.Is(Roles.Coach)) { <NavLink href="sessions/new">Log session</NavLink> }
+    @if (Persona.Is(Roles.Athlete)) { <NavLink href="wellness">Morning check</NavLink> }
+    @if (Persona.Is(Roles.Nutrition)) { <NavLink href="nutrition">Nutrition target</NavLink> }
+    @if (Persona.Is(Roles.Physio)) { <NavLink href="physio">Physio note</NavLink> }
+</nav>
+
+<main class="page">
+    @Body
+</main>
+
+<footer class="foot">Synthetic data only · demo identities, not real sign-in</footer>
+
+@code {
+    protected override void OnInitialized() => Persona.Changed += OnPersonaChanged;
+
+    private void OnPersonaChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Persona.Changed -= OnPersonaChanged;
+}

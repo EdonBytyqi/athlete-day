@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AthleteDay.Api/AthleteDay.Api.csproj" />
+    <Project Path="src/AthleteDay.Contracts/AthleteDay.Contracts.csproj" />
+    <Project Path="src/AthleteDay.Core/AthleteDay.Core.csproj" />
+    <Project Path="src/AthleteDay.Staff/AthleteDay.Staff.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AthleteDay.IntegrationTests/AthleteDay.IntegrationTests.csproj" />
+    <Project Path="tests/AthleteDay.UnitTests/AthleteDay.UnitTests.csproj" />
+  </Folder>
+</Solution>

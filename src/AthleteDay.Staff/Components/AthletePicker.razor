@@ -1,0 +1,45 @@
+@inject StaffApi Api
+
+<label>
+    Athlete
+    <select value="@Value" @onchange="OnChanged">
+        <option value="0">Select…</option>
+        @foreach (var a in _athletes)
+        {
+            <option value="@a.Id">@a.Code · @a.DisplayName (@a.Sport)</option>
+        }
+    </select>
+    @if (ValueExpression is not null)
+    {
+        <ValidationMessage For="ValueExpression" />
+    }
+    @if (_error is not null)
+    {
+        <span class="validation-message">@_error</span>
+    }
+</label>
+
+@code {
+    private List<AthleteDto> _athletes = [];
+    private string? _error;
+
+    [CascadingParameter] private EditContext? EditContext { get; set; }
+    [Parameter] public int Value { get; set; }
+    [Parameter] public EventCallback<int> ValueChanged { get; set; }
+    [Parameter] public System.Linq.Expressions.Expression<Func<int>>? ValueExpression { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Api.GetAthletesAsync();
+        _athletes = result.Value ?? [];
+        _error = result.Error;
+    }
+
+    private async Task OnChanged(ChangeEventArgs e)
+    {
+        Value = int.TryParse(e.Value?.ToString(), out var id) ? id : 0;
+        await ValueChanged.InvokeAsync(Value);
+        if (EditContext is not null && ValueExpression is not null)
+            EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
+    }
+}

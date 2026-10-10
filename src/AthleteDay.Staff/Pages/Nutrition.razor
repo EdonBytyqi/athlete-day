@@ -1,0 +1,67 @@
+@page "/nutrition"
+@inject StaffApi Api
+
+<PageTitle>Nutrition target · Athlete Day</PageTitle>
+
+<RoleGate Role="@Roles.Nutrition">
+    <h1>Daily nutrition target</h1>
+    <p class="lead">The kitchen sees the resulting portion size and carbohydrates in grams, plus your kitchen note.</p>
+
+    <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="nutrition" class="form">
+        <DataAnnotationsValidator />
+        <ServerValidator @ref="_server" />
+
+        <AthletePicker @bind-Value="_model.AthleteId" />
+
+        <div class="row">
+            <label>
+                Date
+                <InputDate @bind-Value="_model.Date" />
+                <ValidationMessage For="() => _model.Date" />
+            </label>
+            <label>
+                Energy (kcal)
+                <InputNumber @bind-Value="_model.EnergyKcal" step="50" />
+                <ValidationMessage For="() => _model.EnergyKcal" />
+            </label>
+            <label>
+                Carbohydrates (g per kg)
+                <InputNumber @bind-Value="_model.CarbsGPerKg" step="0.5" />
+                <ValidationMessage For="() => _model.CarbsGPerKg" />
+            </label>
+        </div>
+
+        <label>
+            Note for the kitchen (preferences only, no medical details)
+            <InputText @bind-Value="_model.KitchenNote" placeholder="e.g. vegetarian" />
+            <ValidationMessage For="() => _model.KitchenNote" />
+        </label>
+
+        <div class="actions">
+            <span></span>
+            <button type="submit" disabled="@_busy">Save target</button>
+        </div>
+    </EditForm>
+
+    <ResultBanner Error="@_error" Success="@_success" />
+</RoleGate>
+
+@code {
+    private readonly NutritionTargetRequest _model = new();
+    private ServerValidator? _server;
+    private bool _busy;
+    private string? _error;
+    private string? _success;
+
+    private async Task SubmitAsync()
+    {
+        _busy = true;
+        _error = _success = null;
+        var result = await Api.SetNutritionAsync(_model);
+        _busy = false;
+
+        if (result.FieldErrors is { } errors) _server!.Show(errors);
+        else if (result.Error is { } error) _error = error;
+        else _success = $"Saved: {result.Value!.EnergyKcal} kcal, {result.Value.CarbsG} g carbohydrates for the day.";
+    }
+}

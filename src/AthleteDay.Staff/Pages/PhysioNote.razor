@@ -1,0 +1,73 @@
+@page "/physio"
+@inject StaffApi Api
+
+<PageTitle>Physio note · Athlete Day</PageTitle>
+
+<RoleGate Role="@Roles.Physio">
+    <h1>Physio note</h1>
+    <p class="lead">
+        The note text is visible to physios only, and every view is written to the audit log.
+        The coach sees just the restriction level, so training can be adapted.
+    </p>
+
+    <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="physio" class="form">
+        <DataAnnotationsValidator />
+        <ServerValidator @ref="_server" />
+
+        <AthletePicker @bind-Value="_model.AthleteId" />
+
+        <div class="row">
+            <label>
+                Date
+                <InputDate @bind-Value="_model.Date" />
+                <ValidationMessage For="() => _model.Date" />
+            </label>
+            <label>
+                Training restriction
+                <InputSelect @bind-Value="_model.Restriction">
+                    @foreach (var r in Enum.GetValues<TrainingRestriction>())
+                    {
+                        <option value="@r">@r</option>
+                    }
+                </InputSelect>
+            </label>
+        </div>
+
+        <label>
+            Note
+            <InputTextArea @bind-Value="_model.Note" rows="4" />
+            <ValidationMessage For="() => _model.Note" />
+        </label>
+
+        <div class="actions">
+            <span></span>
+            <button type="submit" disabled="@_busy">Save note</button>
+        </div>
+    </EditForm>
+
+    <ResultBanner Error="@_error" Success="@_success" />
+</RoleGate>
+
+@code {
+    private PhysioNoteRequest _model = new();
+    private ServerValidator? _server;
+    private bool _busy;
+    private string? _error;
+    private string? _success;
+
+    private async Task SubmitAsync()
+    {
+        _busy = true;
+        _error = _success = null;
+        var result = await Api.AddPhysioNoteAsync(_model);
+        _busy = false;
+
+        if (result.FieldErrors is { } errors) _server!.Show(errors);
+        else if (result.Error is { } error) _error = error;
+        else
+        {
+            _success = $"Note saved. Restriction: {result.Value!.Restriction}.";
+            _model = new PhysioNoteRequest { AthleteId = _model.AthleteId };
+        }
+    }
+}

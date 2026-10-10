@@ -1,0 +1,45 @@
+@page "/"
+@implements IDisposable
+@inject PersonaState Persona
+
+<PageTitle>Athlete Day · Staff input</PageTitle>
+
+<h1>Fast input for the people in the hall</h1>
+<p class="lead">
+    Every discipline records its part of an athlete's day here. The coach dashboard (Angular) combines it,
+    and each role only ever sees what it needs.
+</p>
+
+<div class="cards">
+    <a class="card @(Persona.Is(Roles.Coach) ? "active" : "")" href="sessions/new" @onclick="() => Persona.Switch(PersonaFor(Roles.Coach))">
+        <h2>Coach</h2>
+        <p>Log a session: type, duration and RPE. Load = RPE × minutes.</p>
+    </a>
+    <a class="card @(Persona.Is(Roles.Athlete) ? "active" : "")" href="wellness" @onclick="() => Persona.Switch(PersonaFor(Roles.Athlete))">
+        <h2>Athlete</h2>
+        <p>Morning check: sleep, soreness and mood. Only for yourself.</p>
+    </a>
+    <a class="card @(Persona.Is(Roles.Nutrition) ? "active" : "")" href="nutrition" @onclick="() => Persona.Switch(PersonaFor(Roles.Nutrition))">
+        <h2>Nutrition</h2>
+        <p>Daily energy and carbohydrate targets, plus a note for the kitchen.</p>
+    </a>
+    <a class="card @(Persona.Is(Roles.Physio) ? "active" : "")" href="physio" @onclick="() => Persona.Switch(PersonaFor(Roles.Physio))">
+        <h2>Physio</h2>
+        <p>Health notes and training restrictions. Notes stay with the physio.</p>
+    </a>
+</div>
+
+@if (Persona.Is(Roles.Kitchen))
+{
+    <p class="notice">The kitchen has no input forms. Its view is the kitchen screen in the dashboard, which shows portions and carbohydrates and nothing about health.</p>
+}
+
+@code {
+    private static string PersonaFor(string role) => PersonaState.All.First(p => p.Role == role).User;
+
+    protected override void OnInitialized() => Persona.Changed += OnPersonaChanged;
+
+    private void OnPersonaChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Persona.Changed -= OnPersonaChanged;
+}
