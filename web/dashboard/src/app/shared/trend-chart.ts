@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { LoadTrendPoint } from '../api/models';
 
 export interface Bar {
@@ -58,7 +58,6 @@ function round(n: number): number {
 
 @Component({
   selector: 'app-trend-chart',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <figure class="chart">
       <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img"

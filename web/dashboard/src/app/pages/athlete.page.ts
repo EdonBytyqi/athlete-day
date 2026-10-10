@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService, describeError } from '../api/api.service';
@@ -9,7 +9,6 @@ import { TrendChart } from '../shared/trend-chart';
 
 @Component({
   selector: 'app-athlete-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, TrendChart],
   template: `
     <a routerLink="/dashboard" class="back">← Squad</a>

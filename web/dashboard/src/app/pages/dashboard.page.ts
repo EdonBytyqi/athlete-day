@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService, describeError } from '../api/api.service';
@@ -9,7 +9,6 @@ import { ReadinessBadge } from '../shared/readiness-badge';
 
 @Component({
   selector: 'app-dashboard-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, DecimalPipe, ReadinessBadge],
   template: `
     <header class="page-head">

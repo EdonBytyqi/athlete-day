@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { ReadinessStatus } from '../api/models';
 
 @Component({
   selector: 'app-readiness-badge',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <span class="badge" [class]="'badge ' + status().toLowerCase()">{{ label() }}</span>
     @if (reasons().length) {
