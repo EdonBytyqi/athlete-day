@@ -12,6 +12,7 @@ public class DeviceCsvValidatorTests
         DeviceCsvValidator.Validate(string.Join("\n", [Header, .. rows]), Athletes, Today);
 
     [Fact]
+    [Trait("AC", "AC-24")]
     public void Valid_rows_are_accepted_and_normalised()
     {
         var result = Validate("ath-001,2026-10-09,cmj,38.4,CM", "ATH-002,2026-10-09,SPRINT_30M,4.12,s");
@@ -31,6 +32,7 @@ public class DeviceCsvValidatorTests
     [InlineData("ATH-001,2026-10-09,CMJ,140,cm", "value", "plausible range")]
     [InlineData("ATH-001,2026-10-09,CMJ,38,mm", "unit", "expected 'cm'")]
     [InlineData("ATH-001,2026-10-09,CMJ,38", "row", "Expected 5 columns")]
+    [Trait("AC", "AC-24")]
     public void Invalid_rows_are_rejected_with_column_and_reason(string row, string column, string reasonPart)
     {
         var result = Validate(row);
@@ -44,6 +46,7 @@ public class DeviceCsvValidatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-23")]
     public void Good_rows_survive_next_to_bad_ones()
     {
         var result = Validate("ATH-001,2026-10-09,CMJ,38,cm", "ATH-099,2026-10-09,CMJ,38,cm", "ATH-002,2026-10-09,CMJ,41,cm");
@@ -54,6 +57,7 @@ public class DeviceCsvValidatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-24")]
     public void Duplicate_rows_are_rejected()
     {
         var result = Validate("ATH-001,2026-10-09,CMJ,38,cm", "ATH-001,2026-10-09,CMJ,39,cm");
@@ -63,6 +67,7 @@ public class DeviceCsvValidatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-24")]
     public void Semicolon_exports_from_excel_are_accepted()
     {
         var csv = "athlete_code;date;test_type;value;unit\nATH-001;2026-10-09;CMJ;38.4;cm";
@@ -73,6 +78,7 @@ public class DeviceCsvValidatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-25")]
     public void Wrong_header_is_a_file_level_error()
     {
         var result = DeviceCsvValidator.Validate("code,day,value\nATH-001,2026-10-09,38", Athletes, Today);
@@ -82,12 +88,14 @@ public class DeviceCsvValidatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-25")]
     public void Empty_file_is_a_file_level_error()
     {
         Assert.True(DeviceCsvValidator.Validate("", Athletes, Today).HasFileError);
     }
 
     [Fact]
+    [Trait("AC", "AC-25")]
     public void Blank_lines_and_windows_line_endings_are_ignored()
     {
         var result = DeviceCsvValidator.Validate($"{Header}\r\nATH-001,2026-10-09,CMJ,38,cm\r\n\r\n", Athletes, Today);
@@ -97,6 +105,7 @@ public class DeviceCsvValidatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-24")]
     public void Quoted_cells_keep_their_delimiter()
     {
         Assert.Equal(["a", "b,c", "d\"e"], DeviceCsvValidator.SplitLine("a,\"b,c\",\"d\"\"e\"", ','));

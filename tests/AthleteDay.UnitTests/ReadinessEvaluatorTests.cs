@@ -8,6 +8,7 @@ public class ReadinessEvaluatorTests
     private static readonly WellnessSummaryDto Good = new(new DateOnly(2026, 10, 10), SleepHours: 8, Soreness: 2, Mood: 4);
 
     [Fact]
+    [Trait("AC", "AC-17")]
     public void Good_wellness_and_normal_ratio_is_ok()
     {
         var result = ReadinessEvaluator.Evaluate(Good, ratio: 1.0, TrainingRestriction.None);
@@ -17,6 +18,7 @@ public class ReadinessEvaluatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-17")]
     public void Missing_wellness_alone_is_reported_as_missing_not_as_a_concern()
     {
         var result = ReadinessEvaluator.Evaluate(null, ratio: 1.0, TrainingRestriction.None);
@@ -29,6 +31,7 @@ public class ReadinessEvaluatorTests
     [InlineData(5.5, 2, 4, "Sleep under 6 h (5.5 h)")]
     [InlineData(8.0, 4, 4, "High soreness (4/5)")]
     [InlineData(8.0, 2, 2, "Low mood (2/5)")]
+    [Trait("AC", "AC-10")]
     public void Each_wellness_threshold_raises_a_check_in(decimal sleep, int soreness, int mood, string reason)
     {
         var result = ReadinessEvaluator.Evaluate(Good with { SleepHours = sleep, Soreness = soreness, Mood = mood }, 1.0, TrainingRestriction.None);
@@ -40,6 +43,7 @@ public class ReadinessEvaluatorTests
     [Theory]
     [InlineData(1.31, "above")]
     [InlineData(0.79, "below")]
+    [Trait("AC", "AC-13")]
     public void Ratio_outside_the_band_raises_a_check_in(double ratio, string direction)
     {
         var result = ReadinessEvaluator.Evaluate(Good, ratio, TrainingRestriction.None);
@@ -52,12 +56,14 @@ public class ReadinessEvaluatorTests
     [InlineData(1.3)]
     [InlineData(0.8)]
     [InlineData(null)]
+    [Trait("AC", "AC-13")]
     public void Ratio_at_the_band_edges_or_unknown_is_not_flagged(double? ratio)
     {
         Assert.Equal(ReadinessStatus.Ok, ReadinessEvaluator.Evaluate(Good, ratio, TrainingRestriction.None).Status);
     }
 
     [Fact]
+    [Trait("AC", "AC-18")]
     public void Physio_restriction_is_always_surfaced()
     {
         var result = ReadinessEvaluator.Evaluate(Good, 1.0, TrainingRestriction.Modified);
@@ -67,6 +73,7 @@ public class ReadinessEvaluatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-17")]
     public void Missing_wellness_plus_another_reason_is_a_check_in()
     {
         var result = ReadinessEvaluator.Evaluate(null, ratio: 1.6, TrainingRestriction.None);

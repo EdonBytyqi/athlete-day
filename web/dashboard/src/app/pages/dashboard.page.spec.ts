@@ -43,7 +43,7 @@ describe('DashboardPage', () => {
     controller = TestBed.inject(HttpTestingController);
   });
 
-  it('lists athletes and counts check-ins', async () => {
+  it('[AC-15] lists athletes and counts check-ins', async () => {
     const fixture = TestBed.createComponent(DashboardPage);
     fixture.detectChanges();
 
@@ -66,7 +66,7 @@ describe('DashboardPage', () => {
     expect(el.textContent).toContain('not an injury predictor');
   });
 
-  it('explains a 403 as need-to-know access instead of failing', async () => {
+  it('[AC-28] explains a 403 as need-to-know access instead of failing', async () => {
     TestBed.inject(PersonaService).switchTo('luca');
     const fixture = TestBed.createComponent(DashboardPage);
     fixture.detectChanges();
@@ -79,7 +79,7 @@ describe('DashboardPage', () => {
     );
   });
 
-  it('reloads when the API pushes a change', async () => {
+  it('[AC-31] reloads when the API pushes a change', async () => {
     const fixture = TestBed.createComponent(DashboardPage);
     fixture.detectChanges();
     controller.expectOne('/api/dashboard').flush([row({})]);

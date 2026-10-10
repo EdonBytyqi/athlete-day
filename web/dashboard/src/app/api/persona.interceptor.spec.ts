@@ -19,7 +19,7 @@ describe('personaInterceptor', () => {
 
   afterEach(() => controller.verify());
 
-  it('sends the current persona with API calls', () => {
+  it('[AC-04] sends the current persona with API calls', () => {
     TestBed.inject(PersonaService).switchTo('luca');
 
     http.get('/api/kitchen/today').subscribe();
@@ -30,7 +30,7 @@ describe('personaInterceptor', () => {
     req.flush([]);
   });
 
-  it('leaves non-API requests alone', () => {
+  it('[AC-04] leaves non-API requests alone', () => {
     http.get('/assets/config.json').subscribe();
 
     const req = controller.expectOne('/assets/config.json');

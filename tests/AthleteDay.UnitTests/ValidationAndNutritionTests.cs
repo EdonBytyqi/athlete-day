@@ -14,12 +14,14 @@ public class ValidationAndNutritionTests
     }
 
     [Fact]
+    [Trait("AC", "AC-07")]
     public void A_complete_session_request_is_valid()
     {
         Assert.Empty(Validate(new LogSessionRequest { AthleteId = 1, DurationMinutes = 60, Rpe = 7 }));
     }
 
     [Fact]
+    [Trait("AC", "AC-07")]
     public void Session_request_reports_every_invalid_field()
     {
         var errors = Validate(new LogSessionRequest { AthleteId = 0, DurationMinutes = 2, Rpe = 11 });
@@ -30,6 +32,7 @@ public class ValidationAndNutritionTests
     }
 
     [Fact]
+    [Trait("AC", "AC-08")]
     public void Session_in_the_future_is_rejected()
     {
         var errors = Validate(new LogSessionRequest
@@ -41,6 +44,7 @@ public class ValidationAndNutritionTests
     }
 
     [Fact]
+    [Trait("AC", "AC-21")]
     public void Physio_note_requires_text()
     {
         var errors = Validate(new PhysioNoteRequest { AthleteId = 1, Note = "" });
@@ -51,6 +55,7 @@ public class ValidationAndNutritionTests
     [Theory]
     [InlineData(6.0, 66.0, 396)]
     [InlineData(5.5, 63.0, 347)] // 346.5 rounds up
+    [Trait("AC", "AC-19")]
     public void Carbohydrate_grams_are_rounded_to_whole_grams(decimal perKg, decimal mass, int expected) =>
         Assert.Equal(expected, NutritionCalculator.CarbsGrams(perKg, mass));
 
@@ -59,6 +64,7 @@ public class ValidationAndNutritionTests
     [InlineData(2200, "M")]
     [InlineData(3000, "L")]
     [InlineData(3800, "XL")]
+    [Trait("AC", "AC-19")]
     public void Portion_size_follows_the_energy_target(int kcal, string portion) =>
         Assert.Equal(portion, NutritionCalculator.Portion(kcal));
 }

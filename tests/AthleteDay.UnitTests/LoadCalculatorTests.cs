@@ -10,16 +10,19 @@ public class LoadCalculatorTests
     [InlineData(7, 60, 420)]
     [InlineData(1, 30, 30)]
     [InlineData(10, 120, 1200)]
+    [Trait("AC", "AC-05")]
     public void Session_load_is_rpe_times_minutes(int rpe, int minutes, int expected) =>
         Assert.Equal(expected, LoadCalculator.SessionLoad(rpe, minutes));
 
     [Theory]
     [InlineData(0)]
     [InlineData(11)]
+    [Trait("AC", "AC-06")]
     public void Session_load_rejects_rpe_outside_1_to_10(int rpe) =>
         Assert.Throws<ArgumentOutOfRangeException>(() => LoadCalculator.SessionLoad(rpe, 60));
 
     [Fact]
+    [Trait("AC", "AC-11")]
     public void Rolling_average_counts_rest_days_as_zero()
     {
         var loads = new Dictionary<DateOnly, int>
@@ -32,6 +35,7 @@ public class LoadCalculatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-11")]
     public void Rolling_average_ignores_days_outside_the_window()
     {
         var loads = new Dictionary<DateOnly, int>
@@ -44,6 +48,7 @@ public class LoadCalculatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-12")]
     public void Summary_from_sums_divides_by_window_length_and_computes_ratio()
     {
         var summary = LoadCalculator.FromSums(todayLoad: 500, acuteSum: 3500, chronicSum: 11200);
@@ -55,12 +60,14 @@ public class LoadCalculatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-13")]
     public void Ratio_is_null_without_chronic_load()
     {
         Assert.Null(LoadCalculator.Ratio(acute: 300, chronic: 0));
     }
 
     [Fact]
+    [Trait("AC", "AC-14")]
     public void Trend_has_one_point_per_day_ending_today()
     {
         var trend = LoadCalculator.BuildTrend([], Today, days: 28);
@@ -72,6 +79,7 @@ public class LoadCalculatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-14")]
     public void Trend_sums_multiple_sessions_on_the_same_day()
     {
         var trend = LoadCalculator.BuildTrend(
@@ -83,6 +91,7 @@ public class LoadCalculatorTests
     }
 
     [Fact]
+    [Trait("AC", "AC-14")]
     public void Constant_training_gives_equal_acute_and_chronic_averages()
     {
         var history = Enumerable.Range(0, 60).Select(i => new DailyLoad(Today.AddDays(-i), 400));

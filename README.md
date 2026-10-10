@@ -27,6 +27,17 @@ event-driven import with a row-by-row validation report.
 | Quality | xUnit unit tests, integration tests with `WebApplicationFactory` against a real SQL Server (**Testcontainers** in CI) |
 | Delivery | GitHub Actions (build, tests, Docker images), Docker Compose for one-command start |
 
+## Spec-driven development
+
+The specification in [`docs/spec/`](docs/spec/) is the source of truth:
+[requirements with numbered acceptance criteria](docs/spec/requirements.md), the
+[OpenAPI contract](docs/spec/openapi.json) and [architecture decisions](docs/spec/decisions.md).
+Every change goes **spec → failing tests → code**, one commit each, on a feature branch with a PR.
+
+CI enforces it: a traceability check fails if an acceptance criterion has no test (or a test names an unknown one), and a
+contract test fails if the API drifts from `openapi.json`. v1.0 of the spec was written after the first implementation
+to set a baseline; everything after it follows the workflow. Details: [docs/spec/README.md](docs/spec/README.md).
+
 ## Architecture
 
 ```

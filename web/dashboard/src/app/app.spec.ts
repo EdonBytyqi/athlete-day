@@ -21,7 +21,7 @@ describe('App shell', () => {
     }).compileComponents();
   });
 
-  it('shows only the screens of the current role', async () => {
+  it('[AC-03] shows only the screens of the current role', async () => {
     const fixture = TestBed.createComponent(App);
     const persona = TestBed.inject(PersonaService);
     const tabs = () =>

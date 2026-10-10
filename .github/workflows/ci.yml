@@ -15,10 +15,14 @@ jobs:
           dotnet-version: 10.0.x
       - run: dotnet restore
       - run: dotnet build --no-restore -c Release
+      # Every acceptance criterion in docs/spec/requirements.md must have a test, and vice versa.
+      - name: Spec traceability
+        run: dotnet test tests/AthleteDay.UnitTests --no-build -c Release --filter Category=Spec
       - name: Unit tests
-        run: dotnet test tests/AthleteDay.UnitTests --no-build -c Release
+        run: dotnet test tests/AthleteDay.UnitTests --no-build -c Release --filter "Category!=Spec"
       # Testcontainers starts a throwaway SQL Server 2022 container on the runner.
-      - name: Integration tests (real SQL Server)
+      # Includes the OpenAPI contract check against docs/spec/openapi.json.
+      - name: Integration and contract tests (real SQL Server)
         run: dotnet test tests/AthleteDay.IntegrationTests --no-build -c Release
 
   angular:

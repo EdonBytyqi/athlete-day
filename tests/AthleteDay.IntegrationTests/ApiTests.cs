@@ -15,6 +15,7 @@ public sealed class ApiTests(ApiFactory api)
         TimeZoneInfo.FindSystemTimeZoneById("Europe/Zurich")).DateTime);
 
     [Fact]
+    [Trait("AC", "AC-01")]
     public async Task Requests_without_a_persona_are_rejected()
     {
         var response = await api.CreateClient().GetAsync("/api/dashboard");
@@ -23,6 +24,8 @@ public sealed class ApiTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-05")]
+    [Trait("AC", "AC-12")]
     public async Task Coach_logs_a_session_and_the_dashboard_reflects_the_load()
     {
         var athlete = await api.CreateAthleteAsync();
@@ -43,6 +46,7 @@ public sealed class ApiTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-12")]
     public async Task Dashboard_sql_report_uses_the_7_and_28_day_windows()
     {
         var athlete = await api.CreateAthleteAsync();
@@ -64,6 +68,7 @@ public sealed class ApiTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-07")]
     public async Task Invalid_session_returns_400_with_an_error_per_field()
     {
         var response = await api.ClientAs(Roles.Coach).PostAsJsonAsync("/api/sessions",
@@ -82,6 +87,7 @@ public sealed class ApiTests(ApiFactory api)
     [InlineData(Roles.Coach, "/api/athletes/1/physio-notes")]
     [InlineData(Roles.Nutrition, "/api/athletes/1/physio-notes")]
     [InlineData(Roles.Coach, "/api/audit")]
+    [Trait("AC", "AC-02")]
     public async Task Each_role_is_denied_what_it_does_not_need(string role, string url)
     {
         var response = await api.ClientAs(role).GetAsync(url);
@@ -90,6 +96,7 @@ public sealed class ApiTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-20")]
     public async Task Kitchen_sees_portions_and_carbs_but_no_health_data()
     {
         var athlete = await api.CreateAthleteAsync(bodyMassKg: 80m);
@@ -117,6 +124,7 @@ public sealed class ApiTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-09")]
     public async Task Athletes_can_only_submit_their_own_wellness_check()
     {
         var me = await api.CreateAthleteAsync();
@@ -131,6 +139,7 @@ public sealed class ApiTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-10")]
     public async Task Poor_wellness_raises_a_readiness_check_in()
     {
         var athlete = await api.CreateAthleteAsync();
@@ -145,6 +154,7 @@ public sealed class ApiTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-22")]
     public async Task Viewing_health_notes_is_written_to_the_audit_log()
     {
         var athlete = await api.CreateAthleteAsync();
@@ -157,6 +167,7 @@ public sealed class ApiTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-23")]
     public async Task Device_import_runs_through_the_queue_and_reports_rejected_rows()
     {
         var athlete = await api.CreateAthleteAsync();
@@ -186,6 +197,7 @@ public sealed class ApiTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-26")]
     public async Task Non_csv_uploads_are_rejected()
     {
         var response = await api.ClientAs(Roles.Coach).PostCsvAsync("photo.png", "not a csv");
