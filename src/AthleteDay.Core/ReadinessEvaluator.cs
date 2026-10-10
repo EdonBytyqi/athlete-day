@@ -15,6 +15,10 @@ public static class ReadinessEvaluator
     public const double HighRatio = 1.3;
     public const double LowRatio = 0.8;
 
+    /// <summary>The wellness part of the readiness rules, for one day (spec AC-44).</summary>
+    public static IReadOnlyList<string> WellnessFlags(WellnessSummaryDto wellness) =>
+        throw new NotImplementedException("Spec v1.3 AC-44: not implemented yet.");
+
     public static ReadinessDto Evaluate(WellnessSummaryDto? wellness, double? ratio, TrainingRestriction restriction)
     {
         var reasons = new List<string>();

@@ -35,6 +35,9 @@ public sealed record TrainingSessionDto(
 
 public sealed record WellnessSummaryDto(DateOnly Date, decimal SleepHours, int Soreness, int Mood);
 
+/// <summary>One morning check in the wellness history (spec F11).</summary>
+public sealed record WellnessDayDto(DateOnly Date, decimal SleepHours, int Soreness, int Mood, IReadOnlyList<string> Flags);
+
 public sealed record ReadinessDto(ReadinessStatus Status, IReadOnlyList<string> Reasons);
 
 public sealed record NutritionTodayDto(int EnergyKcal, int CarbsG);
