@@ -11,6 +11,7 @@ import {
   Measurement,
   PhysioNote,
   TrainingSession,
+  WellnessDay,
 } from './models';
 
 @Injectable({ providedIn: 'root' })
@@ -48,6 +49,10 @@ export class ApiService {
 
   loadTrend(athleteId: number, days = 28) {
     return this.http.get<LoadTrend>(`/api/athletes/${athleteId}/load-trend`, { params: { days } });
+  }
+
+  wellness(athleteId: number, days = 14) {
+    return this.http.get<WellnessDay[]>(`/api/athletes/${athleteId}/wellness`, { params: { days } });
   }
 
   sessions(athleteId: number) {

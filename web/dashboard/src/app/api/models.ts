@@ -13,6 +13,11 @@ export interface WellnessSummary {
   mood: number;
 }
 
+/** Spec v1.1 F11: one morning check in the wellness history. */
+export interface WellnessDay extends WellnessSummary {
+  flags: string[];
+}
+
 export interface DashboardRow {
   athleteId: number;
   code: string;

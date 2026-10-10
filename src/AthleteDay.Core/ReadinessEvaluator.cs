@@ -16,26 +16,26 @@ public static class ReadinessEvaluator
     public const double LowRatio = 0.8;
 
     /// <summary>The wellness part of the readiness rules, for one day (spec AC-44).</summary>
-    public static IReadOnlyList<string> WellnessFlags(WellnessSummaryDto wellness) =>
-        throw new NotImplementedException("Spec v1.3 AC-44: not implemented yet.");
+    public static IReadOnlyList<string> WellnessFlags(WellnessSummaryDto wellness)
+    {
+        var flags = new List<string>();
+        if (wellness.SleepHours < MinSleepHours)
+            flags.Add(Invariant($"Sleep under {MinSleepHours:0} h ({wellness.SleepHours:0.#} h)"));
+        if (wellness.Soreness >= HighSoreness)
+            flags.Add(Invariant($"High soreness ({wellness.Soreness}/5)"));
+        if (wellness.Mood <= LowMood)
+            flags.Add(Invariant($"Low mood ({wellness.Mood}/5)"));
+        return flags;
+    }
 
     public static ReadinessDto Evaluate(WellnessSummaryDto? wellness, double? ratio, TrainingRestriction restriction)
     {
         var reasons = new List<string>();
 
         if (wellness is null)
-        {
             reasons.Add("No wellness check today");
-        }
         else
-        {
-            if (wellness.SleepHours < MinSleepHours)
-                reasons.Add(Invariant($"Sleep under {MinSleepHours:0} h ({wellness.SleepHours:0.#} h)"));
-            if (wellness.Soreness >= HighSoreness)
-                reasons.Add(Invariant($"High soreness ({wellness.Soreness}/5)"));
-            if (wellness.Mood <= LowMood)
-                reasons.Add(Invariant($"Low mood ({wellness.Mood}/5)"));
-        }
+            reasons.AddRange(WellnessFlags(wellness));
 
         if (ratio > HighRatio)
             reasons.Add(Invariant($"7-day load well above 28-day average (ratio {ratio:0.00})"));
