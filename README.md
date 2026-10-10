@@ -29,7 +29,7 @@ event-driven import with a row-by-row validation report.
 | API | ASP.NET Core 10 minimal API, built-in request validation, OpenAPI + Scalar, ProblemDetails |
 | Data | SQL Server · **EF Core 10** for writes and migrations · **Dapper + hand-written T-SQL** for the dashboard report |
 | Staff input | **Blazor WebAssembly**, sharing the validation rules with the API through a contracts project |
-| Dashboard | **Angular 21**: standalone components, signals, zoneless, lazy routes, Vitest |
+| Dashboard | **Angular 22**: standalone components, signals, zoneless, lazy routes, Vitest |
 | Events | Azure **Blob Storage** + **Storage Queue** (Azurite locally) → background worker; **SignalR** live updates |
 | Security | Role-based policies per discipline, audit log of who viewed health data |
 | Quality | xUnit unit tests, integration tests with `WebApplicationFactory` against a real SQL Server (**Testcontainers** in CI) |
