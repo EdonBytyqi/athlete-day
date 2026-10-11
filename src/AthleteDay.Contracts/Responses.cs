@@ -2,6 +2,17 @@ namespace AthleteDay.Contracts;
 
 public sealed record AthleteDto(int Id, string Code, string DisplayName, string Sport);
 
+/// <summary>Master data for squad management (coach) and the athlete page. Never part of the kitchen view.</summary>
+public sealed record AthleteDetailsDto(
+    int Id,
+    string Code,
+    string DisplayName,
+    string Sport,
+    int? BirthYear,
+    Sex Sex,
+    decimal BodyMassKg,
+    DateTimeOffset? ArchivedAt);
+
 public sealed record TrainingSessionDto(
     int Id,
     int AthleteId,
@@ -25,6 +36,8 @@ public sealed record DashboardRowDto(
     string Code,
     string DisplayName,
     string Sport,
+    int? Age,
+    Sex Sex,
     int TodayLoad,
     double AcuteLoad,
     double ChronicLoad,

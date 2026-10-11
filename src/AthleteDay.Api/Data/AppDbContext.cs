@@ -1,5 +1,6 @@
 using AthleteDay.Api.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace AthleteDay.Api.Data;
 
@@ -15,6 +16,11 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<ImportRowError> ImportRowErrors => Set<ImportRowError>();
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
+        // Sessions, targets and notes of an archived athlete drop out of navigation queries (e.g. the kitchen view).
+        // That is exactly what ADR-07 wants, so EF Core's warning about it is noise here.
+        optionsBuilder.ConfigureWarnings(w => w.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         // Enums are stored as readable strings, which also keeps the hand-written T-SQL reports clear.
@@ -29,6 +35,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             e.HasIndex(a => a.Code).IsUnique();
             e.Property(a => a.Code).HasMaxLength(16);
             e.Property(a => a.BodyMassKg).HasPrecision(5, 1);
+            // Archive instead of delete (ADR-07): every query, form and import treats an archived athlete as unknown.
+            // Restore and the archive list opt out with IgnoreQueryFilters().
+            e.HasQueryFilter(a => a.ArchivedAt == null);
         });
 
         b.Entity<TrainingSession>(e =>

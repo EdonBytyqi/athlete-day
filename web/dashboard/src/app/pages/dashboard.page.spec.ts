@@ -229,10 +229,10 @@ describe('DashboardPage', () => {
     expect(dialog.hasAttribute('open')).toBe(true);
     expect(dialog.querySelector('h2')?.textContent).toContain('Add athlete');
 
-    await type('dialog.athlete-form input[name="displayName"]', 'Ada');
-    await type('dialog.athlete-form input[name="sport"]', 'Rowing');
-    await type('dialog.athlete-form input[name="birthYear"]', '2001');
-    await type('dialog.athlete-form input[name="bodyMassKg"]', '68.5');
+    await type('dialog.athlete-form input[name="athlete.displayName"]', 'Ada');
+    await type('dialog.athlete-form input[name="athlete.sport"]', 'Rowing');
+    await type('dialog.athlete-form input[name="athlete.birthYear"]', '2001');
+    await type('dialog.athlete-form input[name="athlete.bodyMassKg"]', '68.5');
     await click(dialog.querySelector('button[type="submit"]'));
 
     const create = controller.expectOne('/api/athletes');

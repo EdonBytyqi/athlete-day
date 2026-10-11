@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Version | 1.1 |
-| Status | Draft |
+| Status | Current |
 | Date | 2026-10-11 |
 
 > **How this version came about.** v1.0 was written *after* the first implementation, to capture what the system does and

@@ -97,3 +97,43 @@ internal static class DateRules
         }
     }
 }
+
+/// <summary>Add or edit an athlete. The code is assigned by the system and never part of the request.</summary>
+public sealed class AthleteRequest
+{
+    [Required(ErrorMessage = "Enter a name.")]
+    [StringLength(60, MinimumLength = 2, ErrorMessage = "Name must be 2 to 60 characters.")]
+    public string DisplayName { get; set; } = "";
+
+    [Required(ErrorMessage = "Enter a sport.")]
+    [StringLength(60, MinimumLength = 2, ErrorMessage = "Sport must be 2 to 60 characters.")]
+    public string Sport { get; set; } = "";
+
+    /// <summary>Only the year is stored (data minimisation); the age is the age reached this year.</summary>
+    [Required(ErrorMessage = "Enter the birth year.")]
+    [AgeBetween(10, 70)]
+    public int? BirthYear { get; set; }
+
+    [EnumDataType(typeof(Sex))]
+    public Sex Sex { get; set; } = Sex.NotStated;
+
+    [Range(typeof(decimal), "30", "200", ErrorMessage = "Body mass must be between 30 and 200 kg.")]
+    public decimal BodyMassKg { get; set; } = 70;
+}
+
+/// <summary>
+/// A property-level rule, so it reports together with the other field errors
+/// (IValidatableObject only runs once every property is valid).
+/// </summary>
+[AttributeUsage(AttributeTargets.Property)]
+public sealed class AgeBetweenAttribute(int min, int max) : ValidationAttribute
+{
+    protected override ValidationResult? IsValid(object? value, ValidationContext context)
+    {
+        if (value is not int year) return ValidationResult.Success;
+        var age = DateTime.Today.Year - year;
+        return age >= min && age <= max
+            ? ValidationResult.Success
+            : new ValidationResult($"The birth year must give an age between {min} and {max}.", context.MemberName is { } member ? [member] : null);
+    }
+}

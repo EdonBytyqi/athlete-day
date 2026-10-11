@@ -1,7 +1,9 @@
 using AthleteDay.Api.Audit;
 using AthleteDay.Api.Auth;
 using AthleteDay.Api.Data;
+using AthleteDay.Api.Domain;
 using AthleteDay.Api.Infrastructure;
+using AthleteDay.Api.Realtime;
 using AthleteDay.Api.Reports;
 using AthleteDay.Contracts;
 using AthleteDay.Core;
@@ -23,6 +25,44 @@ public static class AthleteEndpoints
                     .ToListAsync(ct))
             .RequireAuthorization(Policies.ReadAthletes)
             .WithSummary("List athletes (pseudonymous codes only)");
+
+        // ---- Squad management (coach). Archive instead of delete, see ADR-07. ----
+
+        athletes.MapGet("/archived", async (AppDbContext db, CancellationToken ct) =>
+                await db.Athletes.IgnoreQueryFilters().AsNoTracking()
+                    .Where(a => a.ArchivedAt != null)
+                    .OrderByDescending(a => a.ArchivedAt)
+                    .Select(a => ToDetails(a))
+                    .ToListAsync(ct))
+            .RequireAuthorization(Policies.ManageSquad)
+            .WithSummary("Archived athletes, most recently archived first");
+
+        athletes.MapGet("/{athleteId:int}", async Task<Results<Ok<AthleteDetailsDto>, NotFound>> (
+                    int athleteId, AppDbContext db, CancellationToken ct) =>
+                await db.Athletes.AsNoTracking().Where(a => a.Id == athleteId).Select(a => ToDetails(a)).SingleOrDefaultAsync(ct)
+                    is { } athlete ? TypedResults.Ok(athlete) : TypedResults.NotFound())
+            .RequireAuthorization(Policies.ViewDashboard)
+            .WithSummary("Name, sport, birth year, sex and body mass of an athlete");
+
+        athletes.MapPost("/", AddAthlete)
+            .RequireAuthorization(Policies.ManageSquad)
+            .Audited("Athlete")
+            .WithSummary("Add an athlete; the system assigns the next free code");
+
+        athletes.MapPut("/{athleteId:int}", EditAthlete)
+            .RequireAuthorization(Policies.ManageSquad)
+            .Audited("Athlete")
+            .WithSummary("Edit an athlete's details; the code never changes");
+
+        athletes.MapDelete("/{athleteId:int}", ArchiveAthlete)
+            .RequireAuthorization(Policies.ManageSquad)
+            .Audited("Athlete")
+            .WithSummary("Archive an athlete: hidden everywhere, history kept, can be restored");
+
+        athletes.MapPost("/{athleteId:int}/restore", RestoreAthlete)
+            .RequireAuthorization(Policies.ManageSquad)
+            .Audited("Athlete")
+            .WithSummary("Bring an archived athlete back into the squad");
 
         athletes.MapGet("/{athleteId:int}/load-trend",
                 async Task<Results<Ok<LoadTrendDto>, NotFound>> (int athleteId, int? days, AppDbContext db,
@@ -64,4 +104,80 @@ public static class AthleteEndpoints
 
         return api;
     }
+
+    private static async Task<Created<AthleteDetailsDto>> AddAthlete(
+        AthleteRequest request, AppDbContext db, IDashboardNotifier notifier, CancellationToken ct)
+    {
+        var athlete = new Athlete
+        {
+            Code = await NextCodeAsync(db, ct),
+            DisplayName = request.DisplayName.Trim(),
+            Sport = request.Sport.Trim()
+        };
+        Apply(request, athlete);
+        db.Athletes.Add(athlete);
+        await db.SaveChangesAsync(ct);
+        await notifier.DataChangedAsync("athlete", ct);
+
+        return TypedResults.Created($"/api/athletes/{athlete.Id}", ToDetails(athlete));
+    }
+
+    private static async Task<Results<Ok<AthleteDetailsDto>, NotFound>> EditAthlete(
+        int athleteId, AthleteRequest request, AppDbContext db, IDashboardNotifier notifier, CancellationToken ct)
+    {
+        var athlete = await db.Athletes.FindAsync([athleteId], ct);
+        if (athlete is null) return TypedResults.NotFound();
+
+        Apply(request, athlete);
+        await db.SaveChangesAsync(ct);
+        await notifier.DataChangedAsync("athlete", ct);
+        return TypedResults.Ok(ToDetails(athlete));
+    }
+
+    private static async Task<Results<NoContent, NotFound>> ArchiveAthlete(
+        int athleteId, AppDbContext db, AppClock clock, IDashboardNotifier notifier, CancellationToken ct)
+    {
+        var athlete = await db.Athletes.FindAsync([athleteId], ct);
+        if (athlete is null) return TypedResults.NotFound();
+
+        athlete.ArchivedAt = clock.Now;
+        await db.SaveChangesAsync(ct);
+        await notifier.DataChangedAsync("athlete", ct);
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<Ok<AthleteDetailsDto>, NotFound>> RestoreAthlete(
+        int athleteId, AppDbContext db, IDashboardNotifier notifier, CancellationToken ct)
+    {
+        var athlete = await db.Athletes.IgnoreQueryFilters().SingleOrDefaultAsync(a => a.Id == athleteId, ct);
+        if (athlete is null) return TypedResults.NotFound();
+
+        athlete.ArchivedAt = null;
+        await db.SaveChangesAsync(ct);
+        await notifier.DataChangedAsync("athlete", ct);
+        return TypedResults.Ok(ToDetails(athlete));
+    }
+
+    private static void Apply(AthleteRequest request, Athlete athlete)
+    {
+        athlete.DisplayName = request.DisplayName.Trim();
+        athlete.Sport = request.Sport.Trim();
+        athlete.BirthYear = request.BirthYear;
+        athlete.Sex = request.Sex;
+        athlete.BodyMassKg = request.BodyMassKg;
+    }
+
+    /// <summary>ATH- plus the highest number so far + 1. Archived athletes count too, so a code is never reused.</summary>
+    private static async Task<string> NextCodeAsync(AppDbContext db, CancellationToken ct)
+    {
+        var codes = await db.Athletes.IgnoreQueryFilters()
+            .Where(a => a.Code.StartsWith("ATH-"))
+            .Select(a => a.Code)
+            .ToListAsync(ct);
+        var highest = codes.Select(c => int.TryParse(c[4..], out var n) ? n : 0).DefaultIfEmpty(0).Max();
+        return $"ATH-{highest + 1:000}";
+    }
+
+    private static AthleteDetailsDto ToDetails(Athlete a) =>
+        new(a.Id, a.Code, a.DisplayName, a.Sport, a.BirthYear, a.Sex, a.BodyMassKg, a.ArchivedAt);
 }

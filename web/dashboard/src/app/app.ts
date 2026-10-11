@@ -4,6 +4,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { PERSONAS, PersonaService } from './api/persona.service';
 import { RealtimeService } from './api/realtime.service';
+import { staffBaseUrl } from './shared/staff-url';
+import { ToastOutlet } from './shared/toast-outlet';
 
 const SCREEN_LABELS: Record<string, string> = {
   dashboard: 'Squad',
@@ -14,7 +16,7 @@ const SCREEN_LABELS: Record<string, string> = {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastOutlet],
   templateUrl: './app.html',
 })
 export class App {
@@ -24,8 +26,7 @@ export class App {
 
   protected readonly personas = PERSONAS;
   protected readonly labels = SCREEN_LABELS;
-  protected readonly staffUrl =
-    location.port === '4200' ? 'http://localhost:5090' : `${location.protocol}//${location.hostname}:8081`;
+  protected readonly staffUrl = staffBaseUrl();
 
   private readonly url = toSignal(
     this.router.events.pipe(

@@ -4,6 +4,7 @@ export type Role = 'Coach' | 'Physio' | 'Nutrition' | 'Kitchen' | 'Athlete' | 'A
 export type ReadinessStatus = 'Ok' | 'CheckIn' | 'Missing';
 export type TrainingRestriction = 'None' | 'Modified' | 'NoTraining';
 export type ImportStatus = 'Queued' | 'Processing' | 'Completed' | 'Failed';
+export type Sex = 'Female' | 'Male' | 'NotStated';
 
 export interface WellnessSummary {
   date: string;
@@ -17,6 +18,9 @@ export interface DashboardRow {
   code: string;
   displayName: string;
   sport: string;
+  /** Age reached this year (only the birth year is stored). */
+  age: number | null;
+  sex: Sex;
   todayLoad: number;
   acuteLoad: number;
   chronicLoad: number;
@@ -106,4 +110,23 @@ export interface AuditEntry {
   action: string;
   resource: string;
   athleteId: number | null;
+}
+
+export interface AthleteDetails {
+  id: number;
+  code: string;
+  displayName: string;
+  sport: string;
+  birthYear: number | null;
+  sex: Sex;
+  bodyMassKg: number;
+  archivedAt: string | null;
+}
+
+export interface AthleteRequest {
+  displayName: string;
+  sport: string;
+  birthYear: number | null;
+  sex: Sex;
+  bodyMassKg: number;
 }

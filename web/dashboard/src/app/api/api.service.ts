@@ -1,6 +1,8 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import {
+  AthleteDetails,
+  AthleteRequest,
   AuditEntry,
   DashboardRow,
   ImportJob,
@@ -14,6 +16,31 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
+
+  athlete(id: number) {
+    return this.http.get<AthleteDetails>(`/api/athletes/${id}`);
+  }
+
+  archivedAthletes() {
+    return this.http.get<AthleteDetails[]>('/api/athletes/archived');
+  }
+
+  addAthlete(request: AthleteRequest) {
+    return this.http.post<AthleteDetails>('/api/athletes', request);
+  }
+
+  editAthlete(id: number, request: AthleteRequest) {
+    return this.http.put<AthleteDetails>(`/api/athletes/${id}`, request);
+  }
+
+  /** Archives the athlete (ADR-07): hidden everywhere, history kept, restorable. */
+  archiveAthlete(id: number) {
+    return this.http.delete<void>(`/api/athletes/${id}`);
+  }
+
+  restoreAthlete(id: number) {
+    return this.http.post<AthleteDetails>(`/api/athletes/${id}/restore`, null);
+  }
 
   dashboard() {
     return this.http.get<DashboardRow[]>('/api/dashboard');

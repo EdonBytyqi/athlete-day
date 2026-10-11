@@ -63,15 +63,17 @@ to set a baseline; everything after it follows the workflow. Details: [docs/spec
 
 | Role | Can do | Cannot see |
 |---|---|---|
-| Coach | Log sessions, squad dashboard, device import | Physio note text |
+| Coach | Log sessions, squad dashboard, device import, add/edit/archive athletes | Physio note text |
 | Athlete | Submit **their own** morning check | Anyone else's data |
 | Nutrition | Set energy/carb targets, dashboard, kitchen view | Physio note text |
 | Physio | Health notes and restrictions, dashboard, import | – |
-| Kitchen | Portion size, carbs (g), kitchen note | Load, wellness, any health data |
+| Kitchen | Portion size, carbs (g), kitchen note | Load, wellness, age, sex, any health data |
 | Admin | Audit log | – |
 
 * The kitchen endpoint returns a DTO that **has no field** for health data; an integration test checks the exact JSON shape.
-* Every view of health-related data (dashboard, trends, physio notes) is written to an **audit log**.
+* Every view of health-related data (dashboard, trends, physio notes) and every squad change is written to an **audit log**.
+* Athletes are **archived, not deleted**: hidden everywhere, history kept, restorable (*Undo*). Only the birth year is
+  stored, not the birth date (data minimisation, ADR-07 and ADR-08).
 * Identity is a demo persona switcher (`X-Demo-User` / `X-Demo-Role` headers). In production the handler is replaced by
   Entra ID (JWT bearer); the policies and endpoints stay the same.
 
@@ -114,11 +116,12 @@ cd web/dashboard; npx ng test --watch=false
 
 ## Three-minute walkthrough
 
-1. **Staff input** as *Lena · coach*: log a hard session (e.g. Lea, 75 min, RPE 8). The form shows the load live.
-2. **Dashboard**: the row updates without a refresh (SignalR). Elias shows a 7-day spike and short sleep → *Check in*, with reasons.
-3. Switch persona to **Kitchen**: the app jumps to portions and carbs. Health data is not hidden in the UI; the API never sends it.
-4. **Device import** as coach: upload `samples/device-export-broken.csv` → 2 rows imported, 8 rejected, each with column and reason.
-5. Show the **audit log** (Admin) and the green **CI run**.
+1. **Dashboard** as *Lena · coach*: sort by age, filter *Ice hockey*, search a name. Hover a **?** to explain a column.
+2. **⋯ → Log session** on Lea: the staff form opens with Lea selected. Log 75 min at RPE 8; the form shows the load live.
+3. **Dashboard**: the row updates without a refresh (SignalR). Elias shows a 7-day spike and short sleep → *Check in*, with reasons.
+4. Switch persona to **Kitchen**: the app jumps to portions and carbs. Health data is not hidden in the UI; the API never sends it.
+5. **Device import** as coach: upload `samples/device-export-broken.csv` → 2 rows imported, 8 rejected, each with column and reason.
+6. **+ Add athlete**, then **⋯ → Archive** with confirmation and *Undo*. Show the **audit log** (Admin) and the green **CI run**.
 
 ## Project layout
 

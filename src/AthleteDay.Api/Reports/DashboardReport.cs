@@ -26,7 +26,7 @@ public sealed class DashboardReport(SqlConnectionFactory connections)
             FROM daily AS d
             GROUP BY d.AthleteId
         )
-        SELECT a.Id AS AthleteId, a.Code, a.DisplayName, a.Sport, a.BodyMassKg,
+        SELECT a.Id AS AthleteId, a.Code, a.DisplayName, a.Sport, a.BodyMassKg, a.BirthYear, a.Sex,
                COALESCE(w.TodayLoad, 0)  AS TodayLoad,
                COALESCE(w.AcuteSum, 0)   AS AcuteSum,
                COALESCE(w.ChronicSum, 0) AS ChronicSum,
@@ -43,6 +43,7 @@ public sealed class DashboardReport(SqlConnectionFactory connections)
             WHERE pn.AthleteId = a.Id AND pn.[Date] <= @Today
             ORDER BY pn.[Date] DESC, pn.Id DESC
         ) AS p
+        WHERE a.ArchivedAt IS NULL  -- archived athletes stay hidden (ADR-07); Dapper does not see EF Core query filters
         ORDER BY a.Code;
         """;
 
@@ -56,7 +57,7 @@ public sealed class DashboardReport(SqlConnectionFactory connections)
         """;
 
     private sealed record Row(
-        int AthleteId, string Code, string DisplayName, string Sport, decimal BodyMassKg,
+        int AthleteId, string Code, string DisplayName, string Sport, decimal BodyMassKg, int? BirthYear, string Sex,
         int TodayLoad, int AcuteSum, int ChronicSum,
         DateTime? WellnessDate, decimal? SleepHours, int? Soreness, int? Mood,
         int? EnergyKcal, decimal? CarbsGPerKg,
@@ -81,6 +82,7 @@ public sealed class DashboardReport(SqlConnectionFactory connections)
 
             return new DashboardRowDto(
                 r.AthleteId, r.Code, r.DisplayName, r.Sport,
+                today.Year - r.BirthYear, Enum.Parse<Sex>(r.Sex),
                 load.TodayLoad, load.Acute7, load.Chronic28, load.Ratio,
                 wellness,
                 ReadinessEvaluator.Evaluate(wellness, load.Ratio, restriction),
