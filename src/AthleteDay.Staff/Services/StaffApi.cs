@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using AthleteDay.Contracts;
+using AthleteDay.Staff.Resources;
+using Microsoft.Extensions.Localization;
 
 namespace AthleteDay.Staff.Services;
 
@@ -9,7 +11,7 @@ public sealed record ApiResult<T>(T? Value, IReadOnlyDictionary<string, string[]
     public bool Succeeded => FieldErrors is null && Error is null;
 }
 
-public sealed class StaffApi(HttpClient http, PersonaState persona)
+public sealed class StaffApi(HttpClient http, PersonaState persona, IStringLocalizer<Strings> text)
 {
     private sealed class ProblemResponse
     {
@@ -41,7 +43,7 @@ public sealed class StaffApi(HttpClient http, PersonaState persona)
         }
         catch (HttpRequestException)
         {
-            return new(default, Error: $"The API is not reachable at {http.BaseAddress}. Is it running?");
+            return new(default, Error: text["ApiUnreachable", http.BaseAddress!]);
         }
 
         if (response.IsSuccessStatusCode)
@@ -52,8 +54,8 @@ public sealed class StaffApi(HttpClient http, PersonaState persona)
             HttpStatusCode.BadRequest when await response.Content.ReadFromJsonAsync<ProblemResponse>() is { Errors: { } errors } =>
                 new(default, FieldErrors: errors),
             HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden =>
-                new(default, Error: $"The role {persona.Current.Role} is not allowed to do this. That is by design."),
-            _ => new(default, Error: $"The API answered {(int)response.StatusCode} {response.ReasonPhrase}.")
+                new(default, Error: text["NotAllowed", text[$"Role_{persona.Current.Role}"]]),
+            _ => new(default, Error: text["ApiAnswered", (int)response.StatusCode, response.ReasonPhrase ?? ""])
         };
     }
 }

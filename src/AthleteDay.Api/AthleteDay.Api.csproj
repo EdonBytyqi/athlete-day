@@ -19,4 +19,16 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.17.14" />
   </ItemGroup>
 
+  <!-- Translations (ADR-09): English in ApiText.resx, German in ApiText.de.resx, typed access through AthleteDay.Api.Resources.ApiText. -->
+  <ItemGroup>
+    <EmbeddedResource Update="Resources/ApiText.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>AthleteDay.Api.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>ApiText</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)ApiText.Designer.cs</StronglyTypedFileName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

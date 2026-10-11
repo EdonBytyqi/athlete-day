@@ -3,19 +3,19 @@
 @inject StaffApi Api
 @inject PersonaState Persona
 
-<PageTitle>Morning check · Athlete Day</PageTitle>
+<PageTitle>@L["PageTitle", L["NavMorningCheck"]]</PageTitle>
 
 <RoleGate Role="@Roles.Athlete">
     @if (Persona.SignedInAthlete is { } me)
     {
-        <h1>Good morning, @me.DisplayName</h1>
+        <h1>@L["GoodMorning", me.DisplayName]</h1>
     }
     else
     {
-        <h1>Morning check</h1>
-        <div class="notice">Choose your name at the top right first. The check is saved for the athlete you choose.</div>
+        <h1>@L["MorningCheckTitle"]</h1>
+        <div class="notice">@L["ChooseNameFirst"]</div>
     }
-    <p class="lead">Three quick questions. Your coach and physio see the answers; the kitchen does not.</p>
+    <p class="lead">@L["WellnessLead"]</p>
 
     <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="wellness" class="form">
         <DataAnnotationsValidator />
@@ -24,34 +24,34 @@
 
         <div class="row">
             <label>
-                Date
+                @L["Date"]
                 <InputDate @bind-Value="_model.Date" />
                 <ValidationMessage For="() => _model.Date" />
             </label>
             <label>
-                Sleep last night (hours)
+                @L["SleepLastNight"]
                 <InputNumber @bind-Value="_model.SleepHours" step="0.5" min="0" max="14" />
                 <ValidationMessage For="() => _model.SleepHours" />
             </label>
         </div>
 
         <fieldset>
-            <legend>Muscle soreness</legend>
+            <legend>@L["Soreness"]</legend>
             <InputRadioGroup @bind-Value="_model.Soreness">
                 @for (var i = 1; i <= 5; i++)
                 {
-                    <label class="pill"><InputRadio Value="i" /> @i @(i == 1 ? "none" : i == 5 ? "very sore" : "")</label>
+                    <label class="pill"><InputRadio Value="i" /> @i @(i == 1 ? L["SorenessNone"] : i == 5 ? L["SorenessVery"] : "")</label>
                 }
             </InputRadioGroup>
             <ValidationMessage For="() => _model.Soreness" />
         </fieldset>
 
         <fieldset>
-            <legend>Mood</legend>
+            <legend>@L["Mood"]</legend>
             <InputRadioGroup @bind-Value="_model.Mood">
                 @for (var i = 1; i <= 5; i++)
                 {
-                    <label class="pill"><InputRadio Value="i" /> @i @(i == 1 ? "very low" : i == 5 ? "great" : "")</label>
+                    <label class="pill"><InputRadio Value="i" /> @i @(i == 1 ? L["MoodVeryLow"] : i == 5 ? L["MoodGreat"] : "")</label>
                 }
             </InputRadioGroup>
             <ValidationMessage For="() => _model.Mood" />
@@ -59,7 +59,7 @@
 
         <div class="actions">
             <span></span>
-            <button type="submit" disabled="@(_busy || _model.AthleteId == 0)">Send check-in</button>
+            <button type="submit" disabled="@(_busy || _model.AthleteId == 0)">@L["SendCheckIn"]</button>
         </div>
     </EditForm>
 
@@ -103,6 +103,6 @@
 
         if (result.FieldErrors is { } errors) _server!.Show(errors);
         else if (result.Error is { } error) _error = error;
-        else _success = "Thanks! Your check-in is saved and your readiness on the dashboard is updated.";
+        else _success = L["CheckInSaved"];
     }
 }

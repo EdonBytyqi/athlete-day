@@ -1,10 +1,10 @@
 @page "/sessions/new"
 @inject StaffApi Api
 
-<PageTitle>Log session · Athlete Day</PageTitle>
+<PageTitle>@L["PageTitle", L["NavLogSession"]]</PageTitle>
 
 <RoleGate Role="@Roles.Coach">
-    <h1>Log a training session</h1>
+    <h1>@L["LogSessionTitle"]</h1>
 
     <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="log-session" class="form">
         <DataAnnotationsValidator />
@@ -14,16 +14,16 @@
 
         <div class="row">
             <label>
-                Date
+                @L["Date"]
                 <InputDate @bind-Value="_model.Date" />
                 <ValidationMessage For="() => _model.Date" />
             </label>
             <label>
-                Type
+                @L["SessionTypeLabel"]
                 <InputSelect @bind-Value="_model.Type">
                     @foreach (var type in Enum.GetValues<SessionType>())
                     {
-                        <option value="@type">@type</option>
+                        <option value="@type">@L[$"SessionType_{type}"]</option>
                     }
                 </InputSelect>
             </label>
@@ -31,12 +31,12 @@
 
         <div class="row">
             <label>
-                Duration (minutes)
+                @L["DurationMinutes"]
                 <InputNumber @bind-Value="_model.DurationMinutes" min="5" max="300" />
                 <ValidationMessage For="() => _model.DurationMinutes" />
             </label>
             <label>
-                RPE (how hard was it?)
+                @L["RpeLabel"]
                 <InputSelect @bind-Value="_model.Rpe">
                     @for (var i = 1; i <= 10; i++)
                     {
@@ -48,14 +48,14 @@
         </div>
 
         <label>
-            Notes (optional, no health details)
+            @L["NotesOptional"]
             <InputTextArea @bind-Value="_model.Notes" rows="2" />
             <ValidationMessage For="() => _model.Notes" />
         </label>
 
         <div class="actions">
-            <span class="preview">Session load: <strong>@(_model.Rpe * _model.DurationMinutes) AU</strong></span>
-            <button type="submit" disabled="@_busy">Save session</button>
+            <span class="preview">@L["SessionLoad"] <strong>@(_model.Rpe * _model.DurationMinutes) AU</strong></span>
+            <button type="submit" disabled="@_busy">@L["SaveSession"]</button>
         </div>
     </EditForm>
 
@@ -78,12 +78,8 @@
         if (AthleteFromQuery is int id and > 0) _model.AthleteId = id;
     }
 
-    // Borg CR-10 wording, the scale behind session-RPE.
-    private static string RpeLabel(int rpe) => rpe switch
-    {
-        1 => "very easy", 2 => "easy", 3 => "moderate", 4 => "somewhat hard", 5 or 6 => "hard",
-        7 or 8 => "very hard", 9 => "extremely hard", _ => "maximal"
-    };
+    // Borg CR-10 wording, the scale behind session-RPE; 5–6 and 7–8 share a word.
+    private string RpeLabel(int rpe) => L[$"Rpe_{rpe switch { 6 => 5, 8 => 7, _ => rpe }}"];
 
     private async Task SubmitAsync()
     {
@@ -97,7 +93,7 @@
         else
         {
             var s = result.Value!;
-            _success = $"Saved: {s.Type} for {s.AthleteCode}, {s.DurationMinutes} min at RPE {s.Rpe} = {s.Load} AU. The dashboard updates live.";
+            _success = L["SessionSaved", L[$"SessionType_{s.Type}"], s.AthleteCode, s.DurationMinutes, s.Rpe, s.Load];
             _model = new LogSessionRequest { AthleteId = _model.AthleteId, Date = _model.Date };
         }
     }

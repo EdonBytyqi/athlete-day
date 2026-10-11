@@ -13,6 +13,8 @@ event-driven import with a row-by-row validation report.
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Log session](docs/screenshots/staff-log-session.png) |
 | **Kitchen view: no health data** | **Device import: validation report** |
 | ![Kitchen](docs/screenshots/kitchen.png) | ![Imports](docs/screenshots/imports.png) |
+| **Athlete page: 28-day trend** | **Phone, in German** |
+| ![Athlete](docs/screenshots/athlete.png) | <img src="docs/screenshots/dashboard-phone-de.png" alt="Squad dashboard on a phone, in German" width="260"> |
 
 ## Documentation
 
@@ -29,6 +31,8 @@ event-driven import with a row-by-row validation report.
 | API | ASP.NET Core 10 minimal API, built-in request validation, OpenAPI + Scalar, ProblemDetails |
 | Data | SQL Server · **EF Core 10** for writes and migrations · **Dapper + hand-written T-SQL** for the dashboard report |
 | Staff input | **Blazor WebAssembly**, sharing the validation rules with the API through a contracts project |
+| Languages | **English and German** in both apps and the API (`Accept-Language`): typed catalogues in Angular, `.resx` in .NET (ADR-09) |
+| Design | One light, white and light-blue design for both apps; responsive from phone to desktop |
 | Dashboard | **Angular 22**: standalone components, signals, zoneless, lazy routes, Vitest |
 | Events | Azure **Blob Storage** + **Storage Queue** (Azurite locally) → background worker; **SignalR** live updates |
 | Security | Role-based policies per discipline, audit log of who viewed health data |

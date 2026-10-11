@@ -1,7 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using AthleteDay.Contracts;
+using System.Globalization;
+using AthleteDay.Staff.Resources;
 using AthleteDay.Staff.Services;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AthleteDay.Staff.Tests;
@@ -47,11 +50,15 @@ public abstract class StaffTestContext : BunitContext
 
     protected StaffTestContext()
     {
+        // English unless a test switches; independent of the machine's language.
+        CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
         var http = new HttpClient(new DemoHeadersHandler(Persona) { InnerHandler = Api })
         {
             BaseAddress = new Uri("http://api.test/")
         };
+        Services.AddLocalization();
         Services.AddSingleton(Persona);
-        Services.AddSingleton(new StaffApi(http, Persona));
+        Services.AddSingleton(sp => new StaffApi(http, Persona, sp.GetRequiredService<IStringLocalizer<Strings>>()));
     }
 }

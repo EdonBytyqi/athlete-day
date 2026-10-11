@@ -35,6 +35,7 @@ audited.
 | Live updates | SignalR | The push says "something changed"; it carries no data |
 | Staff input | Blazor WebAssembly | Fast forms; shares validation rules with the API |
 | Dashboard | Angular 22 (standalone, signals, zoneless, Signal Forms) | Squad view, athlete trend, kitchen, imports, audit |
+| Languages | English and German | Typed catalogues in Angular (`src/app/i18n`), `.resx` in each .NET project (`Resources/`), server texts follow `Accept-Language` (ADR-09) |
 | Quality | xUnit, Testcontainers, Vitest, GitHub Actions | Spec traceability and an OpenAPI contract check in CI |
 
 Scope is deliberately small. Identity is a demo persona switcher, not real sign-in, and nothing is deployed to Azure
@@ -130,7 +131,7 @@ Each step names the files and what is worth checking in them.
 
 | # | Read | Look for |
 |---|---|---|
-| 1 | [`docs/spec/requirements.md`](spec/requirements.md) | Roles, domain rules (section 4), acceptance criteria AC-01 to AC-52. Everything below traces back here. |
+| 1 | [`docs/spec/requirements.md`](spec/requirements.md) | Roles, domain rules (section 4), acceptance criteria AC-01 to AC-57. Everything below traces back here. |
 | 2 | [`Program.cs`](../src/AthleteDay.Api/Program.cs) | The composition root: data, auth, storage adapters (Azure or in-memory), worker, SignalR, startup migration and seed. |
 | 3 | [`Auth/Policies.cs`](../src/AthleteDay.Api/Auth/Policies.cs), [`Auth/DemoAuthenticationHandler.cs`](../src/AthleteDay.Api/Auth/DemoAuthenticationHandler.cs) | One policy per need, not per screen. The handler is the only part that changes for Entra ID. |
 | 4 | [`Endpoints/`](../src/AthleteDay.Api/Endpoints) | `StaffInputEndpoints` (writes), `ReportEndpoints` (dashboard, kitchen DTO, audit), `AthleteEndpoints` (squad management), `ImportEndpoints` (upload). Note `TypedResults` and the `.Audited(...)` filter. |
@@ -144,7 +145,7 @@ Each step names the files and what is worth checking in them.
 | 12 | Blazor: [`Services/StaffApi.cs`](../src/AthleteDay.Staff/Services/StaffApi.cs), [`Components/ServerValidator.cs`](../src/AthleteDay.Staff/Components/ServerValidator.cs) | Server-side validation errors shown on the right form field. |
 | 13 | Tests: [`ApiFactory.cs`](../tests/AthleteDay.IntegrationTests/ApiFactory.cs), [`ApiTests.cs`](../tests/AthleteDay.IntegrationTests/ApiTests.cs), [`SquadTests.cs`](../tests/AthleteDay.IntegrationTests/SquadTests.cs), [`ContractAndEventTests.cs`](../tests/AthleteDay.IntegrationTests/ContractAndEventTests.cs), [`SpecTraceabilityTests.cs`](../tests/AthleteDay.UnitTests/SpecTraceabilityTests.cs) | A real SQL Server per run, each test creates its own athletes, and the contract and traceability checks. |
 
-Then [`docs/spec/decisions.md`](spec/decisions.md) (ADR-01 to ADR-08) gives the reasons behind the main choices.
+Then [`docs/spec/decisions.md`](spec/decisions.md) (ADR-01 to ADR-09) gives the reasons behind the main choices.
 
 ### Short path (10 minutes)
 
@@ -287,10 +288,10 @@ feature branch: **spec → failing tests → code**. The squad management featur
 
 | Level | Where | What it covers | Count |
 |---|---|---|---|
-| Unit | [`tests/AthleteDay.UnitTests`](../tests/AthleteDay.UnitTests) | Core logic, request validation, spec traceability | 67 |
-| Integration | [`tests/AthleteDay.IntegrationTests`](../tests/AthleteDay.IntegrationTests) | The real API (`WebApplicationFactory`) against a real SQL Server, the import pipeline, SignalR, the OpenAPI contract | 45 |
-| Angular | `web/dashboard/src/**/*.spec.ts` (Vitest) | Role-dependent screens, sorting and filtering, dialogs, the persona interceptor, the chart | 22 |
-| Staff | [`tests/AthleteDay.Staff.Tests`](../tests/AthleteDay.Staff.Tests) (bUnit) | Blazor components with the real persona, headers handler and API client over a fake API | 5 |
+| Unit | [`tests/AthleteDay.UnitTests`](../tests/AthleteDay.UnitTests) | Core logic, request validation, spec traceability | 72 |
+| Integration | [`tests/AthleteDay.IntegrationTests`](../tests/AthleteDay.IntegrationTests) | The real API (`WebApplicationFactory`) against a real SQL Server, the import pipeline, SignalR, the OpenAPI contract | 53 |
+| Angular | `web/dashboard/src/**/*.spec.ts` (Vitest) | Role-dependent screens, sorting and filtering, dialogs, the persona interceptor, the chart | 28 |
+| Staff | [`tests/AthleteDay.Staff.Tests`](../tests/AthleteDay.Staff.Tests) (bUnit) | Blazor components with the real persona, headers handler and API client over a fake API | 8 |
 
 Two checks keep the spec honest:
 
@@ -359,4 +360,5 @@ What is deliberately simple, and where I would most like a reviewer's opinion.
 | Why is "today" Zurich time? | So a server in UTC does not shift the athletes' day. | [`AppClock.cs`](../src/AthleteDay.Api/Infrastructure/AppClock.cs) |
 | How is demo data built? | Generated relative to today on every start, with one load spike, one sore athlete, one restriction and one missing check-in. | [`DemoDataSeeder.cs`](../src/AthleteDay.Api/Data/DemoDataSeeder.cs) |
 | Why EF Core and Dapper? | EF Core for writes and migrations; Dapper where the SQL itself is the point. | [ADR-01](spec/decisions.md) |
+| Where do texts and translations live? | Angular: `en.ts` and `de.ts` (German typed against English). .NET: `Resources/*.resx` per project; a test compares the languages (AC-54). | [`web/dashboard/src/app/i18n`](../web/dashboard/src/app/i18n) |
 | How are athlete codes assigned? | Highest `ATH-` number + 1, inside a transaction that holds a SQL Server application lock, so parallel adds cannot pick the same code (AC-32). | [`AthleteEndpoints.cs`](../src/AthleteDay.Api/Endpoints/AthleteEndpoints.cs) |

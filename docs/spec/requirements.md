@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.4 |
+| Version | 1.5 |
 | Status | Current |
 | Date | 2026-10-11 |
 
@@ -30,7 +30,8 @@ Athlete Day records one athlete's day across these disciplines and shows each ro
 
 **In scope:** session logging, wellness checks, load monitoring, readiness flags, nutrition targets, kitchen view,
 physio notes, device CSV import, audit log, live dashboard updates, squad management (add, edit and archive athletes),
-sorting and filtering the squad dashboard.
+sorting and filtering the squad dashboard, English and German, a light layout that works on phones, tablets and
+desktops.
 
 **Out of scope (v1):** real sign-in (demo personas only), Azure deployment, notifications, athlete-facing dashboard,
 medical advice of any kind.
@@ -52,6 +53,7 @@ medical advice of any kind.
 | Sex | Female, Male or Not stated |
 | Athlete code | `ATH-` plus a three-digit number, assigned by the system (highest existing number + 1) and never changed |
 | Archived athlete | Hidden from every list and form and accepts no new data; its history is kept and it can be restored |
+| Language | English (default) or German. Formats: English as en-GB (11 Oct 2026, 1,234.5), German as de-CH (11.10.2026, 1’234.5; the grouping mark is ' or ’ depending on the browser's locale data). |
 
 ## 5. Functional requirements
 
@@ -209,6 +211,19 @@ Demo only: in production the athlete signs in with Entra ID and the identity alr
 | AC-51 | The morning check greets the signed-in athlete by name and submits for that athlete; picking another athlete switches the form to them. Without a chosen athlete, the form asks to choose one and cannot be sent. | Staff |
 | AC-52 | Every athlete in the squad, including one added after start-up, can submit their own morning check, and it appears on the dashboard. | Integration |
 
+### F15 English and German
+
+*As a member of a Swiss team, I want to use the app in English or German, so everyone works in the language they read
+best.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-53 | The dashboard has a language switch (English, German). Switching changes all visible text at once, without reloading; the choice is remembered, and the link to the staff app opens it in the same language. | Angular |
+| AC-54 | All interface text comes from one translation catalogue per app (and one per .NET project for server messages). A test fails if a text exists in one language but not in the other. | Angular, Unit |
+| AC-55 | Dates and numbers follow the language (section 4): English as 11 Oct 2026 and 1,234.5, German as 11.10.2026 and 1’234.5. | Angular |
+| AC-56 | The staff app has the same language switch; its labels, buttons, choices and validation messages appear in the chosen language. | Staff |
+| AC-57 | The API returns validation and error messages, readiness reasons and import row errors in the language of the request's `Accept-Language` header (German for `de`, `de-CH` …; English otherwise). Both apps send their current language. | Integration, Angular |
+
 ## 6. Non-functional requirements
 
 | ID | Requirement |
@@ -218,6 +233,8 @@ Demo only: in production the athlete signs in with Entra ID and the identity alr
 | NFR-03 | The dashboard needs one database round trip for all athletes. |
 | NFR-04 | The system runs with one command (`docker compose up`) and without Docker on Windows (LocalDB + Azurite). |
 | NFR-05 | Every push runs build, all tests, the traceability check and the Docker build in CI. |
+| NFR-06 | Responsive: usable from 360 px wide to desktop. No horizontal page scrolling; navigation fits or folds into a menu; wide tables scroll inside their card or become cards; touch targets are at least 44 × 44 px. Checked with screenshots at 375, 768 and 1440 px for every UI change. |
+| NFR-07 | One light design for both apps: white background, light-blue accent, shared design tokens. Text and controls meet WCAG AA contrast (4.5:1 for text). No dark mode. |
 
 ## 7. Change log
 
@@ -228,3 +245,4 @@ Demo only: in production the athlete signs in with Entra ID and the identity alr
 | 1.2 | 2026-10-11 | AC-32: concurrent adds get different codes. AC-36: the audit entry for a new athlete carries its id. Both found in review. |
 | 1.3 | 2026-10-11 | F13 wellness history (AC-43–AC-49); contract: `GET /api/athletes/{athleteId}/wellness`, schema `WellnessDayDto`. Written 2026-10-10 as v1.1 on a parallel branch and renumbered when rebased onto v1.2. |
 | 1.4 | 2026-10-11 | F14 athlete sign-in in the staff app (AC-50–AC-52). Adds the verification level *Staff* (bUnit component tests). |
+| 1.5 | 2026-10-11 | F15 English and German (AC-53–AC-57); NFR-06 responsive layout and NFR-07 light design; language rule in section 4. Phase 1 of the "enhance the hub" brief. |

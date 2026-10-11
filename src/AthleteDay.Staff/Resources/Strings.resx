@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="BrandSub" xml:space="preserve"><value>Staff input</value></data>
+  <data name="SignedInAs" xml:space="preserve"><value>Signed in as</value></data>
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="NavOverview" xml:space="preserve"><value>Overview</value></data>
+  <data name="NavLogSession" xml:space="preserve"><value>Log session</value></data>
+  <data name="NavMorningCheck" xml:space="preserve"><value>Morning check</value></data>
+  <data name="NavNutrition" xml:space="preserve"><value>Nutrition target</value></data>
+  <data name="NavPhysio" xml:space="preserve"><value>Physio note</value></data>
+  <data name="NavLabel" xml:space="preserve"><value>Forms</value></data>
+  <data name="Footer" xml:space="preserve"><value>Synthetic data only · demo identities, not real sign-in</value></data>
+  <data name="PageTitle" xml:space="preserve"><value>{0} · Athlete Day</value></data>
+  <data name="Persona_lena" xml:space="preserve"><value>Lena · Athletic coach</value></data>
+  <data name="Persona_athlete" xml:space="preserve"><value>Athlete</value></data>
+  <data name="Persona_mia" xml:space="preserve"><value>Mia · Nutrition scientist</value></data>
+  <data name="Persona_jonas" xml:space="preserve"><value>Jonas · Physio</value></data>
+  <data name="Persona_luca" xml:space="preserve"><value>Luca · Kitchen</value></data>
+  <data name="Role_Coach" xml:space="preserve"><value>Coach</value></data>
+  <data name="Role_Athlete" xml:space="preserve"><value>Athlete</value></data>
+  <data name="Role_Nutrition" xml:space="preserve"><value>Nutrition</value></data>
+  <data name="Role_Physio" xml:space="preserve"><value>Physio</value></data>
+  <data name="Role_Kitchen" xml:space="preserve"><value>Kitchen</value></data>
+  <data name="Role_Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="AthleteSignInLabel" xml:space="preserve"><value>Athlete</value></data>
+  <data name="ChooseYourName" xml:space="preserve"><value>Choose your name…</value></data>
+  <data name="HomeTitle" xml:space="preserve"><value>Fast input for the people in the hall</value></data>
+  <data name="HomeLead" xml:space="preserve"><value>Every discipline records its part of an athlete's day here. The coach dashboard (Angular) combines it, and each role only ever sees what it needs.</value></data>
+  <data name="CardCoachText" xml:space="preserve"><value>Log a session: type, duration and RPE. Load = RPE × minutes.</value></data>
+  <data name="CardAthleteText" xml:space="preserve"><value>Pick your name, then answer three questions: sleep, soreness and mood. Only for yourself.</value></data>
+  <data name="CardNutritionText" xml:space="preserve"><value>Daily energy and carbohydrate targets, plus a note for the kitchen.</value></data>
+  <data name="CardPhysioText" xml:space="preserve"><value>Health notes and training restrictions. Notes stay with the physio.</value></data>
+  <data name="KitchenNotice" xml:space="preserve"><value>The kitchen has no input forms. Its view is the kitchen screen in the dashboard, which shows portions and carbohydrates and nothing about health.</value></data>
+  <data name="Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Athlete" xml:space="preserve"><value>Athlete</value></data>
+  <data name="Select" xml:space="preserve"><value>Select…</value></data>
+  <data name="LogSessionTitle" xml:space="preserve"><value>Log a training session</value></data>
+  <data name="SessionTypeLabel" xml:space="preserve"><value>Type</value></data>
+  <data name="DurationMinutes" xml:space="preserve"><value>Duration (minutes)</value></data>
+  <data name="RpeLabel" xml:space="preserve"><value>RPE (how hard was it?)</value></data>
+  <data name="NotesOptional" xml:space="preserve"><value>Notes (optional, no health details)</value></data>
+  <data name="SessionLoad" xml:space="preserve"><value>Session load:</value></data>
+  <data name="SaveSession" xml:space="preserve"><value>Save session</value></data>
+  <data name="SessionSaved" xml:space="preserve"><value>Saved: {0} for {1}, {2} min at RPE {3} = {4} AU. The dashboard updates live.</value></data>
+  <data name="SessionType_Strength" xml:space="preserve"><value>Strength</value></data>
+  <data name="SessionType_Speed" xml:space="preserve"><value>Speed</value></data>
+  <data name="SessionType_Endurance" xml:space="preserve"><value>Endurance</value></data>
+  <data name="SessionType_OnIce" xml:space="preserve"><value>On ice</value></data>
+  <data name="SessionType_Technique" xml:space="preserve"><value>Technique</value></data>
+  <data name="SessionType_Recovery" xml:space="preserve"><value>Recovery</value></data>
+  <data name="Rpe_1" xml:space="preserve"><value>very easy</value></data>
+  <data name="Rpe_2" xml:space="preserve"><value>easy</value></data>
+  <data name="Rpe_3" xml:space="preserve"><value>moderate</value></data>
+  <data name="Rpe_4" xml:space="preserve"><value>somewhat hard</value></data>
+  <data name="Rpe_5" xml:space="preserve"><value>hard</value></data>
+  <data name="Rpe_7" xml:space="preserve"><value>very hard</value></data>
+  <data name="Rpe_9" xml:space="preserve"><value>extremely hard</value></data>
+  <data name="Rpe_10" xml:space="preserve"><value>maximal</value></data>
+  <data name="MorningCheckTitle" xml:space="preserve"><value>Morning check</value></data>
+  <data name="GoodMorning" xml:space="preserve"><value>Good morning, {0}</value></data>
+  <data name="ChooseNameFirst" xml:space="preserve"><value>Choose your name at the top right first. The check is saved for the athlete you choose.</value></data>
+  <data name="WellnessLead" xml:space="preserve"><value>Three quick questions. Your coach and physio see the answers; the kitchen does not.</value></data>
+  <data name="SleepLastNight" xml:space="preserve"><value>Sleep last night (hours)</value></data>
+  <data name="Soreness" xml:space="preserve"><value>Muscle soreness</value></data>
+  <data name="SorenessNone" xml:space="preserve"><value>none</value></data>
+  <data name="SorenessVery" xml:space="preserve"><value>very sore</value></data>
+  <data name="Mood" xml:space="preserve"><value>Mood</value></data>
+  <data name="MoodVeryLow" xml:space="preserve"><value>very low</value></data>
+  <data name="MoodGreat" xml:space="preserve"><value>great</value></data>
+  <data name="SendCheckIn" xml:space="preserve"><value>Send check-in</value></data>
+  <data name="CheckInSaved" xml:space="preserve"><value>Thanks! Your check-in is saved and your readiness on the dashboard is updated.</value></data>
+  <data name="NutritionTitle" xml:space="preserve"><value>Daily nutrition target</value></data>
+  <data name="NutritionLead" xml:space="preserve"><value>The kitchen sees the resulting portion size and carbohydrates in grams, plus your kitchen note.</value></data>
+  <data name="EnergyKcal" xml:space="preserve"><value>Energy (kcal)</value></data>
+  <data name="CarbsPerKg" xml:space="preserve"><value>Carbohydrates (g per kg)</value></data>
+  <data name="KitchenNote" xml:space="preserve"><value>Note for the kitchen (preferences only, no medical details)</value></data>
+  <data name="KitchenNotePlaceholder" xml:space="preserve"><value>e.g. vegetarian</value></data>
+  <data name="SaveTarget" xml:space="preserve"><value>Save target</value></data>
+  <data name="TargetSaved" xml:space="preserve"><value>Saved: {0} kcal, {1} g carbohydrates for the day.</value></data>
+  <data name="PhysioTitle" xml:space="preserve"><value>Physio note</value></data>
+  <data name="PhysioLead" xml:space="preserve"><value>The note text is visible to physios only, and every view is written to the audit log. The coach sees just the restriction level, so training can be adapted.</value></data>
+  <data name="TrainingRestriction" xml:space="preserve"><value>Training restriction</value></data>
+  <data name="Restriction_None" xml:space="preserve"><value>None</value></data>
+  <data name="Restriction_Modified" xml:space="preserve"><value>Modified</value></data>
+  <data name="Restriction_NoTraining" xml:space="preserve"><value>No training</value></data>
+  <data name="Note" xml:space="preserve"><value>Note</value></data>
+  <data name="SaveNote" xml:space="preserve"><value>Save note</value></data>
+  <data name="NoteSaved" xml:space="preserve"><value>Note saved. Restriction: {0}.</value></data>
+  <data name="NotForRole" xml:space="preserve"><value>Not for the {0} role.</value></data>
+  <data name="RoleGateText" xml:space="preserve"><value>This form belongs to the {0} role. Switch persona at the top right to try it. The API enforces the same rule, so hiding the form is a convenience, not the protection.</value></data>
+  <data name="ApiUnreachable" xml:space="preserve"><value>The API is not reachable at {0}. Is it running?</value></data>
+  <data name="NotAllowed" xml:space="preserve"><value>The role {0} is not allowed to do this. That is by design.</value></data>
+  <data name="ApiAnswered" xml:space="preserve"><value>The API answered {0} {1}.</value></data>
+  <data name="NotFoundTitle" xml:space="preserve"><value>Not found</value></data>
+  <data name="NotFoundText" xml:space="preserve"><value>Sorry, the content you are looking for does not exist.</value></data>
+</root>

@@ -3,6 +3,7 @@ using AthleteDay.Api.Auth;
 using AthleteDay.Api.Data;
 using AthleteDay.Api.Domain;
 using AthleteDay.Api.Infrastructure;
+using AthleteDay.Api.Resources;
 using AthleteDay.Api.Realtime;
 using AthleteDay.Contracts;
 using AthleteDay.Core;
@@ -154,5 +155,5 @@ public static class StaffInputEndpoints
     }
 
     private static ValidationProblem UnknownAthlete() =>
-        TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["AthleteId"] = ["Unknown athlete."] });
+        TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["AthleteId"] = [ApiText.UnknownAthlete] });
 }

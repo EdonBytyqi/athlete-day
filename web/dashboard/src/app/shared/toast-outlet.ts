@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { I18n } from '../i18n/i18n.service';
 import { ToastService } from './toast.service';
 
 @Component({
@@ -12,7 +13,7 @@ import { ToastService } from './toast.service';
           @if (toast.actionLabel) {
             <button type="button" class="link-button" (click)="toasts.act()">{{ toast.actionLabel }}</button>
           }
-          <button type="button" class="icon-button" aria-label="Dismiss" (click)="toasts.dismiss()">×</button>
+          <button type="button" class="icon-button" [attr.aria-label]="t('common.dismiss')" (click)="toasts.dismiss()">×</button>
         </div>
       }
     </div>
@@ -20,4 +21,5 @@ import { ToastService } from './toast.service';
 })
 export class ToastOutlet {
   protected readonly toasts = inject(ToastService);
+  protected readonly t = inject(I18n).t;
 }

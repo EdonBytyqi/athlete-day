@@ -1,4 +1,5 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
+import { I18n } from '../i18n/i18n.service';
 import { LoadTrendPoint } from '../api/models';
 
 export interface Bar {
@@ -61,23 +62,23 @@ function round(n: number): number {
   template: `
     <figure class="chart">
       <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img"
-           [attr.aria-label]="'Daily load with 7-day and 28-day averages over ' + points().length + ' days'">
-        @for (t of geometry().ticks; track t.value) {
-          <line class="grid" [attr.x1]="pad.left" [attr.x2]="width - pad.right" [attr.y1]="t.y" [attr.y2]="t.y" />
-          <text class="axis" [attr.x]="pad.left - 6" [attr.y]="t.y + 4" text-anchor="end">{{ t.value }}</text>
+           [attr.aria-label]="t('chart.label', { days: points().length })">
+        @for (tick of geometry().ticks; track tick.value) {
+          <line class="grid" [attr.x1]="pad.left" [attr.x2]="width - pad.right" [attr.y1]="tick.y" [attr.y2]="tick.y" />
+          <text class="axis" [attr.x]="pad.left - 6" [attr.y]="tick.y + 4" text-anchor="end">{{ i18n.number(tick.value) }}</text>
         }
         @for (b of geometry().bars; track b.date) {
           <rect class="bar" [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.width" [attr.height]="b.height" rx="2">
-            <title>{{ b.date }}: {{ b.load }} AU</title>
+            <title>{{ t('chart.barTitle', { date: i18n.date(b.date), load: i18n.number(b.load) }) }}</title>
           </rect>
         }
         <path class="line chronic" [attr.d]="geometry().chronicPath" />
         <path class="line acute" [attr.d]="geometry().acutePath" />
       </svg>
       <figcaption class="legend">
-        <span><i class="key bar"></i>Daily load (AU)</span>
-        <span><i class="key acute"></i>7-day average</span>
-        <span><i class="key chronic"></i>28-day average</span>
+        <span><i class="key bar"></i>{{ t('chart.daily') }}</span>
+        <span><i class="key acute"></i>{{ t('chart.acute') }}</span>
+        <span><i class="key chronic"></i>{{ t('chart.chronic') }}</span>
       </figcaption>
     </figure>
   `,
@@ -87,5 +88,7 @@ export class TrendChart {
   protected readonly width = 720;
   protected readonly height = 240;
   protected readonly pad = PADDING;
+  protected readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
   protected readonly geometry = computed(() => chartGeometry(this.points(), this.width, this.height));
 }

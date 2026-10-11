@@ -1,11 +1,11 @@
 @page "/nutrition"
 @inject StaffApi Api
 
-<PageTitle>Nutrition target · Athlete Day</PageTitle>
+<PageTitle>@L["PageTitle", L["NavNutrition"]]</PageTitle>
 
 <RoleGate Role="@Roles.Nutrition">
-    <h1>Daily nutrition target</h1>
-    <p class="lead">The kitchen sees the resulting portion size and carbohydrates in grams, plus your kitchen note.</p>
+    <h1>@L["NutritionTitle"]</h1>
+    <p class="lead">@L["NutritionLead"]</p>
 
     <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="nutrition" class="form">
         <DataAnnotationsValidator />
@@ -15,31 +15,31 @@
 
         <div class="row">
             <label>
-                Date
+                @L["Date"]
                 <InputDate @bind-Value="_model.Date" />
                 <ValidationMessage For="() => _model.Date" />
             </label>
             <label>
-                Energy (kcal)
+                @L["EnergyKcal"]
                 <InputNumber @bind-Value="_model.EnergyKcal" step="50" />
                 <ValidationMessage For="() => _model.EnergyKcal" />
             </label>
             <label>
-                Carbohydrates (g per kg)
+                @L["CarbsPerKg"]
                 <InputNumber @bind-Value="_model.CarbsGPerKg" step="0.5" />
                 <ValidationMessage For="() => _model.CarbsGPerKg" />
             </label>
         </div>
 
         <label>
-            Note for the kitchen (preferences only, no medical details)
-            <InputText @bind-Value="_model.KitchenNote" placeholder="e.g. vegetarian" />
+            @L["KitchenNote"]
+            <InputText @bind-Value="_model.KitchenNote" placeholder="@L["KitchenNotePlaceholder"]" />
             <ValidationMessage For="() => _model.KitchenNote" />
         </label>
 
         <div class="actions">
             <span></span>
-            <button type="submit" disabled="@_busy">Save target</button>
+            <button type="submit" disabled="@_busy">@L["SaveTarget"]</button>
         </div>
     </EditForm>
 
@@ -62,6 +62,6 @@
 
         if (result.FieldErrors is { } errors) _server!.Show(errors);
         else if (result.Error is { } error) _error = error;
-        else _success = $"Saved: {result.Value!.EnergyKcal} kcal, {result.Value.CarbsG} g carbohydrates for the day.";
+        else _success = L["TargetSaved", result.Value!.EnergyKcal, result.Value.CarbsG];
     }
 }

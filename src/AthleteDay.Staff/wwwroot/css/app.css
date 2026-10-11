@@ -1,33 +1,25 @@
-/* Shared visual language with the Angular dashboard: same tokens, same feel. */
+/* One light design, shared with the Angular dashboard (NFR-07): same tokens, same feel.
+   Baby blue fills highlights; the deeper blue carries text, links and buttons (WCAG AA). */
 :root {
-    --bg: #f6f7f9;
+    --bg: #ffffff;
     --surface: #ffffff;
-    --text: #17202a;
-    --muted: #5b6673;
-    --border: #dde2e8;
-    --accent: #0f766e;
-    --accent-soft: #e6f4f2;
+    --surface-tint: #f5f9fe;
+    --text: #13253a;
+    --muted: #536476;
+    --border: #dbe6f2;
+    --accent: #1f6fb2;
+    --accent-strong: #165a92;
+    --accent-soft: #e8f3fd;
+    --accent-baby: #bfe0f7;
     --ok: #15803d;
     --warn: #b45309;
     --warn-soft: #fff7ed;
     --danger: #b91c1c;
     --danger-soft: #fef2f2;
-    --radius: 10px;
-    color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg: #0f1419;
-        --surface: #182028;
-        --text: #e6eaef;
-        --muted: #9aa5b1;
-        --border: #2a3540;
-        --accent: #2dd4bf;
-        --accent-soft: #10302d;
-        --warn-soft: #2d2010;
-        --danger-soft: #2d1414;
-    }
+    --shadow: 0 1px 2px rgb(19 37 58 / .05), 0 6px 18px rgb(19 37 58 / .06);
+    --radius: 12px;
+    --tap: 44px;
+    color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -49,7 +41,7 @@ h2 { font-size: 1.05rem; margin: 0 0 .25rem; }
     padding: .75rem 1.25rem; background: var(--surface); border-bottom: 1px solid var(--border);
 }
 .brand { display: flex; align-items: center; gap: .6rem; }
-.brand-mark { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); }
+.brand-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--accent-baby), var(--accent)); }
 .brand-sub { color: var(--muted); margin-left: .4rem; }
 .persona { display: flex; align-items: center; gap: .5rem; color: var(--muted); font-size: .9rem; white-space: nowrap; }
 .persona select { width: auto; }
@@ -59,7 +51,7 @@ h2 { font-size: 1.05rem; margin: 0 0 .25rem; }
     padding: .45rem .8rem; border-radius: 8px 8px 0 0; color: var(--muted); text-decoration: none;
     border-bottom: 2px solid transparent;
 }
-.tabs a.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs a.active { color: var(--accent-strong); border-bottom-color: var(--accent); font-weight: 600; }
 
 .page { max-width: 820px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
 .foot { text-align: center; color: var(--muted); font-size: .8rem; padding: 1rem; }
@@ -70,7 +62,7 @@ h2 { font-size: 1.05rem; margin: 0 0 .25rem; }
     border-radius: var(--radius); color: inherit; text-decoration: none;
 }
 .card p { color: var(--muted); margin: 0; font-size: .9rem; }
-.card:hover, .card.active { border-color: var(--accent); }
+.card:hover, .card.active { border-color: var(--accent-baby); background: var(--surface-tint); }
 
 .form {
     display: grid; gap: 1rem; padding: 1.25rem; background: var(--surface);
@@ -118,3 +110,32 @@ button:disabled { opacity: .55; cursor: not-allowed; }
     display: none; left: 0; padding: .6rem 1.25rem; position: fixed; width: 100%; z-index: 1000;
 }
 #blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: .75rem; top: .5rem; }
+
+/* ---- light cards ---- */
+.card, .form { box-shadow: var(--shadow); }
+input, select, textarea, .pill { background: var(--surface); }
+.pill:has(input:checked) { background: var(--accent-soft); border-color: var(--accent-baby); color: var(--accent-strong); }
+
+.topbar-right { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; }
+.lang-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; padding: 2px; background: var(--surface-tint); }
+.lang-switch button { color: var(--muted); background: transparent; border-radius: 999px; padding: .2rem .65rem; font-size: .8rem; }
+.lang-switch button[aria-pressed="true"] { color: #fff; background: var(--accent); }
+
+/* ---- responsive (NFR-06): 360 px to desktop, 44 px touch targets ---- */
+@media (max-width: 820px), (pointer: coarse) {
+    button, select, input:not([type="radio"]):not([type="checkbox"]), .tabs a, .pill { min-height: var(--tap); }
+}
+@media (max-width: 640px) {
+    .topbar { padding: .6rem 1rem; }
+    .topbar-right { width: 100%; flex-direction: column; align-items: stretch; gap: .5rem; }
+    .persona { justify-content: space-between; white-space: normal; }
+    .persona select { flex: 1; min-width: 0; }
+    .lang-switch { align-self: flex-start; }
+    .brand-sub { display: none; }
+    .tabs { padding: .5rem 1rem 0; overflow-x: auto; flex-wrap: nowrap; }
+    .tabs a { flex: none; display: flex; align-items: center; }
+    .lang-switch button { min-height: calc(var(--tap) - 6px); padding: 0 1rem; }
+    .page { padding: 1rem 1rem 2.5rem; }
+    .form { padding: 1rem; }
+    .actions button { width: 100%; }
+}

@@ -1,13 +1,16 @@
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using Text = AthleteDay.Contracts.Resources.ValidationText;
 
 namespace AthleteDay.Contracts;
 
 // These request types are shared by the API and the Blazor staff app,
 // so the same validation rules run in the browser and on the server.
+// Messages come from Resources/ValidationText(.de).resx in the current UI culture (ADR-09).
 
 public sealed class LogSessionRequest : IValidatableObject
 {
-    [Range(1, int.MaxValue, ErrorMessage = "Select an athlete.")]
+    [Range(1, int.MaxValue, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SelectAthlete))]
     public int AthleteId { get; set; }
 
     public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Today);
@@ -15,13 +18,13 @@ public sealed class LogSessionRequest : IValidatableObject
     [EnumDataType(typeof(SessionType))]
     public SessionType Type { get; set; } = SessionType.Strength;
 
-    [Range(5, 300, ErrorMessage = "Duration must be between 5 and 300 minutes.")]
+    [Range(5, 300, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.DurationRange))]
     public int DurationMinutes { get; set; } = 60;
 
-    [Range(1, 10, ErrorMessage = "RPE must be between 1 and 10.")]
+    [Range(1, 10, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.RpeRange))]
     public int Rpe { get; set; } = 5;
 
-    [StringLength(500)]
+    [StringLength(500, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.NotesLength))]
     public string? Notes { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) =>
@@ -30,20 +33,20 @@ public sealed class LogSessionRequest : IValidatableObject
 
 public sealed class WellnessCheckRequest : IValidatableObject
 {
-    [Range(1, int.MaxValue, ErrorMessage = "Select an athlete.")]
+    [Range(1, int.MaxValue, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SelectAthlete))]
     public int AthleteId { get; set; }
 
     public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-    [Range(0, 14, ErrorMessage = "Sleep must be between 0 and 14 hours.")]
+    [Range(0, 14, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SleepRange))]
     public decimal SleepHours { get; set; } = 8;
 
     /// <summary>1 = no soreness, 5 = very sore.</summary>
-    [Range(1, 5, ErrorMessage = "Soreness must be between 1 and 5.")]
+    [Range(1, 5, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SorenessRange))]
     public int Soreness { get; set; } = 2;
 
     /// <summary>1 = very low, 5 = very good.</summary>
-    [Range(1, 5, ErrorMessage = "Mood must be between 1 and 5.")]
+    [Range(1, 5, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.MoodRange))]
     public int Mood { get; set; } = 4;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) =>
@@ -52,25 +55,25 @@ public sealed class WellnessCheckRequest : IValidatableObject
 
 public sealed class NutritionTargetRequest
 {
-    [Range(1, int.MaxValue, ErrorMessage = "Select an athlete.")]
+    [Range(1, int.MaxValue, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SelectAthlete))]
     public int AthleteId { get; set; }
 
     public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-    [Range(1200, 7000, ErrorMessage = "Energy must be between 1200 and 7000 kcal.")]
+    [Range(1200, 7000, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.EnergyRange))]
     public int EnergyKcal { get; set; } = 3000;
 
-    [Range(typeof(decimal), "2", "12", ErrorMessage = "Carbohydrates must be between 2 and 12 g/kg.")]
+    [Range(typeof(decimal), "2", "12", ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.CarbsRange))]
     public decimal CarbsGPerKg { get; set; } = 5;
 
     /// <summary>Shown to the kitchen. Preferences only, never medical details.</summary>
-    [StringLength(200)]
+    [StringLength(200, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.KitchenNoteLength))]
     public string? KitchenNote { get; set; }
 }
 
 public sealed class PhysioNoteRequest : IValidatableObject
 {
-    [Range(1, int.MaxValue, ErrorMessage = "Select an athlete.")]
+    [Range(1, int.MaxValue, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SelectAthlete))]
     public int AthleteId { get; set; }
 
     public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Today);
@@ -78,8 +81,8 @@ public sealed class PhysioNoteRequest : IValidatableObject
     [EnumDataType(typeof(TrainingRestriction))]
     public TrainingRestriction Restriction { get; set; } = TrainingRestriction.None;
 
-    [Required(ErrorMessage = "A note is required.")]
-    [StringLength(1000, MinimumLength = 3)]
+    [Required(ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.NoteRequired))]
+    [StringLength(1000, MinimumLength = 3, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.NoteLength))]
     public string Note { get; set; } = "";
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) =>
@@ -93,7 +96,7 @@ internal static class DateRules
     {
         if (date > DateOnly.FromDateTime(DateTime.Today).AddDays(1))
         {
-            yield return new ValidationResult("Date cannot be in the future.", [member]);
+            yield return new ValidationResult(Text.DateNotInFuture, [member]);
         }
     }
 }
@@ -101,23 +104,23 @@ internal static class DateRules
 /// <summary>Add or edit an athlete. The code is assigned by the system and never part of the request.</summary>
 public sealed class AthleteRequest
 {
-    [Required(ErrorMessage = "Enter a name.")]
-    [StringLength(60, MinimumLength = 2, ErrorMessage = "Name must be 2 to 60 characters.")]
+    [Required(ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.NameRequired))]
+    [StringLength(60, MinimumLength = 2, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.NameLength))]
     public string DisplayName { get; set; } = "";
 
-    [Required(ErrorMessage = "Enter a sport.")]
-    [StringLength(60, MinimumLength = 2, ErrorMessage = "Sport must be 2 to 60 characters.")]
+    [Required(ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SportRequired))]
+    [StringLength(60, MinimumLength = 2, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SportLength))]
     public string Sport { get; set; } = "";
 
     /// <summary>Only the year is stored (data minimisation); the age is the age reached this year.</summary>
-    [Required(ErrorMessage = "Enter the birth year.")]
+    [Required(ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.BirthYearRequired))]
     [AgeBetween(10, 70)]
     public int? BirthYear { get; set; }
 
     [EnumDataType(typeof(Sex))]
     public Sex Sex { get; set; } = Sex.NotStated;
 
-    [Range(typeof(decimal), "30", "200", ErrorMessage = "Body mass must be between 30 and 200 kg.")]
+    [Range(typeof(decimal), "30", "200", ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.BodyMassRange))]
     public decimal BodyMassKg { get; set; } = 70;
 }
 
@@ -134,6 +137,7 @@ public sealed class AgeBetweenAttribute(int min, int max) : ValidationAttribute
         var age = DateTime.Today.Year - year;
         return age >= min && age <= max
             ? ValidationResult.Success
-            : new ValidationResult($"The birth year must give an age between {min} and {max}.", context.MemberName is { } member ? [member] : null);
+            : new ValidationResult(string.Format(CultureInfo.CurrentCulture, Text.AgeBetween, min, max),
+                context.MemberName is { } member ? [member] : null);
     }
 }

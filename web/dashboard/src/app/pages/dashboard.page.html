@@ -1,13 +1,13 @@
 <header class="page-head">
   <div>
-    <h1>Today's squad</h1>
-    <p class="muted">Load, readiness and nutrition per athlete. Updates live when staff log data.</p>
+    <h1>{{ t('squad.title') }}</h1>
+    <p class="muted">{{ t('squad.lead') }}</p>
   </div>
   @if (rows(); as list) {
     <div class="stats">
-      <div class="stat"><strong>{{ list.length }}</strong><span>athletes</span></div>
-      <div class="stat warn"><strong>{{ checkIns() }}</strong><span>to check in</span></div>
-      <div class="stat"><strong>{{ missing() }}</strong><span>no morning check</span></div>
+      <div class="stat"><strong>{{ list.length }}</strong><span>{{ t('squad.statAthletes') }}</span></div>
+      <div class="stat warn"><strong>{{ checkIns() }}</strong><span>{{ t('squad.statCheckIn') }}</span></div>
+      <div class="stat"><strong>{{ missing() }}</strong><span>{{ t('squad.statMissing') }}</span></div>
     </div>
   }
 </header>
@@ -21,133 +21,157 @@
 } @else if (rows(); as list) {
   <div class="toolbar">
     <label class="search">
-      <span class="visually-hidden">Search athletes</span>
+      <span class="visually-hidden">{{ t('squad.searchLabel') }}</span>
       <input
         type="search"
-        placeholder="Search name or code…"
+        [placeholder]="t('squad.searchPlaceholder')"
         [value]="query()"
         (input)="query.set($any($event.target).value)"
       />
     </label>
-    <div class="chips" role="group" aria-label="Filter by sport">
-      <button type="button" class="chip" [attr.aria-pressed]="sport() === null" (click)="sport.set(null)">All sports</button>
+    <div class="chips" role="group" [attr.aria-label]="t('squad.sportFilter')">
+      <button type="button" class="chip" [attr.aria-pressed]="sport() === null" (click)="sport.set(null)">
+        {{ t('squad.allSports') }}
+      </button>
       @for (s of sports(); track s) {
         <button type="button" class="chip" [attr.aria-pressed]="sport() === s" (click)="toggleSport(s)">{{ s }}</button>
       }
     </div>
     @if (isCoach()) {
-      <button type="button" class="add-athlete" (click)="editing.set('new')">+ Add athlete</button>
+      <button type="button" class="add-athlete" (click)="editing.set('new')">{{ t('squad.addAthlete') }}</button>
     }
   </div>
 
   @if (list.length === 0) {
     <div class="empty">
-      <p>No athletes in the squad yet.</p>
+      <p>{{ t('squad.empty') }}</p>
       @if (isCoach()) {
-        <button type="button" (click)="editing.set('new')">Add the first athlete</button>
+        <button type="button" (click)="editing.set('new')">{{ t('squad.addFirst') }}</button>
       }
     </div>
   } @else if (visible().length === 0) {
     <div class="empty">
       <p>
-        No athletes match
-        @if (query().trim()) { “{{ query().trim() }}” }
-        @if (sport(); as s) { in {{ s }} }.
+        {{ t('squad.noMatch') }}
+        @if (query().trim()) { {{ t('squad.noMatchQuery', { query: query().trim() }) }} }
+        @if (sport(); as s) { {{ t('squad.noMatchSport', { sport: s }) }} }.
       </p>
-      <button type="button" class="secondary" (click)="clearFilters()">Clear filters</button>
+      <button type="button" class="secondary" (click)="clearFilters()">{{ t('squad.clearFilters') }}</button>
     </div>
   } @else {
+    <!-- On phones the column headers are hidden and each row becomes a card, so sorting moves here (NFR-06). -->
+    <label class="sort-mobile">
+      <span>{{ t('squad.sortBy') }}</span>
+      <select (change)="sortFromSelect($any($event.target).value)">
+        @for (option of sortOptions; track option) {
+          <option [value]="option + ':asc'" [selected]="sort().key === option && sort().direction === 'asc'">
+            {{ t(sortKeyLabel(option)) }} ↑
+          </option>
+          <option [value]="option + ':desc'" [selected]="sort().key === option && sort().direction === 'desc'">
+            {{ t(sortKeyLabel(option)) }} ↓
+          </option>
+        }
+      </select>
+    </label>
+
     <div class="table-wrap">
       <table class="grid-table squad">
         <caption class="visually-hidden">
-          Squad, sorted by {{ sortLabels[sort().key] }} ({{ sort().direction === 'asc' ? 'ascending' : 'descending' }})
-          @if (filtered()) { , filtered }
+          {{ t('squad.caption', { key: t(sortKeyLabel(sort().key)), direction: t(sort().direction === 'asc' ? 'squad.ascending' : 'squad.descending') }) }}
+          @if (filtered()) { {{ t('squad.captionFiltered') }} }
         </caption>
         <thead>
           <tr>
-            <th [attr.aria-sort]="ariaSort('name')"><button type="button" class="sort" (click)="sortBy('name')">Athlete</button></th>
-            <th [attr.aria-sort]="ariaSort('sport')"><button type="button" class="sort" (click)="sortBy('sport')">Sport</button></th>
-            <th class="num" [attr.aria-sort]="ariaSort('age')"><button type="button" class="sort" (click)="sortBy('age')">Age</button></th>
-            <th [attr.aria-sort]="ariaSort('sex')"><button type="button" class="sort" (click)="sortBy('sex')">Sex</button></th>
+            <th [attr.aria-sort]="ariaSort('name')"><button type="button" class="sort" (click)="sortBy('name')">{{ t('squad.col.athlete') }}</button></th>
+            <th [attr.aria-sort]="ariaSort('sport')"><button type="button" class="sort" (click)="sortBy('sport')">{{ t('squad.col.sport') }}</button></th>
+            <th class="num" [attr.aria-sort]="ariaSort('age')"><button type="button" class="sort" (click)="sortBy('age')">{{ t('squad.col.age') }}</button></th>
+            <th [attr.aria-sort]="ariaSort('sex')"><button type="button" class="sort" (click)="sortBy('sex')">{{ t('squad.col.sex') }}</button></th>
             <th class="num" [attr.aria-sort]="ariaSort('todayLoad')">
-              <button type="button" class="sort" (click)="sortBy('todayLoad')">Load today</button>
-              <app-info-tip label="Load today" text="Today's training load: how hard each session felt (RPE 1–10) × its minutes, added up. In arbitrary units (AU)." />
+              <button type="button" class="sort" (click)="sortBy('todayLoad')">{{ t('squad.col.loadToday') }}</button>
+              <app-info-tip [label]="t('squad.col.loadToday')" [text]="t('squad.tip.loadToday')" />
             </th>
             <th class="num">
-              Week average
-              <app-info-tip label="Week average" text="Average daily load over the last 7 days, rest days counted as 0." />
+              {{ t('squad.col.weekAvg') }}
+              <app-info-tip [label]="t('squad.col.weekAvg')" [text]="t('squad.tip.weekAvg')" />
             </th>
             <th class="num">
-              Month average
-              <app-info-tip label="Month average" text="Average daily load over the last 28 days, rest days counted as 0." />
+              {{ t('squad.col.monthAvg') }}
+              <app-info-tip [label]="t('squad.col.monthAvg')" [text]="t('squad.tip.monthAvg')" />
             </th>
             <th class="num">
-              Week vs month
-              <app-info-tip label="Week vs month" text="Week average ÷ month average. 0.8–1.3 is the usual range; outside it, this week is much lighter or harder than usual. A reason to talk, not an injury prediction." />
+              {{ t('squad.col.weekVsMonth') }}
+              <app-info-tip [label]="t('squad.col.weekVsMonth')" [text]="t('squad.tip.weekVsMonth')" />
             </th>
-            <th [attr.aria-sort]="ariaSort('readiness')"><button type="button" class="sort" (click)="sortBy('readiness')">Readiness</button></th>
-            <th>Morning check</th>
-            <th>Nutrition today</th>
+            <th [attr.aria-sort]="ariaSort('readiness')"><button type="button" class="sort" (click)="sortBy('readiness')">{{ t('squad.col.readiness') }}</button></th>
+            <th>{{ t('squad.col.morningCheck') }}</th>
+            <th>{{ t('squad.col.nutrition') }}</th>
             @if (isCoach()) {
-              <th class="sticky-end"><span class="visually-hidden">Actions</span></th>
+              <th class="sticky-end"><span class="visually-hidden">{{ t('squad.col.actions') }}</span></th>
             }
           </tr>
         </thead>
         <tbody>
           @for (r of visible(); track r.athleteId) {
             <tr [class.flagged]="r.readiness.status === 'CheckIn'">
-              <td>
+              <td class="cell-athlete">
                 <a [routerLink]="['/athletes', r.athleteId]" class="athlete">
                   <strong>{{ r.displayName }}</strong>
                   <span class="muted">{{ r.code }}</span>
                 </a>
                 @if (r.restriction !== 'None') {
-                  <span class="tag warn">Restriction: {{ r.restriction }}</span>
+                  <span class="tag warn">{{ t('squad.restrictionTag', { restriction: t(restrictionLabel(r.restriction)) }) }}</span>
                 }
               </td>
-              <td>{{ r.sport }}</td>
-              <td class="num">{{ r.age ?? '–' }}</td>
-              <td>{{ sexLabels[r.sex] }}</td>
-              <td class="num">{{ r.todayLoad }}</td>
-              <td class="num">{{ r.acuteLoad | number: '1.0-0' }}</td>
-              <td class="num">{{ r.chronicLoad | number: '1.0-0' }}</td>
-              <td class="num">{{ r.acuteChronicRatio === null ? '–' : (r.acuteChronicRatio | number: '1.2-2') }}</td>
-              <td class="readiness"><app-readiness-badge [status]="r.readiness.status" [reasons]="r.readiness.reasons" /></td>
-              <td>
+              <td class="nowrap" [attr.data-label]="t('squad.col.sport')">{{ r.sport }}</td>
+              <td class="num" [attr.data-label]="t('squad.col.age')">{{ r.age ?? '–' }}</td>
+              <td [attr.data-label]="t('squad.col.sex')">{{ t(sexLabel(r.sex)) }}</td>
+              <td class="num" [attr.data-label]="t('squad.col.loadToday')">{{ i18n.number(r.todayLoad) }}</td>
+              <td class="num" [attr.data-label]="t('squad.col.weekAvg')">{{ i18n.number(r.acuteLoad) }}</td>
+              <td class="num" [attr.data-label]="t('squad.col.monthAvg')">{{ i18n.number(r.chronicLoad) }}</td>
+              <td class="num" [attr.data-label]="t('squad.col.weekVsMonth')">
+                {{ r.acuteChronicRatio === null ? '–' : i18n.number(r.acuteChronicRatio, 2) }}
+              </td>
+              <td class="readiness" [attr.data-label]="t('squad.col.readiness')">
+                <app-readiness-badge [status]="r.readiness.status" [reasons]="r.readiness.reasons" />
+              </td>
+              <td [attr.data-label]="t('squad.col.morningCheck')">
                 @if (r.wellness; as w) {
                   <span class="muted stacked">
-                    <span>Sleep {{ w.sleepHours }} h</span>
-                    <span>Soreness {{ w.soreness }}/5</span>
-                    <span>Mood {{ w.mood }}/5</span>
+                    <span>{{ t('squad.sleep', { hours: i18n.number(w.sleepHours, 1, 0) }) }}</span>
+                    <span>{{ t('squad.soreness', { value: w.soreness }) }}</span>
+                    <span>{{ t('squad.mood', { value: w.mood }) }}</span>
                   </span>
                 } @else {
                   <span class="muted">–</span>
                 }
               </td>
-              <td>
+              <td [attr.data-label]="t('squad.col.nutrition')">
                 @if (r.nutrition; as n) {
-                  <span class="stacked"><span>{{ n.energyKcal }} kcal</span><span>{{ n.carbsG }} g carbs</span></span>
+                  <span class="stacked">
+                    <span>{{ t('squad.kcal', { value: i18n.number(n.energyKcal) }) }}</span>
+                    <span>{{ t('squad.carbs', { value: i18n.number(n.carbsG) }) }}</span>
+                  </span>
                 } @else {
-                  <span class="muted">not set</span>
+                  <span class="muted">{{ t('common.notSet') }}</span>
                 }
               </td>
               @if (isCoach()) {
-                <td class="sticky-end">
+                <td class="sticky-end cell-actions">
                   <!-- A native popover sits in the top layer, so the scrolling table never clips it. -->
                   <div class="row-actions">
                     <button
                       type="button"
                       class="menu-button"
                       [attr.popovertarget]="'row-menu-' + r.athleteId"
-                      [attr.aria-label]="'Actions for ' + r.displayName"
+                      [attr.aria-label]="t('squad.actionsFor', { name: r.displayName })"
                     >
                       ⋯
                     </button>
                     <div class="menu" popover [id]="'row-menu-' + r.athleteId" #menu>
-                      <a class="log-session" [href]="logSessionUrl(r.athleteId)" target="_blank" rel="noopener" (click)="closeMenu(menu)">Log session ↗</a>
-                      <a class="details" [routerLink]="['/athletes', r.athleteId]" (click)="closeMenu(menu)">Details and trend</a>
-                      <button type="button" class="edit" (click)="closeMenu(menu); edit(r)">Edit</button>
-                      <button type="button" class="archive" (click)="closeMenu(menu); archiving.set(r)">Archive</button>
+                      <a class="log-session" [href]="logSessionUrl(r.athleteId)" target="_blank" rel="noopener" (click)="closeMenu(menu)">{{ t('squad.logSession') }}</a>
+                      <a class="details" [routerLink]="['/athletes', r.athleteId]" (click)="closeMenu(menu)">{{ t('squad.details') }}</a>
+                      <button type="button" class="edit" (click)="closeMenu(menu); edit(r)">{{ t('squad.edit') }}</button>
+                      <button type="button" class="archive" (click)="closeMenu(menu); archiving.set(r)">{{ t('squad.archive') }}</button>
                     </div>
                   </div>
                 </td>
@@ -159,30 +183,27 @@
     </div>
   }
 
-  <p class="footnote">
-    Load = session RPE × minutes (AU). The 7-day vs 28-day comparison is a monitoring aid to start a
-    conversation, not an injury predictor; the acute:chronic workload ratio is debated in sports science.
-  </p>
+  <p class="footnote">{{ t('squad.footnote') }}</p>
 
   @if (isCoach()) {
     <details class="archived panel" (toggle)="onArchiveToggle($event)">
-      <summary>Archived athletes</summary>
+      <summary>{{ t('squad.archived') }}</summary>
       @if (archived(); as list) {
         @for (a of list; track a.id) {
           <div class="archived-row">
             <span><strong>{{ a.displayName }}</strong> <span class="muted">{{ a.code }} · {{ a.sport }}</span></span>
-            <button type="button" class="secondary" (click)="restore(a.id, a.displayName)">Restore</button>
+            <button type="button" class="secondary" (click)="restore(a.id, a.displayName)">{{ t('squad.restore') }}</button>
           </div>
         } @empty {
-          <p class="muted">Nobody is archived. Archived athletes keep their history and can be restored here.</p>
+          <p class="muted">{{ t('squad.archivedEmpty') }}</p>
         }
       } @else {
-        <p class="muted">Loading…</p>
+        <p class="muted">{{ t('common.loading') }}</p>
       }
     </details>
   }
 } @else {
-  <p class="muted">Loading…</p>
+  <p class="muted">{{ t('common.loading') }}</p>
 }
 
 @if (editing() !== null) {
@@ -190,14 +211,11 @@
 }
 
 @if (archiving(); as row) {
-  <app-modal-dialog kind="confirm" [heading]="'Archive ' + row.displayName + '?'" (closed)="archiving.set(null)">
-    <p>
-      {{ row.displayName }} disappears from the squad, the staff forms and the kitchen list. Their history is kept, and
-      you can undo this.
-    </p>
+  <app-modal-dialog kind="confirm" [heading]="t('squad.archiveTitle', { name: row.displayName })" (closed)="archiving.set(null)">
+    <p>{{ t('squad.archiveText', { name: row.displayName }) }}</p>
     <div class="dialog-actions">
-      <button type="button" class="secondary" (click)="archiving.set(null)">Cancel</button>
-      <button type="button" class="danger confirm-archive" (click)="confirmArchive()">Archive</button>
+      <button type="button" class="secondary" (click)="archiving.set(null)">{{ t('common.cancel') }}</button>
+      <button type="button" class="danger confirm-archive" (click)="confirmArchive()">{{ t('squad.archiveConfirm') }}</button>
     </div>
   </app-modal-dialog>
 }

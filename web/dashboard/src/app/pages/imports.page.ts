@@ -1,30 +1,27 @@
 import { Component, effect, inject, signal, untracked } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { ApiService, describeError } from '../api/api.service';
 import { ImportJob } from '../api/models';
 import { PersonaService } from '../api/persona.service';
 import { RealtimeService } from '../api/realtime.service';
+import { TranslationKey } from '../i18n/catalogue';
+import { I18n } from '../i18n/i18n.service';
 
 @Component({
   selector: 'app-imports-page',
-  imports: [DatePipe],
   template: `
     <header class="page-head">
       <div>
-        <h1>Device import</h1>
-        <p class="muted">
-          Upload a CSV export (jump tests, GPS). The file goes to Blob Storage, an event is queued and a background
-          worker validates it. Good rows are imported; bad rows come back with the reason.
-        </p>
+        <h1>{{ t('imports.title') }}</h1>
+        <p class="muted">{{ t('imports.lead') }}</p>
       </div>
     </header>
 
     <section class="panel upload">
-      <input #picker type="file" accept=".csv" (change)="selected.set(picker.files?.item(0) ?? null)" />
+      <input #picker type="file" accept=".csv" [attr.aria-label]="t('imports.fileLabel')" (change)="selected.set(picker.files?.item(0) ?? null)" />
       <button type="button" [disabled]="!selected() || uploading()" (click)="upload(picker)">
-        {{ uploading() ? 'Uploading…' : 'Upload' }}
+        {{ uploading() ? t('imports.uploading') : t('imports.upload') }}
       </button>
-      <span class="muted">Columns: athlete_code, date, test_type, value, unit. Samples are in the repo's samples/ folder.</span>
+      <span class="muted">{{ t('imports.columns') }}</span>
     </section>
 
     @if (error(); as message) {
@@ -33,35 +30,32 @@ import { RealtimeService } from '../api/realtime.service';
 
     <div class="two-col wide-right">
       <section class="panel">
-        <h2>Recent imports</h2>
+        <h2>{{ t('imports.recent') }}</h2>
         <ul class="job-list">
           @for (j of jobs(); track j.id) {
             <li>
               <button type="button" class="job" [class.active]="report()?.id === j.id" (click)="open(j.id)">
-                <span class="status" [class]="'status ' + j.status.toLowerCase()">{{ j.status }}</span>
+                <span class="status" [class]="'status ' + j.status.toLowerCase()">{{ t(statusLabel(j.status)) }}</span>
                 <strong>{{ j.fileName }}</strong>
-                <span class="muted">{{ j.importedRows }} imported · {{ j.rejectedRows }} rejected · {{ j.uploadedAt | date: 'HH:mm' }}</span>
+                <span class="muted">{{ t('imports.jobLine', { imported: j.importedRows, rejected: j.rejectedRows, time: i18n.dateTime(j.uploadedAt, { hour: '2-digit', minute: '2-digit' }) }) }}</span>
               </button>
             </li>
           } @empty {
-            <li class="muted">No imports yet.</li>
+            <li class="muted">{{ t('imports.none') }}</li>
           }
         </ul>
       </section>
 
       <section class="panel">
-        <h2>Validation report</h2>
+        <h2>{{ t('imports.report') }}</h2>
         @if (report(); as r) {
-          <p>
-            <strong>{{ r.fileName }}</strong> by {{ r.uploadedBy }}: {{ r.totalRows }} rows,
-            {{ r.importedRows }} imported, {{ r.rejectedRows }} rejected.
-          </p>
+          <p>{{ t('imports.summary', { file: r.fileName, user: r.uploadedBy, total: r.totalRows, imported: r.importedRows, rejected: r.rejectedRows }) }}</p>
           @if (r.failureReason) {
             <p class="banner error">{{ r.failureReason }}</p>
           }
           @if (r.errors.length) {
             <table class="grid-table compact">
-              <thead><tr><th class="num">Row</th><th>Column</th><th>Reason</th><th>Line</th></tr></thead>
+              <thead><tr><th class="num">{{ t('imports.col.row') }}</th><th>{{ t('imports.col.column') }}</th><th>{{ t('imports.col.reason') }}</th><th>{{ t('imports.col.line') }}</th></tr></thead>
               <tbody>
                 @for (e of r.errors; track e.rowNumber) {
                   <tr>
@@ -74,12 +68,12 @@ import { RealtimeService } from '../api/realtime.service';
               </tbody>
             </table>
           } @else if (r.status === 'Completed') {
-            <p class="muted">Every row passed validation.</p>
+            <p class="muted">{{ t('imports.allPassed') }}</p>
           } @else {
-            <p class="muted">Waiting for the worker…</p>
+            <p class="muted">{{ t('imports.waiting') }}</p>
           }
         } @else {
-          <p class="muted">Select an import to see its report.</p>
+          <p class="muted">{{ t('imports.selectOne') }}</p>
         }
       </section>
     </div>
@@ -89,6 +83,12 @@ export class ImportsPage {
   private readonly api = inject(ApiService);
   private readonly persona = inject(PersonaService);
   private readonly realtime = inject(RealtimeService);
+  protected readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
+
+  protected statusLabel(status: ImportJob['status']): TranslationKey {
+    return `imports.status.${status}`;
+  }
 
   protected readonly jobs = signal<ImportJob[]>([]);
   protected readonly report = signal<ImportJob | null>(null);
@@ -124,7 +124,7 @@ export class ImportsPage {
       },
       error: (e) => {
         this.uploading.set(false);
-        this.error.set(describeError(e, this.persona.current().role));
+        this.error.set(describeError(e, this.persona.current().role, this.t));
       },
     });
   }
@@ -143,7 +143,7 @@ export class ImportsPage {
       error: (e) => {
         this.jobs.set([]);
         this.report.set(null);
-        this.error.set(describeError(e, this.persona.current().role));
+        this.error.set(describeError(e, this.persona.current().role, this.t));
       },
     });
   }

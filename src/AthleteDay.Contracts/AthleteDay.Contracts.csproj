@@ -1,3 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Translations (ADR-09): English in ValidationText.resx, German in ValidationText.de.resx, typed access through AthleteDay.Contracts.Resources.ValidationText. -->
+  <ItemGroup>
+    <EmbeddedResource Update="Resources/ValidationText.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>AthleteDay.Contracts.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>ValidationText</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)ValidationText.Designer.cs</StronglyTypedFileName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

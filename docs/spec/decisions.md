@@ -59,3 +59,21 @@ Short records of the decisions that shape the code. Format: context → decision
   stated. Both appear on the dashboard (coach, physio, nutrition) and never in the kitchen view.
 * **Consequence:** data minimisation under the Swiss FADP / DSG; the age can be off by one before the birthday, which
   is precise enough for squad planning.
+
+## ADR-09 Runtime translation catalogues, server messages by Accept-Language
+
+* **Context:** both apps and the API must work in English and German (AC-53 – AC-57). The dashboard should switch
+  language without a reload, and server texts (validation, readiness reasons, import errors) are shown in the UI.
+* **Decision:**
+  * **Angular:** a small signal-based translation service with one catalogue per language as TypeScript objects. The
+    German catalogue is typed against the English one, so a missing key fails the build. Dates and numbers are
+    formatted with `Intl` for the current locale (en-GB, de-CH). Angular's built-in `@angular/localize` was not used:
+    it compiles one build per language, so switching means a reload and a second deployment.
+  * **.NET:** `.resx` resources (English neutral, `.de` for German) in the project that owns the text: Contracts for
+    validation messages (shared by API and Blazor), Core for readiness reasons and import errors, the API for its own
+    errors, and the staff app for its UI. The API picks the culture from `Accept-Language` (request localization);
+    both apps send their language.
+  * **Blazor WebAssembly** loads culture data at start-up, so its language switch stores the choice and reloads the
+    page (the documented .NET pattern).
+* **Consequence:** one place per app to translate; a test compares the language catalogues (AC-54). Import row errors
+  are stored as text in the language of the upload; a report viewed later in the other language stays as it was.

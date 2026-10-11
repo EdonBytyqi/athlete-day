@@ -1,5 +1,6 @@
 using System.Globalization;
 using AthleteDay.Contracts;
+using Text = AthleteDay.Core.Resources.CoreText;
 
 namespace AthleteDay.Core;
 
@@ -44,7 +45,7 @@ public static class DeviceCsvValidator
         var header = lines.FirstOrDefault()?.Trim().TrimStart('\uFEFF') ?? "";
         if (header.Length == 0)
         {
-            errors.Add(new(1, "file", "The file is empty.", ""));
+            errors.Add(new(1, "file", Text.FileEmpty, ""));
             return new(0, valid, errors);
         }
 
@@ -53,7 +54,7 @@ public static class DeviceCsvValidator
         var columns = header.Split(delimiter).Select(c => c.Trim().ToLowerInvariant()).ToArray();
         if (!columns.SequenceEqual(ExpectedHeader))
         {
-            errors.Add(new(1, "header", $"Expected header '{string.Join(',', ExpectedHeader)}'.", header));
+            errors.Add(new(1, "header", Format(Text.ExpectedHeader, string.Join(',', ExpectedHeader)), header));
             return new(0, valid, errors);
         }
 
@@ -69,7 +70,7 @@ public static class DeviceCsvValidator
             total++;
             if (total > MaxRows)
             {
-                errors.Add(new(rowNumber, "file", $"More than {MaxRows} rows; the rest of the file was not read.", ""));
+                errors.Add(new(rowNumber, "file", Format(Text.TooManyRows, MaxRows), ""));
                 break;
             }
 
@@ -82,7 +83,7 @@ public static class DeviceCsvValidator
 
             if (!seen.Add((row!.AthleteCode, row.Date, row.TestType)))
             {
-                errors.Add(new(rowNumber, "row", "Duplicate of an earlier row (same athlete, date and test).", raw));
+                errors.Add(new(rowNumber, "row", Text.DuplicateRow, raw));
                 continue;
             }
 
@@ -123,7 +124,7 @@ public static class DeviceCsvValidator
         row = null;
         column = "row";
         if (cells.Length != ExpectedHeader.Length)
-            return $"Expected {ExpectedHeader.Length} columns, found {cells.Length}.";
+            return Format(Text.ColumnCount, ExpectedHeader.Length, cells.Length);
 
         var code = cells[0].Trim().ToUpperInvariant();
         var dateText = cells[1].Trim();
@@ -132,33 +133,36 @@ public static class DeviceCsvValidator
         var unit = cells[4].Trim().ToLowerInvariant();
 
         column = "athlete_code";
-        if (code.Length == 0) return "Athlete code is missing.";
-        if (!knownAthleteCodes.Contains(code)) return $"Unknown athlete code '{code}'.";
+        if (code.Length == 0) return Text.AthleteCodeMissing;
+        if (!knownAthleteCodes.Contains(code)) return Format(Text.UnknownAthleteCode, code);
 
         column = "date";
         if (!DateOnly.TryParseExact(dateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
-            return $"'{dateText}' is not a date in the format yyyy-MM-dd.";
-        if (date > today) return "Date is in the future.";
+            return Format(Text.BadDate, dateText);
+        if (date > today) return Text.DateInFuture;
 
         column = "test_type";
         if (!Tests.TryGetValue(test, out var spec))
-            return $"Unknown test type '{test}'. Supported: {string.Join(", ", Tests.Keys)}.";
+            return Format(Text.UnknownTest, test, string.Join(", ", Tests.Keys));
 
         column = "value";
         if (valueText.Contains(',') && !valueText.Contains('.'))
-            return $"'{valueText}' uses a decimal comma; use '.' as the decimal separator.";
+            return Format(Text.DecimalComma, valueText);
         if (!decimal.TryParse(valueText, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign,
                 CultureInfo.InvariantCulture, out var value))
-            return $"'{valueText}' is not a number.";
+            return Format(Text.NotANumber, valueText);
         if (value < spec.Min || value > spec.Max)
-            return $"{value.ToString(CultureInfo.InvariantCulture)} {spec.Unit} is outside the plausible range " +
-                   $"{spec.Min.ToString(CultureInfo.InvariantCulture)}-{spec.Max.ToString(CultureInfo.InvariantCulture)} {spec.Unit} for {test}.";
+            return Format(Text.OutOfRange, value, spec.Unit, spec.Min, spec.Max, test);
 
         column = "unit";
-        if (unit != spec.Unit) return $"Unit '{unit}' does not match {test}; expected '{spec.Unit}'.";
+        if (unit != spec.Unit) return Format(Text.UnitMismatch, unit, test, spec.Unit);
 
         column = "row";
         row = new DeviceMeasurementRow(0, code, date, test, value, spec.Unit);
         return null;
     }
+
+    // Texts from Resources/CoreText(.de).resx in the current UI culture; numbers stay invariant ("4.12").
+    private static string Format(string template, params object[] args) =>
+        string.Format(CultureInfo.InvariantCulture, template, args);
 }

@@ -2,36 +2,33 @@
 @implements IDisposable
 @inject PersonaState Persona
 
-<PageTitle>Athlete Day · Staff input</PageTitle>
+<PageTitle>@L["PageTitle", L["BrandSub"]]</PageTitle>
 
-<h1>Fast input for the people in the hall</h1>
-<p class="lead">
-    Every discipline records its part of an athlete's day here. The coach dashboard (Angular) combines it,
-    and each role only ever sees what it needs.
-</p>
+<h1>@L["HomeTitle"]</h1>
+<p class="lead">@L["HomeLead"]</p>
 
 <div class="cards">
     <a class="card @(Persona.Is(Roles.Coach) ? "active" : "")" href="sessions/new" @onclick="() => Persona.Switch(PersonaFor(Roles.Coach))">
-        <h2>Coach</h2>
-        <p>Log a session: type, duration and RPE. Load = RPE × minutes.</p>
+        <h2>@L["Role_Coach"]</h2>
+        <p>@L["CardCoachText"]</p>
     </a>
     <a class="card @(Persona.Is(Roles.Athlete) ? "active" : "")" href="wellness" @onclick="() => Persona.Switch(PersonaFor(Roles.Athlete))">
-        <h2>Athlete</h2>
-        <p>Pick your name, then answer three questions: sleep, soreness and mood. Only for yourself.</p>
+        <h2>@L["Role_Athlete"]</h2>
+        <p>@L["CardAthleteText"]</p>
     </a>
     <a class="card @(Persona.Is(Roles.Nutrition) ? "active" : "")" href="nutrition" @onclick="() => Persona.Switch(PersonaFor(Roles.Nutrition))">
-        <h2>Nutrition</h2>
-        <p>Daily energy and carbohydrate targets, plus a note for the kitchen.</p>
+        <h2>@L["Role_Nutrition"]</h2>
+        <p>@L["CardNutritionText"]</p>
     </a>
     <a class="card @(Persona.Is(Roles.Physio) ? "active" : "")" href="physio" @onclick="() => Persona.Switch(PersonaFor(Roles.Physio))">
-        <h2>Physio</h2>
-        <p>Health notes and training restrictions. Notes stay with the physio.</p>
+        <h2>@L["Role_Physio"]</h2>
+        <p>@L["CardPhysioText"]</p>
     </a>
 </div>
 
 @if (Persona.Is(Roles.Kitchen))
 {
-    <p class="notice">The kitchen has no input forms. Its view is the kitchen screen in the dashboard, which shows portions and carbohydrates and nothing about health.</p>
+    <p class="notice">@L["KitchenNotice"]</p>
 }
 
 @code {
