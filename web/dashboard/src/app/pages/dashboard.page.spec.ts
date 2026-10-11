@@ -10,6 +10,13 @@ import { PersonaService } from '../api/persona.service';
 import { RealtimeService } from '../api/realtime.service';
 import { ToastService } from '../shared/toast.service';
 import { I18n } from '../i18n/i18n.service';
+import { addDaysIso, todayIso } from '../shared/dates';
+
+const sportsList = [
+  { id: 4, name: 'Rowing', retired: false },
+  { id: 2, name: 'Ice hockey', retired: false },
+  { id: 9, name: 'Fencing', retired: true },
+];
 
 const row = (overrides: Partial<DashboardRow>): DashboardRow => ({
   athleteId: 1,
@@ -26,6 +33,7 @@ const row = (overrides: Partial<DashboardRow>): DashboardRow => ({
   readiness: { status: 'Ok', reasons: [] },
   restriction: 'None',
   nutrition: { energyKcal: 3200, carbsG: 396 },
+  range: { from: '2026-10-11', to: '2026-10-11', days: 1, totalLoad: 0, averageDailyLoad: 0, sessions: 0, wellnessDays: 0, averageSleep: null, averageSoreness: null, averageMood: null },
   ...overrides,
 });
 
@@ -64,6 +72,13 @@ describe('DashboardPage', () => {
       fixture.detectChanges();
       await fixture.whenStable();
     };
+    const choose = async (selector: string, value: string) => {
+      const select = el.querySelector<HTMLSelectElement>(selector)!;
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+    };
     const type = async (selector: string, value: string) => {
       const input = el.querySelector<HTMLInputElement>(selector)!;
       input.value = value;
@@ -71,7 +86,7 @@ describe('DashboardPage', () => {
       fixture.detectChanges();
       await fixture.whenStable();
     };
-    return { fixture, el, click, type };
+    return { fixture, el, click, type, choose };
   }
 
   const names = (el: HTMLElement) =>
@@ -223,7 +238,7 @@ describe('DashboardPage', () => {
   });
 
   it('[AC-41] adds an athlete through the form', async () => {
-    const { el, click, type, fixture } = await render();
+    const { el, click, type, choose, fixture } = await render();
 
     await click(el.querySelector('button.add-athlete'));
     const dialog = el.querySelector('dialog.athlete-form')!;
@@ -231,18 +246,85 @@ describe('DashboardPage', () => {
     expect(dialog.querySelector('h2')?.textContent).toContain('Add athlete');
 
     await type('dialog.athlete-form input[name="athlete.displayName"]', 'Ada');
-    await type('dialog.athlete-form input[name="athlete.sport"]', 'Rowing');
+    controller.expectOne('/api/sports').flush(sportsList);
+    await fixture.whenStable();
+    const sportOptions = [...dialog.querySelectorAll('select[name="athlete.sportId"] option')].map((o) => o.textContent?.trim());
+    expect(sportOptions).toEqual(['Choose a sport…', 'Ice hockey', 'Rowing']);
+    await choose('dialog.athlete-form select[name="athlete.sportId"]', '4');
     await type('dialog.athlete-form input[name="athlete.birthYear"]', '2001');
     await type('dialog.athlete-form input[name="athlete.bodyMassKg"]', '68.5');
     await click(dialog.querySelector('button[type="submit"]'));
 
     const create = controller.expectOne('/api/athletes');
     expect(create.request.method).toBe('POST');
-    expect(create.request.body).toMatchObject({ displayName: 'Ada', sport: 'Rowing', birthYear: 2001, bodyMassKg: 68.5 });
-    create.flush({ id: 9, code: 'ATH-009', displayName: 'Ada', sport: 'Rowing', birthYear: 2001, sex: 'NotStated', bodyMassKg: 68.5, archivedAt: null }, { status: 201, statusText: 'Created' });
+    expect(create.request.body).toMatchObject({ displayName: 'Ada', sportId: 4, birthYear: 2001, bodyMassKg: 68.5 });
+    create.flush({ id: 9, code: 'ATH-009', displayName: 'Ada', sportId: 4, sport: 'Rowing', birthYear: 2001, sex: 'NotStated', bodyMassKg: 68.5, archivedAt: null }, { status: 201, statusText: 'Created' });
     await fixture.whenStable();
 
     expect(TestBed.inject(ToastService).current()?.message).toContain('Ada added as ATH-009');
+  });
+
+  it('[AC-60] loads the chosen period and says which period the figures refer to', async () => {
+    const { el, click, fixture } = await render();
+    const today = todayIso();
+    expect(el.querySelector('.period')?.textContent).toContain(TestBed.inject(I18n).date(today));
+
+    const week = [...el.querySelectorAll('.range-presets button')].find((b) => b.textContent?.trim() === 'Last 7 days');
+    await click(week);
+    const request = controller.expectOne((r) => r.url === '/api/dashboard');
+    expect([request.request.params.get('from'), request.request.params.get('to')]).toEqual([addDaysIso(today, -6), today]);
+    request.flush(squad.map((r) => ({ ...r, range: { ...r.range, from: addDaysIso(today, -6), to: today, days: 7, totalLoad: 2100, averageDailyLoad: 300, sessions: 5 } })));
+    await fixture.whenStable();
+
+    expect(week?.getAttribute('aria-pressed')).toBe('true');
+    expect(el.querySelector('.period')?.textContent).toContain('7');
+    expect([...el.querySelectorAll('th')].some((th) => th.textContent?.includes('Load in period'))).toBe(true);
+    expect(el.textContent).toContain('2,100');
+
+    const from = el.querySelector<HTMLInputElement>('input[type="date"][name="from"]')!;
+    from.value = addDaysIso(today, -2);
+    from.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const custom = controller.expectOne((r) => r.url === '/api/dashboard');
+    expect(custom.request.params.get('from')).toBe(addDaysIso(today, -2));
+    custom.flush(squad);
+  });
+
+  it('[AC-62] compares the squad on one load metric at a time', async () => {
+    const { el, click } = await render([
+      row({ athleteId: 1, displayName: 'Nora', acuteLoad: 300, chronicLoad: 420, acuteChronicRatio: 0.71 }),
+      row({ athleteId: 2, displayName: 'Elias', acuteLoad: 650, chronicLoad: 380, acuteChronicRatio: 1.71 }),
+      row({ athleteId: 3, displayName: 'Lea', acuteLoad: 360, chronicLoad: 330, acuteChronicRatio: 1.09 }),
+    ]);
+    const bars = () => [...el.querySelectorAll('.compare .bar-row .bar-name')].map((n) => n.textContent?.trim());
+    const metric = (label: string) => [...el.querySelectorAll('.compare-metrics button')].find((b) => b.textContent?.trim() === label);
+
+    expect(metric('Week average')?.getAttribute('aria-pressed')).toBe('true');
+    expect(bars()).toEqual(['Elias', 'Lea', 'Nora']);
+
+    await click(metric('Month average'));
+    expect(bars()).toEqual(['Nora', 'Elias', 'Lea']);
+
+    await click(metric('Week vs month'));
+    expect(bars()).toEqual(['Elias', 'Lea', 'Nora']);
+    expect(el.querySelector('.compare .band')).toBeTruthy();
+    const outside = [...el.querySelectorAll('.compare .bar-row.outside .bar-name')].map((n) => n.textContent?.trim());
+    expect(outside).toEqual(['Elias', 'Nora']);
+  });
+
+  it('[AC-65] the athlete form offers active sports plus the current retired one', async () => {
+    const { el, click, fixture } = await render();
+    const nora = [...el.querySelectorAll('tbody tr')].find((tr) => tr.textContent?.includes('Nora'))!;
+
+    await click(nora.querySelector('button.edit'));
+    controller.expectOne('/api/athletes/1').flush({ id: 1, code: 'ATH-001', displayName: 'Nora', sportId: 9, sport: 'Fencing', birthYear: 2002, sex: 'Female', bodyMassKg: 66, archivedAt: null });
+    await fixture.whenStable();
+    controller.expectOne('/api/sports').flush(sportsList);
+    await fixture.whenStable();
+
+    const options = [...el.querySelectorAll('dialog.athlete-form select[name="athlete.sportId"] option')].map((o) => o.textContent?.trim());
+    expect(options).toEqual(['Choose a sport…', 'Fencing (retired)', 'Ice hockey', 'Rowing']);
   });
 
   it('[AC-57] reloads in the new language so server texts are translated too', async () => {

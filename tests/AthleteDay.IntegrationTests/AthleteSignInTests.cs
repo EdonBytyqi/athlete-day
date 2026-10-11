@@ -16,7 +16,7 @@ public sealed class AthleteSignInTests(ApiFactory api)
     {
         var added = await (await api.ClientAs(Roles.Coach).PostAsJsonAsync("/api/athletes", new AthleteRequest
         {
-            DisplayName = "Ada", Sport = "Rowing", BirthYear = Today.Year - 24, Sex = Sex.Female, BodyMassKg = 68.5m
+            DisplayName = "Ada", SportId = await api.SportIdAsync("Rowing"), BirthYear = Today.Year - 24, Sex = Sex.Female, BodyMassKg = 68.5m
         })).ReadAsync<AthleteDetailsDto>();
 
         var check = await api.ClientAs(Roles.Athlete, user: added.Code).PutAsJsonAsync("/api/wellness",

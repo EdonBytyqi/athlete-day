@@ -10,14 +10,25 @@ using Microsoft.EntityFrameworkCore;
 namespace AthleteDay.IntegrationTests;
 
 [Collection(ApiCollection.Name)]
-public sealed class SquadTests(ApiFactory api)
+public sealed class SquadTests(ApiFactory api) : IAsyncLifetime
 {
+    private int _rowing;
+    private int _sculling;
+
+    public async Task InitializeAsync()
+    {
+        _rowing = await api.SportIdAsync("Rowing");
+        _sculling = await api.SportIdAsync("Sculling");
+    }
+
+    public Task DisposeAsync() => Task.CompletedTask;
+
     private static DateOnly Today => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow,
         TimeZoneInfo.FindSystemTimeZoneById("Europe/Zurich")).DateTime);
 
-    private static AthleteRequest NewAthlete(string name = "Ada", int age = 24) => new()
+    private AthleteRequest NewAthlete(string name = "Ada", int age = 24) => new()
     {
-        DisplayName = name, Sport = "Rowing", BirthYear = Today.Year - age, Sex = Sex.Female, BodyMassKg = 68.5m
+        DisplayName = name, SportId = _rowing, BirthYear = Today.Year - age, Sex = Sex.Female, BodyMassKg = 68.5m
     };
 
     private async Task<AthleteDetailsDto> AddAsync(AthleteRequest? request = null)
@@ -60,11 +71,11 @@ public sealed class SquadTests(ApiFactory api)
     public async Task Invalid_athlete_returns_400_with_an_error_per_field()
     {
         var response = await api.ClientAs(Roles.Coach).PostAsJsonAsync("/api/athletes",
-            new AthleteRequest { DisplayName = "", Sport = "x", BirthYear = Today.Year - 5, BodyMassKg = 10 });
+            new AthleteRequest { DisplayName = "", SportId = 0, BirthYear = Today.Year - 5, BodyMassKg = 10 });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var problem = await response.ReadAsync<ValidationProblemDetails>();
-        Assert.Equivalent(new[] { "DisplayName", "Sport", "BirthYear", "BodyMassKg" }, problem.Errors.Keys.ToArray());
+        Assert.Equivalent(new[] { "DisplayName", "SportId", "BirthYear", "BodyMassKg" }, problem.Errors.Keys.ToArray());
     }
 
     [Fact]
@@ -76,7 +87,7 @@ public sealed class SquadTests(ApiFactory api)
 
         var response = await coach.PutAsJsonAsync($"/api/athletes/{athlete.Id}", new AthleteRequest
         {
-            DisplayName = "Ada L.", Sport = "Sculling", BirthYear = Today.Year - 25, Sex = Sex.NotStated, BodyMassKg = 70m
+            DisplayName = "Ada L.", SportId = _sculling, BirthYear = Today.Year - 25, Sex = Sex.NotStated, BodyMassKg = 70m
         });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

@@ -101,4 +101,12 @@ public class LoadCalculatorTests
         Assert.Equal(400, last.Acute7);
         Assert.Equal(400, last.Chronic28);
     }
+
+    [Theory]
+    [InlineData(700, 3, 233.3)]
+    [InlineData(0, 1, 0)]
+    [InlineData(1400, 7, 200)]
+    [Trait("AC", "AC-59")]
+    public void Range_average_counts_rest_days_as_zero(int totalLoad, int days, double expected) =>
+        Assert.Equal(expected, LoadCalculator.RangeAverage(totalLoad, days));
 }

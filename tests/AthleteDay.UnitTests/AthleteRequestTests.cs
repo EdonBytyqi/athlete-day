@@ -16,7 +16,7 @@ public class AthleteRequestTests
 
     private static AthleteRequest Valid() => new()
     {
-        DisplayName = "Ada", Sport = "Rowing", BirthYear = ThisYear - 24, Sex = Sex.Female, BodyMassKg = 68.5m
+        DisplayName = "Ada", SportId = 1, BirthYear = ThisYear - 24, Sex = Sex.Female, BodyMassKg = 68.5m
     };
 
     [Fact]
@@ -30,10 +30,10 @@ public class AthleteRequestTests
     [Trait("AC", "AC-33")]
     public void Athlete_request_reports_every_invalid_field()
     {
-        var errors = Validate(new AthleteRequest { DisplayName = "", Sport = "x", BirthYear = null, BodyMassKg = 10 });
+        var errors = Validate(new AthleteRequest { DisplayName = "", SportId = 0, BirthYear = null, BodyMassKg = 10 });
 
         Assert.Equivalent(
-            new[] { "DisplayName", "Sport", "BirthYear", "BodyMassKg" },
+            new[] { "DisplayName", "SportId", "BirthYear", "BodyMassKg" },
             errors.SelectMany(e => e.MemberNames).ToArray());
     }
 
