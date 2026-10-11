@@ -1,11 +1,20 @@
 @page "/wellness"
+@implements IDisposable
 @inject StaffApi Api
 @inject PersonaState Persona
 
 <PageTitle>Morning check · Athlete Day</PageTitle>
 
 <RoleGate Role="@Roles.Athlete">
-    <h1>Good morning, @Persona.Current.User</h1>
+    @if (Persona.SignedInAthlete is { } me)
+    {
+        <h1>Good morning, @me.DisplayName</h1>
+    }
+    else
+    {
+        <h1>Morning check</h1>
+        <div class="notice">Choose your name at the top right first. The check is saved for the athlete you choose.</div>
+    }
     <p class="lead">Three quick questions. Your coach and physio see the answers; the kitchen does not.</p>
 
     <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="wellness" class="form">
@@ -64,13 +73,26 @@
     private string? _error;
     private string? _success;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // The athlete persona's user name is their code; find their own record.
-        var athletes = await Api.GetAthletesAsync();
-        _error = athletes.Error;
-        _model.AthleteId = athletes.Value?.FirstOrDefault(a => a.Code == Persona.Current.User)?.Id ?? 0;
+        Persona.Changed += OnPersonaChanged;
+        FollowSignedInAthlete();
     }
+
+    // The form always belongs to the athlete signed in at the top; picking someone else switches it.
+    private void FollowSignedInAthlete()
+    {
+        _model.AthleteId = Persona.SignedInAthlete?.Id ?? 0;
+        _error = _success = null;
+    }
+
+    private void OnPersonaChanged() => InvokeAsync(() =>
+    {
+        FollowSignedInAthlete();
+        StateHasChanged();
+    });
+
+    public void Dispose() => Persona.Changed -= OnPersonaChanged;
 
     private async Task SubmitAsync()
     {

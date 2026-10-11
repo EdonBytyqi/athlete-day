@@ -1,0 +1,57 @@
+@implements IDisposable
+@inject PersonaState Persona
+@inject StaffApi Api
+
+@* Demo only: with Entra ID the athlete's identity already says who they are. *@
+@if (Persona.Is(Roles.Athlete))
+{
+    <label class="persona">
+        <span>Athlete</span>
+        <select value="@(Persona.SignedInAthlete?.Code ?? "")" @onchange="OnChosen">
+            <option value="">Choose your name…</option>
+            @foreach (var a in _squad)
+            {
+                <option value="@a.Code">@a.DisplayName (@a.Code)</option>
+            }
+        </select>
+    </label>
+    @if (_error is not null)
+    {
+        <span class="validation-message">@_error</span>
+    }
+}
+
+@code {
+    private List<AthleteDto> _squad = [];
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Persona.Changed += OnPersonaChanged;
+        await LoadSquadAsync();
+    }
+
+    // Reload whenever someone switches to the athlete role, so athletes added since then appear too.
+    private async Task LoadSquadAsync()
+    {
+        if (!Persona.Is(Roles.Athlete) || Persona.SignedInAthlete is not null) return;
+        var result = await Api.GetAthletesAsync();
+        _squad = result.Value ?? [];
+        _error = result.Error;
+    }
+
+    private void OnChosen(ChangeEventArgs e)
+    {
+        var athlete = _squad.FirstOrDefault(a => a.Code == e.Value?.ToString());
+        if (athlete is not null) Persona.SignInAsAthlete(athlete);
+        else Persona.Switch(PersonaState.AthleteChooser);
+    }
+
+    private void OnPersonaChanged() => InvokeAsync(async () =>
+    {
+        await LoadSquadAsync();
+        StateHasChanged();
+    });
+
+    public void Dispose() => Persona.Changed -= OnPersonaChanged;
+}

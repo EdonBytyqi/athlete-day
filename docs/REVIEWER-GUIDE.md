@@ -69,6 +69,7 @@ Restart the API to undo anything you tried.
 | `mia` | Nutrition | Squad and kitchen screens |
 | `luca` | Kitchen | Only portions and carbohydrates; compare the JSON at `/api/kitchen/today` in Scalar |
 | `admin` | Admin | The audit log, including the views you just caused |
+| *(staff app)* Athlete | Athlete | In the staff app, pick *Athlete*, then any name: the morning check is sent for that athlete only |
 
 To see a rejected import, upload [`samples/device-export-broken.csv`](../samples/device-export-broken.csv) as the
 coach under *Device import*: 2 rows are imported and 8 rejected, each with a row, column and reason.
@@ -286,8 +287,9 @@ feature branch: **spec → failing tests → code**. The squad management featur
 | Level | Where | What it covers | Count |
 |---|---|---|---|
 | Unit | [`tests/AthleteDay.UnitTests`](../tests/AthleteDay.UnitTests) | Core logic, request validation, spec traceability | 62 |
-| Integration | [`tests/AthleteDay.IntegrationTests`](../tests/AthleteDay.IntegrationTests) | The real API (`WebApplicationFactory`) against a real SQL Server, the import pipeline, SignalR, the OpenAPI contract | 32 |
+| Integration | [`tests/AthleteDay.IntegrationTests`](../tests/AthleteDay.IntegrationTests) | The real API (`WebApplicationFactory`) against a real SQL Server, the import pipeline, SignalR, the OpenAPI contract | 33 |
 | Angular | `web/dashboard/src/**/*.spec.ts` (Vitest) | Role-dependent screens, sorting and filtering, dialogs, the persona interceptor, the chart | 19 |
+| Staff | [`tests/AthleteDay.Staff.Tests`](../tests/AthleteDay.Staff.Tests) (bUnit) | Blazor components with the real persona, headers handler and API client over a fake API | 5 |
 
 Two checks keep the spec honest:
 
@@ -304,6 +306,7 @@ tests (Testcontainers SQL Server 2022) · Angular build and tests · Docker imag
 
 ```powershell
 dotnet test tests/AthleteDay.UnitTests
+dotnet test tests/AthleteDay.Staff.Tests
 # Integration tests start a SQL Server container (Docker). Without Docker, point them at LocalDB:
 $env:ATHLETEDAY_TEST_SQL = "Server=(localdb)\MSSQLLocalDB;Trusted_Connection=True;TrustServerCertificate=True"
 dotnet test tests/AthleteDay.IntegrationTests
@@ -351,6 +354,7 @@ What is deliberately simple, and where I would most like a reviewer's opinion.
 | What does the CSV validator check? | Header, athlete code, date format and not in the future, test type, number format and plausible range, unit, duplicates. | [`DeviceCsvValidator.cs`](../src/AthleteDay.Core/DeviceCsvValidator.cs) |
 | How do Blazor and the API share validation? | DataAnnotations in Contracts; .NET 10 `AddValidation()` on the server, `DataAnnotationsValidator` in Blazor. | [`Requests.cs`](../src/AthleteDay.Contracts/Requests.cs) |
 | How does a role switch reload the screen? | `PersonaService` is a signal; the page `effect` reads it and reloads. | [`persona.service.ts`](../web/dashboard/src/app/api/persona.service.ts) |
+| How does an athlete sign in to the demo? | In the staff app, pick *Athlete*, then a name from the squad list; that code becomes the identity, and the API only accepts a morning check for it (AC-09, AC-50). | [`AthleteSignIn.razor`](../src/AthleteDay.Staff/Components/AthleteSignIn.razor) |
 | Why is "today" Zurich time? | So a server in UTC does not shift the athletes' day. | [`AppClock.cs`](../src/AthleteDay.Api/Infrastructure/AppClock.cs) |
 | How is demo data built? | Generated relative to today on every start, with one load spike, one sore athlete, one restriction and one missing check-in. | [`DemoDataSeeder.cs`](../src/AthleteDay.Api/Data/DemoDataSeeder.cs) |
 | Why EF Core and Dapper? | EF Core for writes and migrations; Dapper where the SQL itself is the point. | [ADR-01](spec/decisions.md) |

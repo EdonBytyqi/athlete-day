@@ -17,7 +17,7 @@
     </a>
     <a class="card @(Persona.Is(Roles.Athlete) ? "active" : "")" href="wellness" @onclick="() => Persona.Switch(PersonaFor(Roles.Athlete))">
         <h2>Athlete</h2>
-        <p>Morning check: sleep, soreness and mood. Only for yourself.</p>
+        <p>Pick your name, then answer three questions: sleep, soreness and mood. Only for yourself.</p>
     </a>
     <a class="card @(Persona.Is(Roles.Nutrition) ? "active" : "")" href="nutrition" @onclick="() => Persona.Switch(PersonaFor(Roles.Nutrition))">
         <h2>Nutrition</h2>
