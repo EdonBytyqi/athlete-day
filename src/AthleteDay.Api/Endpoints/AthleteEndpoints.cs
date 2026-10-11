@@ -1,11 +1,12 @@
+using System.Linq.Expressions;
 using AthleteDay.Api.Audit;
 using AthleteDay.Api.Auth;
 using AthleteDay.Api.Data;
 using AthleteDay.Api.Domain;
 using AthleteDay.Api.Infrastructure;
-using AthleteDay.Api.Resources;
 using AthleteDay.Api.Realtime;
 using AthleteDay.Api.Reports;
+using AthleteDay.Api.Resources;
 using AthleteDay.Contracts;
 using AthleteDay.Core;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -22,7 +23,7 @@ public static class AthleteEndpoints
         athletes.MapGet("/", async (AppDbContext db, CancellationToken ct) =>
                 await db.Athletes.AsNoTracking()
                     .OrderBy(a => a.Code)
-                    .Select(a => new AthleteDto(a.Id, a.Code, a.DisplayName, a.Sport))
+                    .Select(a => new AthleteDto(a.Id, a.Code, a.DisplayName, a.Sport.Name))
                     .ToListAsync(ct))
             .RequireAuthorization(Policies.ReadAthletes)
             .WithSummary("List athletes (pseudonymous codes only)");
@@ -33,14 +34,14 @@ public static class AthleteEndpoints
                 await db.Athletes.IgnoreQueryFilters().AsNoTracking()
                     .Where(a => a.ArchivedAt != null)
                     .OrderByDescending(a => a.ArchivedAt)
-                    .Select(a => ToDetails(a))
+                    .Select(Details)
                     .ToListAsync(ct))
             .RequireAuthorization(Policies.ManageSquad)
             .WithSummary("Archived athletes, most recently archived first");
 
         athletes.MapGet("/{athleteId:int}", async Task<Results<Ok<AthleteDetailsDto>, NotFound>> (
                     int athleteId, AppDbContext db, CancellationToken ct) =>
-                await db.Athletes.AsNoTracking().Where(a => a.Id == athleteId).Select(a => ToDetails(a)).SingleOrDefaultAsync(ct)
+                await db.Athletes.AsNoTracking().Where(a => a.Id == athleteId).Select(Details).SingleOrDefaultAsync(ct)
                     is { } athlete ? TypedResults.Ok(athlete) : TypedResults.NotFound())
             .RequireAuthorization(Policies.ViewDashboard)
             .WithSummary("Name, sport, birth year, sex and body mass of an athlete");
@@ -136,9 +137,12 @@ public static class AthleteEndpoints
         return api;
     }
 
-    private static async Task<Created<AthleteDetailsDto>> AddAthlete(
+    private static async Task<Results<Created<AthleteDetailsDto>, ValidationProblem>> AddAthlete(
         AthleteRequest request, AppDbContext db, IDashboardNotifier notifier, CancellationToken ct)
     {
+        var (sport, problem) = await ChosenSportAsync(db, request.SportId, currentSportId: null, ct);
+        if (problem is not null) return problem;
+
         // "Read the highest code, then insert" must not interleave, or two coaches get the same code.
         // An application lock serialises it for the length of the transaction. The execution strategy
         // (retry on transient failures) requires the transaction to run inside it.
@@ -149,12 +153,7 @@ public static class AthleteEndpoints
             await db.Database.ExecuteSqlRawAsync(
                 "EXEC sp_getapplock @Resource = 'AthleteCode', @LockMode = 'Exclusive', @LockOwner = 'Transaction';", ct);
 
-            var added = new Athlete
-            {
-                Code = await NextCodeAsync(db, ct),
-                DisplayName = request.DisplayName.Trim(),
-                Sport = request.Sport.Trim()
-            };
+            var added = new Athlete { Code = await NextCodeAsync(db, ct), DisplayName = request.DisplayName.Trim() };
             Apply(request, added);
             db.Athletes.Add(added);
             await db.SaveChangesAsync(ct);
@@ -163,20 +162,38 @@ public static class AthleteEndpoints
         });
         await notifier.DataChangedAsync("athlete", ct);
 
-        return TypedResults.Created($"/api/athletes/{athlete.Id}", ToDetails(athlete));
+        return TypedResults.Created($"/api/athletes/{athlete.Id}", ToDetails(athlete, sport!.Name));
     }
 
-    private static async Task<Results<Ok<AthleteDetailsDto>, NotFound>> EditAthlete(
+    private static async Task<Results<Ok<AthleteDetailsDto>, NotFound, ValidationProblem>> EditAthlete(
         int athleteId, AthleteRequest request, AppDbContext db, IDashboardNotifier notifier, CancellationToken ct)
     {
         var athlete = await db.Athletes.FindAsync([athleteId], ct);
         if (athlete is null) return TypedResults.NotFound();
 
+        var (sport, problem) = await ChosenSportAsync(db, request.SportId, athlete.SportId, ct);
+        if (problem is not null) return problem;
+
         Apply(request, athlete);
         await db.SaveChangesAsync(ct);
         await notifier.DataChangedAsync("athlete", ct);
-        return TypedResults.Ok(ToDetails(athlete));
+        return TypedResults.Ok(ToDetails(athlete, sport!.Name));
     }
+
+    /// <summary>
+    /// The sport must exist and be active; an athlete may keep a sport that was retired after it was chosen (AC-64).
+    /// </summary>
+    private static async Task<(Sport? Sport, ValidationProblem? Problem)> ChosenSportAsync(
+        AppDbContext db, int sportId, int? currentSportId, CancellationToken ct)
+    {
+        var sport = await db.Sports.AsNoTracking().SingleOrDefaultAsync(s => s.Id == sportId, ct);
+        if (sport is null) return (null, SportProblem(ApiText.UnknownSport));
+        if (sport.RetiredAt is not null && sportId != currentSportId) return (null, SportProblem(ApiText.RetiredSport));
+        return (sport, null);
+    }
+
+    private static ValidationProblem SportProblem(string message) =>
+        TypedResults.ValidationProblem(new Dictionary<string, string[]> { [nameof(AthleteRequest.SportId)] = [message] });
 
     private static async Task<Results<NoContent, NotFound>> ArchiveAthlete(
         int athleteId, AppDbContext db, AppClock clock, IDashboardNotifier notifier, CancellationToken ct)
@@ -193,19 +210,19 @@ public static class AthleteEndpoints
     private static async Task<Results<Ok<AthleteDetailsDto>, NotFound>> RestoreAthlete(
         int athleteId, AppDbContext db, IDashboardNotifier notifier, CancellationToken ct)
     {
-        var athlete = await db.Athletes.IgnoreQueryFilters().SingleOrDefaultAsync(a => a.Id == athleteId, ct);
+        var athlete = await db.Athletes.IgnoreQueryFilters().Include(a => a.Sport).SingleOrDefaultAsync(a => a.Id == athleteId, ct);
         if (athlete is null) return TypedResults.NotFound();
 
         athlete.ArchivedAt = null;
         await db.SaveChangesAsync(ct);
         await notifier.DataChangedAsync("athlete", ct);
-        return TypedResults.Ok(ToDetails(athlete));
+        return TypedResults.Ok(ToDetails(athlete, athlete.Sport.Name));
     }
 
     private static void Apply(AthleteRequest request, Athlete athlete)
     {
         athlete.DisplayName = request.DisplayName.Trim();
-        athlete.Sport = request.Sport.Trim();
+        athlete.SportId = request.SportId;
         athlete.BirthYear = request.BirthYear;
         athlete.Sex = request.Sex;
         athlete.BodyMassKg = request.BodyMassKg;
@@ -222,6 +239,10 @@ public static class AthleteEndpoints
         return $"ATH-{highest + 1:000}";
     }
 
-    private static AthleteDetailsDto ToDetails(Athlete a) =>
-        new(a.Id, a.Code, a.DisplayName, a.Sport, a.BirthYear, a.Sex, a.BodyMassKg, a.ArchivedAt);
+    private static AthleteDetailsDto ToDetails(Athlete a, string sportName) =>
+        new(a.Id, a.Code, a.DisplayName, a.SportId, sportName, a.BirthYear, a.Sex, a.BodyMassKg, a.ArchivedAt);
+
+    /// <summary>The same shape for queries, so EF Core reads the sport name in the same SQL statement.</summary>
+    private static readonly Expression<Func<Athlete, AthleteDetailsDto>> Details = a =>
+        new AthleteDetailsDto(a.Id, a.Code, a.DisplayName, a.SportId, a.Sport.Name, a.BirthYear, a.Sex, a.BodyMassKg, a.ArchivedAt);
 }

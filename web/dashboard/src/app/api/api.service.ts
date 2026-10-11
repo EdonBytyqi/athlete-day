@@ -12,6 +12,7 @@ import {
   LoadTrend,
   Measurement,
   PhysioNote,
+  Sport,
   TrainingSession,
   WellnessDay,
 } from './models';
@@ -45,8 +46,21 @@ export class ApiService {
     return this.http.post<AthleteDetails>(`/api/athletes/${id}/restore`, null);
   }
 
-  dashboard() {
-    return this.http.get<DashboardRow[]>('/api/dashboard');
+  /** Without a period the API uses today; with one, the figures are as of its end date (AC-58, AC-59). */
+  dashboard(period?: { from: string; to: string }) {
+    return this.http.get<DashboardRow[]>('/api/dashboard', period ? { params: period } : {});
+  }
+
+  sports() {
+    return this.http.get<Sport[]>('/api/sports');
+  }
+
+  addSport(name: string) {
+    return this.http.post<Sport>('/api/sports', { name });
+  }
+
+  updateSport(id: number, change: { name: string; retired: boolean }) {
+    return this.http.put<Sport>(`/api/sports/${id}`, change);
   }
 
   loadTrend(athleteId: number, days = 28) {

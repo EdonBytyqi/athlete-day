@@ -3,18 +3,33 @@ using AthleteDay.Api.Auth;
 using AthleteDay.Api.Data;
 using AthleteDay.Api.Infrastructure;
 using AthleteDay.Api.Reports;
+using AthleteDay.Api.Resources;
 using AthleteDay.Contracts;
 using AthleteDay.Core;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace AthleteDay.Api.Endpoints;
 
 public static class ReportEndpoints
 {
+    public const int MaxRangeDays = 366;
+
     public static RouteGroupBuilder MapReportEndpoints(this RouteGroupBuilder api)
     {
-        api.MapGet("/dashboard", (DashboardReport report, AppClock clock, CancellationToken ct) =>
-                report.GetAsync(clock.Today, ct))
+        api.MapGet("/dashboard", async Task<Results<Ok<IReadOnlyList<DashboardRowDto>>, ValidationProblem>> (
+                    DateOnly? from, DateOnly? to, DashboardReport report, AppClock clock, CancellationToken ct) =>
+                {
+                    // A period (AC-58): both default to today; figures "as of" are those of the end date.
+                    var today = clock.Today;
+                    var end = to ?? today;
+                    var start = from ?? end;
+                    if (end > today) return RangeProblem("to", ApiText.RangeToInFuture);
+                    if (start > end) return RangeProblem("from", ApiText.RangeFromAfterTo);
+                    if (end.DayNumber - start.DayNumber + 1 > MaxRangeDays) return RangeProblem("from", ApiText.RangeTooLong);
+
+                    return TypedResults.Ok(await report.GetAsync(today, start, end, ct));
+                })
             .RequireAuthorization(Policies.ViewDashboard)
             .Audited("Dashboard")
             .WithTags("Dashboard")
@@ -52,4 +67,7 @@ public static class ReportEndpoints
 
         return api;
     }
+
+    private static ValidationProblem RangeProblem(string field, string message) =>
+        TypedResults.ValidationProblem(new Dictionary<string, string[]> { [field] = [message] });
 }

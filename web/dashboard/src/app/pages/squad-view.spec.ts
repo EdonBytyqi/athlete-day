@@ -16,6 +16,7 @@ const row = (athleteId: number, overrides: Partial<DashboardRow>): DashboardRow 
   readiness: { status: 'Ok', reasons: [] },
   restriction: 'None',
   nutrition: null,
+  range: { from: '2026-10-11', to: '2026-10-11', days: 1, totalLoad: 0, averageDailyLoad: 0, sessions: 0, wellnessDays: 0, averageSleep: null, averageSoreness: null, averageMood: null },
   ...overrides,
 });
 
@@ -40,6 +41,20 @@ describe('viewSquad', () => {
     expect(names(viewSquad(squad, all, { key: 'todayLoad', direction: 'desc' }))).toEqual(['elias', 'Jan', 'Nora', 'Lea']);
     // Readiness ascending puts the most urgent first: check in, then no check-in, then ready.
     expect(names(viewSquad(squad, all, { key: 'readiness', direction: 'asc' }))).toEqual(['elias', 'Lea', 'Jan', 'Nora']);
+  });
+
+  it('[AC-61] sorts by week average, month average and week vs month, unknown ratio last', () => {
+    const loads = [
+      row(1, { displayName: 'Nora', acuteLoad: 300, chronicLoad: 250, acuteChronicRatio: 1.2 }),
+      row(2, { displayName: 'Elias', acuteLoad: 650, chronicLoad: 380, acuteChronicRatio: 1.71 }),
+      row(3, { displayName: 'Lea', acuteLoad: 0, chronicLoad: 0, acuteChronicRatio: null }),
+      row(4, { displayName: 'Jan', acuteLoad: 260, chronicLoad: 400, acuteChronicRatio: 0.65 }),
+    ];
+
+    expect(names(viewSquad(loads, all, { key: 'acuteLoad', direction: 'desc' }))).toEqual(['Elias', 'Nora', 'Jan', 'Lea']);
+    expect(names(viewSquad(loads, all, { key: 'chronicLoad', direction: 'asc' }))).toEqual(['Lea', 'Nora', 'Elias', 'Jan']);
+    expect(names(viewSquad(loads, all, { key: 'ratio', direction: 'desc' }))).toEqual(['Elias', 'Nora', 'Jan', 'Lea']);
+    expect(names(viewSquad(loads, all, { key: 'ratio', direction: 'asc' }))).toEqual(['Jan', 'Nora', 'Elias', 'Lea']);
   });
 
   it('[AC-39] filters by name or code and by sport', () => {

@@ -16,8 +16,11 @@ public sealed class AuditFilter(string resource) : IEndpointFilter
     {
         var result = await next(context);
 
+        // Handlers that can answer in several ways return Results<…>; look at the result inside it.
+        var outcome = result is INestedHttpResult nested ? nested.Result : result;
+
         var http = context.HttpContext;
-        var status = result is IStatusCodeHttpResult { StatusCode: { } code } ? code : http.Response.StatusCode;
+        var status = outcome is IStatusCodeHttpResult { StatusCode: { } code } ? code : http.Response.StatusCode;
         if (status is < 200 or >= 300)
             return result;
 
@@ -25,7 +28,7 @@ public sealed class AuditFilter(string resource) : IEndpointFilter
         // from the response instead.
         int? athleteId = http.Request.RouteValues.TryGetValue("athleteId", out var raw) && int.TryParse(raw?.ToString(), out var id)
             ? id
-            : result is IValueHttpResult { Value: IAthleteScoped scoped } ? scoped.AthleteId : null;
+            : outcome is IValueHttpResult { Value: IAthleteScoped scoped } ? scoped.AthleteId : null;
 
         var db = http.RequestServices.GetRequiredService<AppDbContext>();
         var clock = http.RequestServices.GetRequiredService<AppClock>();

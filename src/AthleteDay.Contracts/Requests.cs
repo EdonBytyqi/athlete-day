@@ -108,9 +108,9 @@ public sealed class AthleteRequest
     [StringLength(60, MinimumLength = 2, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.NameLength))]
     public string DisplayName { get; set; } = "";
 
-    [Required(ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SportRequired))]
-    [StringLength(60, MinimumLength = 2, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SportLength))]
-    public string Sport { get; set; } = "";
+    /// <summary>An active sport from the managed list (ADR-10).</summary>
+    [Range(1, int.MaxValue, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SelectSport))]
+    public int SportId { get; set; }
 
     /// <summary>Only the year is stored (data minimisation); the age is the age reached this year.</summary>
     [Required(ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.BirthYearRequired))]
@@ -122,6 +122,16 @@ public sealed class AthleteRequest
 
     [Range(typeof(decimal), "30", "200", ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.BodyMassRange))]
     public decimal BodyMassKg { get; set; } = 70;
+}
+
+/// <summary>Add or change an entry of the sports list (admin). Retired sports cannot be chosen for athletes.</summary>
+public sealed class SportRequest
+{
+    [Required(ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SportRequired))]
+    [StringLength(60, MinimumLength = 2, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.SportLength))]
+    public string Name { get; set; } = "";
+
+    public bool Retired { get; set; }
 }
 
 /// <summary>

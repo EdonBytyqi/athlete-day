@@ -77,3 +77,22 @@ Short records of the decisions that shape the code. Format: context → decision
     page (the documented .NET pattern).
 * **Consequence:** one place per app to translate; a test compares the language catalogues (AC-54). Import row errors
   are stored as text in the language of the upload; a report viewed later in the other language stays as it was.
+
+## ADR-10 Sports as a reference table
+
+* **Context:** sports were free text on each athlete, so "Ice hockey", "Icehockey" and "ice hockey" could coexist and
+  split the filters (AC-63 – AC-65).
+* **Decision:** a `Sports` table (name, retired) managed by the admin; athletes hold a foreign key. DTOs keep the sport
+  *name* for reading, so dashboards and the staff app stay simple; writes take the sport id. Retiring instead of
+  deleting keeps existing athletes valid.
+* **Consequence:** one rename changes every view at once. The migration turns the existing free-text values into list
+  entries, so no athlete loses its sport.
+
+## ADR-11 Dashboard range figures in the same SQL round trip
+
+* **Context:** the date range (AC-58 – AC-59) adds totals and averages for a period, while week and month averages stay
+  anchored on the end date.
+* **Decision:** the Dapper report takes `@From` and `@To`; `@To` replaces "today" in the existing windows, and two more
+  CTEs aggregate sessions and wellness checks over the range. Still one query (NFR-03).
+* **Consequence:** looking at a past day shows the squad as it was then, with the data recorded so far; nothing is
+  recalculated in the browser.

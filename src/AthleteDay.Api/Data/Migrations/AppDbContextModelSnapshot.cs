@@ -55,15 +55,15 @@ namespace AthleteDay.Api.Data.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
-                    b.Property<string>("Sport")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<int>("SportId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("SportId");
 
                     b.ToTable("Athletes");
                 });
@@ -309,6 +309,30 @@ namespace AthleteDay.Api.Data.Migrations
                     b.ToTable("PhysioNotes");
                 });
 
+            modelBuilder.Entity("AthleteDay.Api.Domain.Sport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTimeOffset?>("RetiredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Sports");
+                });
+
             modelBuilder.Entity("AthleteDay.Api.Domain.TrainingSession", b =>
                 {
                     b.Property<int>("Id")
@@ -385,6 +409,17 @@ namespace AthleteDay.Api.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("WellnessChecks");
+                });
+
+            modelBuilder.Entity("AthleteDay.Api.Domain.Athlete", b =>
+                {
+                    b.HasOne("AthleteDay.Api.Domain.Sport", "Sport")
+                        .WithMany()
+                        .HasForeignKey("SportId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Sport");
                 });
 
             modelBuilder.Entity("AthleteDay.Api.Domain.DeviceMeasurement", b =>

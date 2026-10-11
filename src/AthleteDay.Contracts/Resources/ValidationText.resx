@@ -24,4 +24,5 @@
   <data name="BirthYearRequired" xml:space="preserve"><value>Enter the birth year.</value></data>
   <data name="AgeBetween" xml:space="preserve"><value>The birth year must give an age between {0} and {1}.</value></data>
   <data name="BodyMassRange" xml:space="preserve"><value>Body mass must be between 30 and 200 kg.</value></data>
+  <data name="SelectSport" xml:space="preserve"><value>Choose a sport.</value></data>
 </root>

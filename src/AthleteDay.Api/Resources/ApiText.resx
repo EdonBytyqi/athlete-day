@@ -8,4 +8,10 @@
   <data name="FileSize" xml:space="preserve"><value>The file must be between 1 byte and 2 MB.</value></data>
   <data name="CsvOnly" xml:space="preserve"><value>Only .csv files are accepted.</value></data>
   <data name="DaysRange" xml:space="preserve"><value>days must be between 1 and 28.</value></data>
+  <data name="SportNameTaken" xml:space="preserve"><value>A sport with this name already exists.</value></data>
+  <data name="UnknownSport" xml:space="preserve"><value>Unknown sport.</value></data>
+  <data name="RetiredSport" xml:space="preserve"><value>This sport is retired; choose an active one.</value></data>
+  <data name="RangeToInFuture" xml:space="preserve"><value>The end date cannot be in the future.</value></data>
+  <data name="RangeFromAfterTo" xml:space="preserve"><value>The start date must be on or before the end date.</value></data>
+  <data name="RangeTooLong" xml:space="preserve"><value>A period can be at most 366 days.</value></data>
 </root>

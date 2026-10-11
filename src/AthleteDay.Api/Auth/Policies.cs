@@ -20,6 +20,8 @@ public static class Policies
     public const string ViewAudit = nameof(ViewAudit);
     public const string ManageSquad = nameof(ManageSquad);
     public const string WellnessHistory = nameof(WellnessHistory);
+    public const string ReadSports = nameof(ReadSports);
+    public const string ManageSports = nameof(ManageSports);
 
     public static AuthorizationBuilder AddAthleteDayPolicies(this AuthorizationBuilder builder) => builder
         .AddPolicy(ReadAthletes, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Nutrition, Roles.Athlete))
@@ -32,5 +34,7 @@ public static class Policies
         .AddPolicy(ImportDeviceData, p => p.RequireRole(Roles.Coach, Roles.Physio))
         .AddPolicy(ViewAudit, p => p.RequireRole(Roles.Admin))
         .AddPolicy(ManageSquad, p => p.RequireRole(Roles.Coach))
-        .AddPolicy(WellnessHistory, p => p.RequireRole(Roles.Coach, Roles.Physio));
+        .AddPolicy(WellnessHistory, p => p.RequireRole(Roles.Coach, Roles.Physio))
+        .AddPolicy(ReadSports, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Nutrition, Roles.Athlete, Roles.Admin))
+        .AddPolicy(ManageSports, p => p.RequireRole(Roles.Admin));
 }

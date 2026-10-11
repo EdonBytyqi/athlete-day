@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.5 |
+| Version | 1.6 |
 | Status | Current |
 | Date | 2026-10-11 |
 
@@ -54,6 +54,8 @@ medical advice of any kind.
 | Athlete code | `ATH-` plus a three-digit number, assigned by the system (highest existing number + 1) and never changed |
 | Archived athlete | Hidden from every list and form and accepts no new data; its history is kept and it can be restored |
 | Language | English (default) or German. Formats: English as en-GB (11 Oct 2026, 1,234.5), German as de-CH (11.10.2026, 1’234.5; the grouping mark is ' or ’ depending on the browser's locale data). |
+| Date range | From and to, both included, as dates in Europe/Zurich. To is today or earlier; at most 366 days. Average daily load over a range = total load ÷ days in the range (rest days count as 0). |
+| Sport | One entry of the managed sports list (name, active or retired). Athletes refer to it; its name is shown wherever the athlete is. |
 
 ## 5. Functional requirements
 
@@ -224,6 +226,35 @@ best.*
 | AC-56 | The staff app has the same language switch; its labels, buttons, choices and validation messages appear in the chosen language. | Staff |
 | AC-57 | The API returns validation and error messages, readiness reasons and import row errors in the language of the request's `Accept-Language` header (German for `de`, `de-CH` …; English otherwise). Both apps send their current language. | Integration, Angular |
 
+### F16 Date range on the dashboard
+
+*As a coach, I want to look at a specific day or period, so I can review last week or prepare a conversation about it.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-58 | The dashboard takes an optional date range (`from`, `to`; both default to today). `to` may not be in the future, `from` may not be after `to`, and a range spans at most 366 days; otherwise the API answers 400 with an error for the field. | Integration |
+| AC-59 | For the range, each row adds the total load, the average daily load (rest days count as 0), the number of sessions, and the average sleep, soreness and mood over the days with a morning check. Load of the day, week and month averages, ratio, readiness, morning check, nutrition and restriction are those of the end date. | Unit, Integration |
+| AC-60 | The dashboard has a date range control with presets (today, last 7 days, last 28 days) and custom start and end dates. Changing it reloads the data for that range, and the page says which day or period the figures refer to. | Angular |
+
+### F17 Comparing week and month load
+
+*As a coach, I want to rank the squad by week average, month average or the week-vs-month ratio, so outliers stand out.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-61 | The squad table also sorts by week average, month average and week vs month; athletes without a ratio come last in both directions. | Angular |
+| AC-62 | A comparison panel shows every athlete as a bar for one metric at a time (week average, month average, week vs month), highest first. Switching the metric is one click. For week vs month, the usual range 0.8–1.3 is marked and values outside it are highlighted. | Angular |
+
+### F18 Managed list of sports
+
+*As an administrator, I want to control the list of sports, so athlete profiles, filters and reports use the same names.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-63 | The admin can add, rename, retire and reactivate sports. Names are 2–60 characters and unique (ignoring case). Every other role gets 403 for these changes; every role that sees athletes can read the list. | Integration |
+| AC-64 | An athlete's sport is chosen from the list: adding or editing takes a sport id, and an unknown or retired sport is rejected (an athlete may keep a sport that was retired later). Renaming a sport renames it everywhere athletes are shown. | Integration |
+| AC-65 | The athlete form offers the active sports in a dropdown (plus the athlete's current sport if it was retired). The admin has a Settings screen with the list. | Angular |
+
 ## 6. Non-functional requirements
 
 | ID | Requirement |
@@ -246,3 +277,4 @@ best.*
 | 1.3 | 2026-10-11 | F13 wellness history (AC-43–AC-49); contract: `GET /api/athletes/{athleteId}/wellness`, schema `WellnessDayDto`. Written 2026-10-10 as v1.1 on a parallel branch and renumbered when rebased onto v1.2. |
 | 1.4 | 2026-10-11 | F14 athlete sign-in in the staff app (AC-50–AC-52). Adds the verification level *Staff* (bUnit component tests). |
 | 1.5 | 2026-10-11 | F15 English and German (AC-53–AC-57); NFR-06 responsive layout and NFR-07 light design; language rule in section 4. Phase 1 of the "enhance the hub" brief. |
+| 1.6 | 2026-10-11 | F16 date range (AC-58–AC-60), F17 week and month comparison (AC-61–AC-62), F18 managed sports list (AC-63–AC-65); date range and sport rules in section 4. Phase 2. |

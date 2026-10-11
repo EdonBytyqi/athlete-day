@@ -1,6 +1,15 @@
 import { DashboardRow, ReadinessStatus, Sex } from '../api/models';
 
-export type SortKey = 'name' | 'sport' | 'age' | 'sex' | 'todayLoad' | 'readiness';
+export type SortKey =
+  | 'name'
+  | 'sport'
+  | 'age'
+  | 'sex'
+  | 'todayLoad'
+  | 'acuteLoad'
+  | 'chronicLoad'
+  | 'ratio'
+  | 'readiness';
 export type SortDirection = 'asc' | 'desc';
 
 export interface SquadSort {
@@ -28,10 +37,19 @@ const compare: Record<SortKey, (a: DashboardRow, b: DashboardRow) => number> = {
   age: (a, b) => (a.age ?? 0) - (b.age ?? 0),
   sex: (a, b) => SEX_ORDER[a.sex] - SEX_ORDER[b.sex],
   todayLoad: (a, b) => a.todayLoad - b.todayLoad,
+  acuteLoad: (a, b) => a.acuteLoad - b.acuteLoad,
+  chronicLoad: (a, b) => a.chronicLoad - b.chronicLoad,
+  ratio: (a, b) => (a.acuteChronicRatio ?? 0) - (b.acuteChronicRatio ?? 0),
   readiness: (a, b) => READINESS_ORDER[a.readiness.status] - READINESS_ORDER[b.readiness.status],
 };
 
-/** Filters and sorts the squad. Unknown ages stay last in both directions; ties fall back to the name. */
+/** Values that may be unknown; unknown ones stay last in both directions. */
+const OPTIONAL: Partial<Record<SortKey, (r: DashboardRow) => unknown>> = {
+  age: (r) => r.age,
+  ratio: (r) => r.acuteChronicRatio,
+};
+
+/** Filters and sorts the squad. Unknown ages and ratios stay last in both directions; ties fall back to the name. */
 export function viewSquad(rows: readonly DashboardRow[], filter: SquadFilter, sort: SquadSort): DashboardRow[] {
   const query = filter.query.trim().toLowerCase();
   const sign = sort.direction === 'asc' ? 1 : -1;
@@ -40,7 +58,8 @@ export function viewSquad(rows: readonly DashboardRow[], filter: SquadFilter, so
     .filter((r) => filter.sport === null || r.sport === filter.sport)
     .filter((r) => !query || r.displayName.toLowerCase().includes(query) || r.code.toLowerCase().includes(query))
     .sort((a, b) => {
-      if (sort.key === 'age' && (a.age === null) !== (b.age === null)) return a.age === null ? 1 : -1;
+      const optional = OPTIONAL[sort.key];
+      if (optional && (optional(a) === null) !== (optional(b) === null)) return optional(a) === null ? 1 : -1;
       return sign * compare[sort.key](a, b) || byName(a, b);
     });
 }

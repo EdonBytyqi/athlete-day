@@ -6,6 +6,7 @@ using AthleteDay.Contracts;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.MsSql;
 
@@ -59,16 +60,32 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         return client;
     }
 
+    /// <summary>The id of a sport in the managed list, created on first use.</summary>
+    public async Task<int> SportIdAsync(string name = "Testing")
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var sport = await db.Sports.FirstOrDefaultAsync(s => s.Name == name);
+        if (sport is null)
+        {
+            sport = new Sport { Name = name };
+            db.Sports.Add(sport);
+            await db.SaveChangesAsync();
+        }
+        return sport.Id;
+    }
+
     /// <summary>Each test creates its own athlete so tests never depend on each other's data.</summary>
     public async Task<Athlete> CreateAthleteAsync(decimal bodyMassKg = 70m)
     {
+        var sportId = await SportIdAsync();
         await using var scope = Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var athlete = new Athlete
         {
             Code = $"T-{Guid.NewGuid().ToString("N")[..8].ToUpperInvariant()}",
             DisplayName = "Test athlete",
-            Sport = "Testing",
+            SportId = sportId,
             BodyMassKg = bodyMassKg
         };
         db.Athletes.Add(athlete);
