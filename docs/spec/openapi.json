@@ -365,7 +365,7 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "application/problem\u002Bjson": {
+              "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
@@ -405,7 +405,7 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "application/problem\u002Bjson": {
+              "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
@@ -420,7 +420,7 @@
         "tags": [
           "Nutrition"
         ],
-        "summary": "Set an athlete\u0027s daily energy and carbohydrate target",
+        "summary": "Set an athlete's daily energy and carbohydrate target",
         "requestBody": {
           "content": {
             "application/json": {
@@ -445,7 +445,7 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "application/problem\u002Bjson": {
+              "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
@@ -520,7 +520,7 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "application/problem\u002Bjson": {
+              "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
@@ -535,7 +535,7 @@
         "tags": [
           "Dashboard"
         ],
-        "summary": "Per-athlete load, 7/28-day trend, readiness flags and today\u0027s nutrition (Dapper \u002B T-SQL)",
+        "summary": "Per-athlete load, 7/28-day trend, readiness flags and today's nutrition (Dapper + T-SQL)",
         "responses": {
           "200": {
             "description": "OK",
@@ -558,7 +558,7 @@
         "tags": [
           "Kitchen"
         ],
-        "summary": "Today\u0027s portions and carbohydrate needs per athlete, without health data",
+        "summary": "Today's portions and carbohydrate needs per athlete, without health data",
         "responses": {
           "200": {
             "description": "OK",
@@ -651,7 +651,7 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "application/problem\u002Bjson": {
+              "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
@@ -706,6 +706,66 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ImportJobDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/athletes/{athleteId}/wellness": {
+      "get": {
+        "tags": [
+          "Athletes"
+        ],
+        "summary": "Morning wellness checks of the last days, with flags (coach and physio only)",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WellnessDayDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
@@ -943,7 +1003,7 @@
             "format": "int32"
           },
           "acuteLoad": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
             "type": [
               "number",
               "string"
@@ -951,7 +1011,7 @@
             "format": "double"
           },
           "chronicLoad": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
             "type": [
               "number",
               "string"
@@ -959,7 +1019,7 @@
             "format": "double"
           },
           "acuteChronicRatio": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
             "type": [
               "null",
               "number",
@@ -1253,7 +1313,7 @@
             "format": "int32"
           },
           "acute7": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
             "type": [
               "number",
               "string"
@@ -1261,7 +1321,7 @@
             "format": "double"
           },
           "chronic28": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
             "type": [
               "number",
               "string"
@@ -1338,7 +1398,7 @@
             "type": "string"
           },
           "value": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": [
               "number",
               "string"
@@ -1384,7 +1444,7 @@
           "carbsGPerKg": {
             "maximum": 12,
             "minimum": 2,
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": [
               "number",
               "string"
@@ -1636,7 +1696,7 @@
           "sleepHours": {
             "maximum": 14,
             "minimum": 0,
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": [
               "number",
               "string"
@@ -1679,7 +1739,7 @@
             "format": "date"
           },
           "sleepHours": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": [
               "number",
               "string"
@@ -1701,6 +1761,52 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "WellnessDayDto": {
+        "required": [
+          "date",
+          "sleepHours",
+          "soreness",
+          "mood",
+          "flags"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "sleepHours": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "soreness": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "mood": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }

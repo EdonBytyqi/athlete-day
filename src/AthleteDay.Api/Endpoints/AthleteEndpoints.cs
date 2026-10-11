@@ -79,6 +79,36 @@ public static class AthleteEndpoints
             .Audited("LoadTrend")
             .WithSummary("Daily session-RPE load with rolling 7-day and 28-day averages");
 
+        // Spec F13 (AC-43 – AC-48)
+        athletes.MapGet("/{athleteId:int}/wellness",
+                async Task<Results<Ok<List<WellnessDayDto>>, ValidationProblem, NotFound>> (int athleteId, int? days,
+                    AppDbContext db, AppClock clock, CancellationToken ct) =>
+                {
+                    var window = days ?? 14;
+                    if (window is < 1 or > 28)
+                        return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+                        {
+                            ["days"] = ["days must be between 1 and 28."]
+                        });
+
+                    if (!await db.Athletes.AnyAsync(a => a.Id == athleteId, ct)) return TypedResults.NotFound();
+
+                    var today = clock.Today;
+                    var from = today.AddDays(-(window - 1));
+                    var checks = await db.WellnessChecks.AsNoTracking()
+                        .Where(w => w.AthleteId == athleteId && w.Date >= from && w.Date <= today)
+                        .OrderByDescending(w => w.Date)
+                        .Select(w => new WellnessSummaryDto(w.Date, w.SleepHours, w.Soreness, w.Mood))
+                        .ToListAsync(ct);
+
+                    return TypedResults.Ok(checks
+                        .Select(c => new WellnessDayDto(c.Date, c.SleepHours, c.Soreness, c.Mood, ReadinessEvaluator.WellnessFlags(c)))
+                        .ToList());
+                })
+            .RequireAuthorization(Policies.WellnessHistory)
+            .Audited("WellnessHistory")
+            .WithSummary("Morning wellness checks of the last days, with flags (coach and physio only)");
+
         athletes.MapGet("/{athleteId:int}/sessions", async (int athleteId, AppDbContext db, CancellationToken ct) =>
                 await db.TrainingSessions.AsNoTracking()
                     .Where(s => s.AthleteId == athleteId)

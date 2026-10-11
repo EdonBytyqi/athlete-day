@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, input, signal, untracked } from '@
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService, describeError } from '../api/api.service';
-import { AthleteDetails, LoadTrend, Measurement, PhysioNote, Sex, TrainingSession } from '../api/models';
+import { AthleteDetails, LoadTrend, Measurement, PhysioNote, Sex, TrainingSession, WellnessDay } from '../api/models';
 import { PersonaService } from '../api/persona.service';
 import { RealtimeService } from '../api/realtime.service';
 import { logSessionUrl } from '../shared/staff-url';
@@ -69,6 +69,30 @@ const SEX_LABELS: Record<Sex, string> = { Female: 'female', Male: 'male', NotSta
         </section>
       </div>
 
+      @if (canSeeWellness()) {
+        <section class="panel">
+          <h2>Morning checks · last 14 days</h2>
+          @if (wellness().length) {
+            <table class="grid-table compact wellness-history">
+              <thead><tr><th>Date</th><th class="num">Sleep</th><th class="num">Soreness</th><th class="num">Mood</th><th>Flags</th></tr></thead>
+              <tbody>
+                @for (d of wellness(); track d.date) {
+                  <tr [class.flagged]="d.flags.length > 0">
+                    <td>{{ d.date }}</td>
+                    <td class="num">{{ d.sleepHours }} h</td>
+                    <td class="num">{{ d.soreness }}/5</td>
+                    <td class="num">{{ d.mood }}/5</td>
+                    <td>{{ d.flags.join(' · ') || '–' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="muted">No morning checks in the last 14 days.</p>
+          }
+        </section>
+      }
+
       <section class="panel">
         <h2>Physio notes</h2>
         @if (isPhysio()) {
@@ -103,11 +127,14 @@ export class AthletePage {
   protected readonly measurements = signal<Measurement[]>([]);
   protected readonly notes = signal<PhysioNote[]>([]);
   protected readonly error = signal<string | null>(null);
+  protected readonly wellness = signal<WellnessDay[]>([]);
   protected readonly isPhysio = computed(() => this.persona.current().role === 'Physio');
   protected readonly isCoach = computed(() => this.persona.current().role === 'Coach');
   protected readonly sexLabels = SEX_LABELS;
   protected readonly logSessionUrl = logSessionUrl;
   private readonly thisYear = new Date().getFullYear();
+  // Spec F13 AC-46/AC-49: wellness history is for coach and physio only.
+  protected readonly canSeeWellness = computed(() => ['Coach', 'Physio'].includes(this.persona.current().role));
 
   protected age(d: AthleteDetails): string {
     return d.birthYear === null ? 'age unknown' : `${this.thisYear - d.birthYear} years`;
@@ -141,6 +168,12 @@ export class AthletePage {
         this.error.set(describeError(e, role));
       },
     });
+
+    if (role === 'Coach' || role === 'Physio') {
+      this.api.wellness(athleteId).subscribe({ next: (w) => this.wellness.set(w), error: () => this.wellness.set([]) });
+    } else {
+      this.wellness.set([]);
+    }
 
     // Only the physio asks for notes, so nobody else even triggers an audit entry.
     if (role === 'Physio') {

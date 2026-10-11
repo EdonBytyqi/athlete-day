@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.2 |
+| Version | 1.3 |
 | Status | Current |
 | Date | 2026-10-11 |
 
@@ -182,6 +182,20 @@ Each acceptance criterion (AC) is verified by at least one automated test tagged
 | AC-41 | The coach sees *Add athlete* and actions per row (log session, details, edit, archive); other roles see none of them. Archiving asks for confirmation and ends with a message that offers *Undo*. | Angular |
 | AC-42 | *Log session* opens the staff input form with the athlete already selected. | Angular |
 
+### F13 Wellness history
+
+*As a coach or physio, I want to see an athlete's recent morning checks, so I notice a trend before it becomes a problem.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-43 | `GET /api/athletes/{athleteId}/wellness?days=n` returns the athlete's checks from the last n days including today (default 14), newest first, each with date, sleep, soreness, mood and flags. | Integration |
+| AC-44 | A day's flags use the readiness thresholds of section 4 and the same wording as readiness reasons; a day within all thresholds has no flags. | Unit |
+| AC-45 | `days` outside 1–28 is rejected with 400 and an error for `days`. | Integration |
+| AC-46 | Only coach and physio may read the history; other roles get 403. | Integration |
+| AC-47 | Every successful read is written to the audit log as resource `WellnessHistory` with the athlete. | Integration |
+| AC-48 | An unknown athlete returns 404. | Integration |
+| AC-49 | The athlete page shows the history as a table with flagged days highlighted, for coach and physio; other roles do not request it. | Angular |
+
 ## 6. Non-functional requirements
 
 | ID | Requirement |
@@ -199,3 +213,4 @@ Each acceptance criterion (AC) is verified by at least one automated test tagged
 | 1.0 | 2026-10-10 | Baseline written after the first implementation; all ACs linked to tests. |
 | 1.1 | 2026-10-11 | F11 squad management (AC-32–AC-37) and F12 dashboard usability (AC-38–AC-42); age, sex, code and archive rules in section 4. |
 | 1.2 | 2026-10-11 | AC-32: concurrent adds get different codes. AC-36: the audit entry for a new athlete carries its id. Both found in review. |
+| 1.3 | 2026-10-11 | F13 wellness history (AC-43–AC-49); contract: `GET /api/athletes/{athleteId}/wellness`, schema `WellnessDayDto`. Written 2026-10-10 as v1.1 on a parallel branch and renumbered when rebased onto v1.2. |
