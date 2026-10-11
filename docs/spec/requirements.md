@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.6 |
+| Version | 1.7 |
 | Status | Current |
 | Date | 2026-10-11 |
 
@@ -56,6 +56,10 @@ medical advice of any kind.
 | Language | English (default) or German. Formats: English as en-GB (11 Oct 2026, 1,234.5), German as de-CH (11.10.2026, 1’234.5; the grouping mark is ' or ’ depending on the browser's locale data). |
 | Date range | From and to, both included, as dates in Europe/Zurich. To is today or earlier; at most 366 days. Average daily load over a range = total load ÷ days in the range (rest days count as 0). |
 | Sport | One entry of the managed sports list (name, active or retired). Athletes refer to it; its name is shown wherever the athlete is. |
+| Week | Monday to Sunday, in Europe/Zurich. |
+| Trend (last 4 weeks vs the 4 before) | Load and sessions: up or down when they differ by more than 10 %, otherwise stable. Sleep, soreness and mood: up or down when the averages differ by more than 0.3, otherwise stable. Up is good for sleep and mood, bad for soreness; for load and sessions it is neither, only a change to talk about. |
+| Device test direction | Higher is better for CMJ, SJ, GPS_DISTANCE and GPS_HSR; lower is better for SPRINT_30M. |
+| Goal status | *Reached* when the latest result meets the target; *behind* when the goal date has passed without that; otherwise *open*. |
 
 ## 5. Functional requirements
 
@@ -255,6 +259,46 @@ best.*
 | AC-64 | An athlete's sport is chosen from the list: adding or editing takes a sport id, and an unknown or retired sport is rejected (an athlete may keep a sport that was retired later). Renaming a sport renames it everywhere athletes are shown. | Integration |
 | AC-65 | The athlete form offers the active sports in a dropdown (plus the athlete's current sport if it was retired). The admin has a Settings screen with the list. | Angular |
 
+### F19 Athlete space
+
+*As a coach, I want one place per athlete with everything about their development, and to switch athletes without losing my place.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-66 | The athlete page is a space with the sections Overview, Performance, Sessions and notes, and Reviews. A searchable athlete selector, grouped by sport, switches the whole space to another athlete and keeps the open section. | Angular |
+| AC-67 | `GET /api/athletes/{id}/progress?weeks=n` (4–52, default 12) returns one entry per week (Monday to Sunday) ending with the current week, each with total load, sessions and average sleep, soreness and mood. It also compares the last 4 weeks with the 4 before for load, sessions, sleep, soreness and mood as up, down or stable (section 4). Coach, physio and nutrition only; reads are audited. | Unit, Integration |
+| AC-68 | The Overview shows key figures with an arrow for up, down or stable against the 4 weeks before, says in words whether a change is good or needs attention, and charts the weekly load with average sleep. The period can be 4, 12 or 26 weeks. | Angular |
+
+### F20 Benchmarks and goals
+
+*As a coach, I want to see each athlete's test results against their goals, their own history and the squad, so I know where they stand.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-69 | `GET /api/athletes/{id}/benchmarks?weeks=n` returns, per device test the athlete has done: the latest result, the personal best, the first result in the period and the change since, the squad average for the same sport (latest result per athlete), the goal and the gap to it, and a status: *reached*, *behind* (goal date passed) or *open*. Better means higher for jumps and distances and lower for sprint times. | Unit, Integration |
+| AC-70 | The coach sets one goal per test and athlete (target value within the test's plausible range, optional date and note) and can remove it. Other roles get 403. | Integration |
+| AC-71 | The Performance section charts each test's history with the goal line and the squad average, and states the gap in words (e.g. "4.2 cm to go"). The coach can set or remove goals there. | Angular |
+
+### F21 Session notes
+
+*As a coach, I want to add notes to sessions and read them later, so I remember the context behind a change.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-72 | The coach adds notes to a session (1–1000 characters); each note keeps its author, time, session date and athlete. A note entered while logging a session is stored the same way. Other roles get 403 for adding. | Integration |
+| AC-73 | Coach and physio read an athlete's session notes, newest first, with the session's date, type and load. Other roles get 403, and every read is audited. | Integration |
+| AC-74 | The Sessions and notes section lists recent sessions with their notes, and the coach can add a note to any of them. | Angular |
+
+### F22 Progress reviews
+
+*As a coach, I want to record structured reviews of an athlete's development and keep them, so long-term progress is documented.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-75 | The coach records a review for a period with observations, achievements, challenges and recommendations (at least one filled, each up to 2000 characters). The API stores a snapshot of the period's figures with it: load per week, sessions, wellness averages and test results against goals. The snapshot does not change when later data arrives. | Integration |
+| AC-76 | Coach and physio read an athlete's reviews, newest first. Other roles get 403, and reads are audited. | Integration |
+| AC-77 | The Reviews section lists past reviews with their snapshot figures, and the coach can write a new one for the last 4, 12 or 26 weeks. | Angular |
+
 ## 6. Non-functional requirements
 
 | ID | Requirement |
@@ -278,3 +322,4 @@ best.*
 | 1.4 | 2026-10-11 | F14 athlete sign-in in the staff app (AC-50–AC-52). Adds the verification level *Staff* (bUnit component tests). |
 | 1.5 | 2026-10-11 | F15 English and German (AC-53–AC-57); NFR-06 responsive layout and NFR-07 light design; language rule in section 4. Phase 1 of the "enhance the hub" brief. |
 | 1.6 | 2026-10-11 | F16 date range (AC-58–AC-60), F17 week and month comparison (AC-61–AC-62), F18 managed sports list (AC-63–AC-65); date range and sport rules in section 4. Phase 2. |
+| 1.7 | 2026-10-11 | F19 athlete space (AC-66–AC-68), F20 benchmarks and goals (AC-69–AC-71), F21 session notes (AC-72–AC-74), F22 progress reviews (AC-75–AC-77); week, trend, test direction and goal status rules in section 4. Phase 3. |
