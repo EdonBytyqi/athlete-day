@@ -30,6 +30,7 @@ describe('AthleteSpacePage', () => {
               component: AthleteSpacePage,
               children: [
                 { path: '', component: SectionStub },
+                { path: 'plan', component: SectionStub },
                 { path: 'performance', component: SectionStub },
                 { path: 'sessions', component: SectionStub },
                 { path: 'reviews', component: SectionStub },
@@ -63,6 +64,7 @@ describe('AthleteSpacePage', () => {
 
     expect([...el.querySelectorAll('nav.sections a')].map((a) => a.textContent?.trim())).toEqual([
       'Overview',
+      'Plan',
       'Performance',
       'Sessions and notes',
       'Reviews',
