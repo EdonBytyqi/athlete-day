@@ -270,7 +270,8 @@ dashboard rows, never in the kitchen view. Only the birth year is stored (ADR-08
 
 **Audit.** [`AuditFilter`](../src/AthleteDay.Api/Audit/AuditFilter.cs) writes user, role, action
 (`Viewed`/`Changed`), resource and athlete id after **successful** requests only, so the log answers "who has seen this
-athlete's data?". The Angular athlete page requests physio notes only for the physio role, so other roles do not
+athlete's data?". The athlete id comes from the route, or, for a create, from the response
+(`IAthleteScoped`). The Angular athlete page requests physio notes only for the physio role, so other roles do not
 create audit noise.
 
 **Tests to read for this section:** AC-01, AC-02, AC-09, AC-20, AC-22 and AC-36 in
@@ -285,7 +286,7 @@ feature branch: **spec → failing tests → code**. The squad management featur
 | Level | Where | What it covers | Count |
 |---|---|---|---|
 | Unit | [`tests/AthleteDay.UnitTests`](../tests/AthleteDay.UnitTests) | Core logic, request validation, spec traceability | 62 |
-| Integration | [`tests/AthleteDay.IntegrationTests`](../tests/AthleteDay.IntegrationTests) | The real API (`WebApplicationFactory`) against a real SQL Server, the import pipeline, SignalR, the OpenAPI contract | 30 |
+| Integration | [`tests/AthleteDay.IntegrationTests`](../tests/AthleteDay.IntegrationTests) | The real API (`WebApplicationFactory`) against a real SQL Server, the import pipeline, SignalR, the OpenAPI contract | 32 |
 | Angular | `web/dashboard/src/**/*.spec.ts` (Vitest) | Role-dependent screens, sorting and filtering, dialogs, the persona interceptor, the chart | 19 |
 
 Two checks keep the spec honest:
@@ -327,11 +328,6 @@ What is deliberately simple, and where I would most like a reviewer's opinion.
 
 - **The upload is not atomic.** The API saves the blob, then the job, then publishes the event. If publishing fails,
   the job stays `Queued` forever. A transactional outbox, or Event Grid on `BlobCreated`, would close this.
-- **Athlete codes can collide under concurrency.** `NextCodeAsync` reads the highest code, then inserts. Two
-  simultaneous creates could pick the same code; the unique index prevents a duplicate, but the second request gets a
-  500 instead of a retry. A database sequence would fix it.
-- **Creating an athlete is audited without an athlete id.** `AuditFilter` reads the id from the route, and `POST
-  /api/athletes` has none yet. Edits, archives and restores carry it.
 - **"Today" differs slightly between validation and the clock.** Request validation uses the server's local date with
   one day of tolerance, while `AppClock` uses Europe/Zurich. This only matters around midnight on a server far from
   Zurich.
@@ -358,3 +354,4 @@ What is deliberately simple, and where I would most like a reviewer's opinion.
 | Why is "today" Zurich time? | So a server in UTC does not shift the athletes' day. | [`AppClock.cs`](../src/AthleteDay.Api/Infrastructure/AppClock.cs) |
 | How is demo data built? | Generated relative to today on every start, with one load spike, one sore athlete, one restriction and one missing check-in. | [`DemoDataSeeder.cs`](../src/AthleteDay.Api/Data/DemoDataSeeder.cs) |
 | Why EF Core and Dapper? | EF Core for writes and migrations; Dapper where the SQL itself is the point. | [ADR-01](spec/decisions.md) |
+| How are athlete codes assigned? | Highest `ATH-` number + 1, inside a transaction that holds a SQL Server application lock, so parallel adds cannot pick the same code (AC-32). | [`AthleteEndpoints.cs`](../src/AthleteDay.Api/Endpoints/AthleteEndpoints.cs) |

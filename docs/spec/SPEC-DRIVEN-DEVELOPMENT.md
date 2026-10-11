@@ -130,17 +130,21 @@ How the ACs map to tests:
 
 | AC | Verified by |
 |---|---|
-| AC-32 add athlete, code assigned | `SquadTests.Coach_adds_an_athlete_and_the_system_assigns_the_next_free_code` |
+| AC-32 add athlete, code assigned | `SquadTests.Coach_adds_an_athlete_and_the_system_assigns_the_next_free_code` · `SquadTests.Athletes_added_at_the_same_time_get_different_codes` (v1.2) |
 | AC-33 validation | `AthleteRequestTests` (4 tests) · `SquadTests.Invalid_athlete_returns_400_with_an_error_per_field` |
 | AC-34 edit | `SquadTests.Coach_edits_an_athlete_and_the_code_stays_the_same` · `…unknown_or_archived_athlete_returns_404` |
 | AC-35 archive and restore | `SquadTests.Archiving_hides_the_athlete_keeps_its_history_and_can_be_undone` |
-| AC-36 coach only, audit, push | `SquadTests.Only_the_coach_manages_the_squad` (5 roles) · `…are_audited_and_push_a_change_signal` |
+| AC-36 coach only, audit, push | `SquadTests.Only_the_coach_manages_the_squad` (5 roles) · `…are_audited_and_push_a_change_signal` · `SquadTests.Adding_an_athlete_is_audited_with_its_id` (v1.2) |
 | AC-37 age and sex in rows | `SquadTests.Dashboard_rows_contain_age_and_sex` |
 | AC-38 sorting | `squad-view.spec.ts` · `dashboard.page.spec.ts` |
 | AC-39 search and filter | `squad-view.spec.ts` · `dashboard.page.spec.ts` |
 | AC-40 plain-language headers | `dashboard.page.spec.ts` |
 | AC-41 coach actions, confirm, Undo | `dashboard.page.spec.ts` (3 tests) |
 | AC-42 log session link | `dashboard.page.spec.ts` |
+
+**Review follow-up (v1.2).** Writing the reviewer guide surfaced two gaps: parallel adds could get the same code, and
+the audit entry for a new athlete had no athlete id. Both went through the same three steps: AC-32 and AC-36 were
+sharpened, two failing tests reproduced the problems, and the fix made them pass. Bugs follow the workflow too.
 
 Two honest notes from this example:
 
