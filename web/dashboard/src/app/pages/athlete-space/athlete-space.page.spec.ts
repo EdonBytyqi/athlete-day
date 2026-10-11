@@ -104,4 +104,10 @@ describe('AthleteSpacePage', () => {
     expect(el.querySelector('select.athlete-select option[value=""]')?.textContent).toContain('Choose an athlete');
     expect(options).toEqual(['Lea (ATH-003)']);
   });
+
+  it('[AC-96] links to Versus mode with this athlete chosen', async () => {
+    const { el } = await open('/athletes/1/performance');
+
+    expect(el.querySelector<HTMLAnchorElement>('a.compare')?.getAttribute('href')).toBe('/versus?a=1');
+  });
 });

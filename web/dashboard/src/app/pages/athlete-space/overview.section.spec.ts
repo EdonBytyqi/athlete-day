@@ -6,6 +6,7 @@ import { signal } from '@angular/core';
 import { personaInterceptor } from '../../api/persona.interceptor';
 import { PersonaService } from '../../api/persona.service';
 import { RealtimeService } from '../../api/realtime.service';
+import { I18n } from '../../i18n/i18n.service';
 import { OverviewSection } from './overview.section';
 
 const progress = {
@@ -22,6 +23,12 @@ const progress = {
     { metric: 'mood', recent: 4.4, previous: 3.9, trend: 'Up' },
   ],
 };
+
+const insights = [
+  { kind: 'LoadSpike', tone: 'Attention', testType: null, figures: { ratio: 1.42, acute: 620, chronic: 437 } },
+  { kind: 'PersonalBest', tone: 'Positive', testType: 'CMJ', figures: { value: 43, previous: 41.5 } },
+  { kind: 'MissingCheckIns', tone: 'Info', testType: null, figures: { checkIns: 2 } },
+];
 
 describe('OverviewSection', () => {
   let controller: HttpTestingController;
@@ -40,13 +47,14 @@ describe('OverviewSection', () => {
     controller = TestBed.inject(HttpTestingController);
   });
 
-  async function render(user: string) {
+  async function render(user: string, found: unknown[] = []) {
     TestBed.inject(PersonaService).switchTo(user);
     const fixture = TestBed.createComponent(OverviewSection);
     fixture.componentRef.setInput('id', '2');
     fixture.detectChanges();
     controller.expectOne((r) => r.url === '/api/athletes/2/progress').flush(progress);
     controller.expectOne((r) => r.url === '/api/athletes/2/load-trend').flush({ athleteId: 2, code: 'ATH-002', points: [] });
+    controller.expectOne('/api/athletes/2/insights').flush(found);
     await fixture.whenStable();
     return fixture;
   }
@@ -108,5 +116,33 @@ describe('OverviewSection', () => {
 
     controller.expectNone((r) => r.url === '/api/athletes/2/wellness');
     controller.verify();
+  });
+
+  it('[AC-99] lists the insights as sentences with their figures, attention first', async () => {
+    const fixture = await render('lena', insights);
+    const el = fixture.nativeElement as HTMLElement;
+
+    const items = el.querySelectorAll<HTMLElement>('.insight');
+    expect(items).toHaveLength(3);
+    expect(items[0].dataset['tone']).toBe('Attention');
+    expect(items[0].textContent).toContain('1.42');
+    expect(items[0].textContent).toContain('620');
+    expect(items[1].dataset['tone']).toBe('Positive');
+    expect(items[1].textContent).toContain('Counter-movement jump');
+    expect(items[1].textContent).toContain('43');
+    expect(items[2].textContent).toContain('2');
+    expect(el.querySelector('.insights-empty')).toBeNull();
+  });
+
+  it('[AC-99] speaks German and says when there is nothing to report', async () => {
+    TestBed.inject(I18n).setLanguage('de');
+    const fixture = await render('mia', [insights[0]]);
+    const el = fixture.nativeElement as HTMLElement;
+
+    // de-CH writes 1.42 with a point (spec section 4); the sentence is German.
+    expect(el.querySelector('.insight')?.textContent).toContain('Belastungsspitze: Verhältnis 1.42');
+
+    const empty = await render('mia', []);
+    expect((empty.nativeElement as HTMLElement).querySelector('.insights-empty')).not.toBeNull();
   });
 });

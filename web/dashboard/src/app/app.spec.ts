@@ -28,7 +28,7 @@ describe('App shell', () => {
     const persona = TestBed.inject(PersonaService);
 
     await fixture.whenStable();
-    expect(tabs(fixture.nativeElement)).toEqual(['Squad', 'Device import', 'Staff input ↗']);
+    expect(tabs(fixture.nativeElement)).toEqual(['Squad', 'Versus', 'Device import', 'Staff input ↗']);
 
     persona.switchTo('luca');
     await fixture.whenStable();
@@ -45,7 +45,7 @@ describe('App shell', () => {
     await fixture.whenStable();
 
     expect(german?.getAttribute('aria-pressed')).toBe('true');
-    expect(tabs(el)).toEqual(['Kader', 'Geräte-Import', 'Erfassung ↗']);
+    expect(tabs(el)).toEqual(['Kader', 'Vergleich', 'Geräte-Import', 'Erfassung ↗']);
     expect(el.querySelector('.persona span')?.textContent).toContain('Ansicht als');
     expect(el.querySelector<HTMLAnchorElement>('.tabs a[target="_blank"]')?.href).toContain('lang=de');
     expect(localStorage.getItem('athlete-day.lang')).toBe('de');
