@@ -1,15 +1,18 @@
-import { Component, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, output, signal } from '@angular/core';
 import { FormField, form, max, maxLength, min, minLength, required, submit } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { ApiService, describeError } from '../api/api.service';
-import { AthleteDetails, AthleteRequest, Sex } from '../api/models';
+import { AthleteDetails, AthleteRequest, Sex, Sport } from '../api/models';
 import { TranslationKey } from '../i18n/catalogue';
 import { I18n } from '../i18n/i18n.service';
 import { ModalDialog } from '../shared/modal-dialog';
 
 const THIS_YEAR = new Date().getFullYear();
 
-const EMPTY: AthleteRequest = { displayName: '', sport: '', birthYear: null, sex: 'NotStated', bodyMassKg: 70 };
+/** The form's own model: a select's value is text, so the sport id travels as a string until saving. */
+type AthleteFormModel = Omit<AthleteRequest, 'sportId'> & { sportId: string };
+
+const EMPTY: AthleteFormModel = { displayName: '', sportId: '', birthYear: null, sex: 'NotStated', bodyMassKg: 70 };
 
 /** A field's state, as far as showing its error goes. */
 interface FieldView {
@@ -48,13 +51,13 @@ interface FieldView {
 
         <label>
           {{ t('athleteForm.sport') }}
-          <input list="known-sports" autocomplete="off" [formField]="form.sport" [attr.aria-invalid]="showError(form.sport)" />
-          <datalist id="known-sports">
-            @for (s of sports(); track s) {
-              <option [value]="s"></option>
+          <select [formField]="form.sportId" [attr.aria-invalid]="showError(form.sportId)">
+            <option value="">{{ t('athleteForm.sportChoose') }}</option>
+            @for (s of sportOptions(); track s.id) {
+              <option [value]="'' + s.id">{{ s.retired ? t('athleteForm.sportRetired', { name: s.name }) : s.name }}</option>
             }
-          </datalist>
-          @if (errorText(form.sport); as message) {
+          </select>
+          @if (errorText(form.sportId); as message) {
             <span class="field-error">{{ message }}</span>
           }
         </label>
@@ -105,25 +108,31 @@ export class AthleteForm {
 
   /** null adds a new athlete. */
   readonly athlete = input<AthleteDetails | null>(null);
-  /** Existing sports, suggested while typing so the filter chips stay tidy. */
-  readonly sports = input<string[]>([]);
   readonly saved = output<{ athlete: AthleteDetails; created: boolean }>();
   readonly cancelled = output<void>();
 
   protected readonly sexes: Sex[] = ['NotStated', 'Female', 'Male'];
 
-  private readonly model = linkedSignal<AthleteRequest>(() => {
+  /** The managed list (ADR-10): active sports, plus the athlete's current one if it was retired since. */
+  private readonly sports = signal<Sport[]>([]);
+  protected readonly sportOptions = computed(() =>
+    this.sports()
+      .filter((s) => !s.retired || s.id === this.athlete()?.sportId)
+      .sort((a, b) => a.name.localeCompare(b.name)),
+  );
+
+  private readonly model = linkedSignal<AthleteFormModel>(() => {
     const a = this.athlete();
-    return a ? { displayName: a.displayName, sport: a.sport, birthYear: a.birthYear, sex: a.sex, bodyMassKg: a.bodyMassKg } : { ...EMPTY };
+    return a
+      ? { displayName: a.displayName, sportId: String(a.sportId), birthYear: a.birthYear, sex: a.sex, bodyMassKg: a.bodyMassKg }
+      : { ...EMPTY };
   });
 
   protected readonly form = form(this.model, (p) => {
     required(p.displayName, { message: 'athleteForm.error.nameRequired' });
     minLength(p.displayName, 2, { message: 'athleteForm.error.nameLength' });
     maxLength(p.displayName, 60, { message: 'athleteForm.error.nameLength' });
-    required(p.sport, { message: 'athleteForm.error.sportRequired' });
-    minLength(p.sport, 2, { message: 'athleteForm.error.sportLength' });
-    maxLength(p.sport, 60, { message: 'athleteForm.error.sportLength' });
+    required(p.sportId, { message: 'athleteForm.error.sportRequired' });
     required(p.birthYear, { message: 'athleteForm.error.birthYearRequired' });
     min(p.birthYear, THIS_YEAR - 70, { message: 'athleteForm.error.ageRange' });
     max(p.birthYear, THIS_YEAR - 10, { message: 'athleteForm.error.ageRange' });
@@ -132,6 +141,10 @@ export class AthleteForm {
   }, { name: 'athlete' });
 
   protected readonly error = signal<string | null>(null);
+
+  constructor() {
+    this.api.sports().subscribe({ next: (sports) => this.sports.set(sports), error: () => this.sports.set([]) });
+  }
 
   protected sexLabel(sex: Sex): TranslationKey {
     return `sexOption.${sex}`;
@@ -151,7 +164,8 @@ export class AthleteForm {
     event.preventDefault();
     await submit(this.form, async () => {
       const existing = this.athlete();
-      const request = this.model();
+      const { sportId, ...rest } = this.model();
+      const request: AthleteRequest = { ...rest, sportId: Number(sportId) };
       try {
         const athlete = await firstValueFrom(
           existing ? this.api.editAthlete(existing.id, request) : this.api.addAthlete(request),

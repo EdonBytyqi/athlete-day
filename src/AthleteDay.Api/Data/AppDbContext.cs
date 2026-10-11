@@ -6,6 +6,7 @@ namespace AthleteDay.Api.Data;
 
 public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<Sport> Sports => Set<Sport>();
     public DbSet<Athlete> Athletes => Set<Athlete>();
     public DbSet<TrainingSession> TrainingSessions => Set<TrainingSession>();
     public DbSet<WellnessCheck> WellnessChecks => Set<WellnessCheck>();
@@ -35,9 +36,17 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             e.HasIndex(a => a.Code).IsUnique();
             e.Property(a => a.Code).HasMaxLength(16);
             e.Property(a => a.BodyMassKg).HasPrecision(5, 1);
+            e.HasOne(a => a.Sport).WithMany().HasForeignKey(a => a.SportId).OnDelete(DeleteBehavior.Restrict);
             // Archive instead of delete (ADR-07): every query, form and import treats an archived athlete as unknown.
             // Restore and the archive list opt out with IgnoreQueryFilters().
             e.HasQueryFilter(a => a.ArchivedAt == null);
+        });
+
+        b.Entity<Sport>(e =>
+        {
+            // Unique ignoring case: SQL Server's default collation is case-insensitive.
+            e.Property(s => s.Name).HasMaxLength(60);
+            e.HasIndex(s => s.Name).IsUnique();
         });
 
         b.Entity<TrainingSession>(e =>

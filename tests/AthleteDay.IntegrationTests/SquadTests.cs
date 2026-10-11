@@ -209,6 +209,17 @@ public sealed class SquadTests(ApiFactory api) : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("AC", "AC-36")]
+    public async Task Failed_changes_are_not_audited()
+    {
+        var response = await api.ClientAs(Roles.Coach, "lena").PutAsJsonAsync("/api/athletes/999998", NewAthlete());
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var audit = await api.ClientAs(Roles.Admin).GetFromJsonAsync<List<AuditEntryDto>>("/api/audit?take=500");
+        Assert.DoesNotContain(audit!, a => a.AthleteId == 999998);
+    }
+
+    [Fact]
     [Trait("AC", "AC-37")]
     public async Task Dashboard_rows_contain_age_and_sex()
     {

@@ -34,6 +34,27 @@ export interface DashboardRow {
   readiness: { status: ReadinessStatus; reasons: string[] };
   restriction: TrainingRestriction;
   nutrition: { energyKcal: number; carbsG: number } | null;
+  range: DashboardRange;
+}
+
+/** Figures over the chosen period; everything else in the row is as of its end date. */
+export interface DashboardRange {
+  from: string;
+  to: string;
+  days: number;
+  totalLoad: number;
+  averageDailyLoad: number;
+  sessions: number;
+  wellnessDays: number;
+  averageSleep: number | null;
+  averageSoreness: number | null;
+  averageMood: number | null;
+}
+
+export interface Sport {
+  id: number;
+  name: string;
+  retired: boolean;
 }
 
 export interface LoadTrendPoint {
@@ -121,6 +142,7 @@ export interface AthleteDetails {
   id: number;
   code: string;
   displayName: string;
+  sportId: number;
   sport: string;
   birthYear: number | null;
   sex: Sex;
@@ -130,7 +152,7 @@ export interface AthleteDetails {
 
 export interface AthleteRequest {
   displayName: string;
-  sport: string;
+  sportId: number;
   birthYear: number | null;
   sex: Sex;
   bodyMassKg: number;

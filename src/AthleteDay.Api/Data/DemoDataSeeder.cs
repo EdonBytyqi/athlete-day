@@ -24,6 +24,8 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
         new("ATH-006", "Jan", "Biathlon", 30, Sex.Male, 72.0m, 3600, 7.0m, null)
     ];
 
+    private static readonly string[] ExtraSports = ["Cycling", "Swimming"];
+
     private static readonly SessionType[] Rotation =
         [SessionType.Strength, SessionType.Endurance, SessionType.Speed, SessionType.Technique, SessionType.OnIce, SessionType.Recovery];
 
@@ -38,12 +40,16 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
         await db.WellnessChecks.ExecuteDeleteAsync(ct);
         await db.TrainingSessions.ExecuteDeleteAsync(ct);
         await db.Athletes.IgnoreQueryFilters().ExecuteDeleteAsync(ct);
+        await db.Sports.ExecuteDeleteAsync(ct);
         // Keep demo athletes at ids 1–6 so links like /athletes/2 survive a reset.
         // (Only when rows were ever inserted; on a brand-new table RESEED 0 would make the first id 0.)
         await db.Database.ExecuteSqlRawAsync("""
             IF EXISTS (SELECT 1 FROM sys.identity_columns
                        WHERE object_id = OBJECT_ID('dbo.Athletes') AND last_value IS NOT NULL)
                 DBCC CHECKIDENT ('dbo.Athletes', RESEED, 0);
+            IF EXISTS (SELECT 1 FROM sys.identity_columns
+                       WHERE object_id = OBJECT_ID('dbo.Sports') AND last_value IS NOT NULL)
+                DBCC CHECKIDENT ('dbo.Sports', RESEED, 0);
             """, ct);
         await SeedAsync(ct);
     }
@@ -53,9 +59,16 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
         if (await db.Athletes.IgnoreQueryFilters().AnyAsync(ct)) return;
 
         var today = clock.Today;
+
+        // The managed sports list (ADR-10): the squad's sports plus two nobody does yet, to choose from.
+        var sports = Profiles.Select(p => p.Sport).Concat(ExtraSports).Distinct().Order()
+            .Select(name => new Sport { Name = name })
+            .ToDictionary(sport => sport.Name);
+        db.Sports.AddRange(sports.Values);
+
         var athletes = Profiles.Select(p => new Athlete
         {
-            Code = p.Code, DisplayName = p.Name, Sport = p.Sport, BodyMassKg = p.Mass, BirthYear = today.Year - p.Age, Sex = p.Sex
+            Code = p.Code, DisplayName = p.Name, Sport = sports[p.Sport], BodyMassKg = p.Mass, BirthYear = today.Year - p.Age, Sex = p.Sex
         }).ToList();
         db.Athletes.AddRange(athletes);
         await db.SaveChangesAsync(ct);
@@ -68,11 +81,16 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
             AddSessionHistory(athlete, today, random);
             AddWellnessHistory(athlete, today, random);
 
-            db.NutritionTargets.Add(new NutritionTarget
+            // Two weeks of nutrition targets, so past days and periods show them too; today's are the profile's.
+            for (var daysAgo = 13; daysAgo >= 0; daysAgo--)
             {
-                AthleteId = athlete.Id, Date = today, EnergyKcal = profile.Kcal, CarbsGPerKg = profile.Carbs,
-                KitchenNote = profile.KitchenNote, SetBy = "seed"
-            });
+                db.NutritionTargets.Add(new NutritionTarget
+                {
+                    AthleteId = athlete.Id, Date = today.AddDays(-daysAgo),
+                    EnergyKcal = profile.Kcal + (daysAgo == 0 ? 0 : random.Next(-3, 4) * 100),
+                    CarbsGPerKg = profile.Carbs, KitchenNote = profile.KitchenNote, SetBy = "seed"
+                });
+            }
         }
 
         db.PhysioNotes.AddRange(
@@ -135,7 +153,7 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
 
     private void AddWellnessHistory(Athlete athlete, DateOnly today, Random random)
     {
-        for (var daysAgo = 13; daysAgo >= 0; daysAgo--)
+        for (var daysAgo = 27; daysAgo >= 0; daysAgo--)
         {
             // ATH-003 has not done today's check-in yet: the athlete persona fills it in during the demo.
             if (daysAgo == 0 && athlete.Code == "ATH-003") continue;

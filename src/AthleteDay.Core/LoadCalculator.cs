@@ -37,6 +37,13 @@ public static class LoadCalculator
     public static double? Ratio(double acute, double chronic) =>
         chronic <= 0 ? null : Math.Round(acute / chronic, 2);
 
+    /// <summary>Average daily load over a period of <paramref name="days"/> days; rest days count as 0.</summary>
+    public static double RangeAverage(int totalLoad, int days)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(days, 1);
+        return Math.Round((double)totalLoad / days, 1);
+    }
+
     /// <summary>Builds the summary from window sums, as returned by the dashboard SQL report.</summary>
     public static LoadSummary FromSums(int todayLoad, int acuteSum, int chronicSum)
     {

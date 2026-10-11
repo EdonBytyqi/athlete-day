@@ -1,6 +1,6 @@
 <header class="page-head">
   <div>
-    <h1>{{ t('squad.title') }}</h1>
+    <h1>{{ title() }}</h1>
     <p class="muted">{{ t('squad.lead') }}</p>
   </div>
   @if (rows(); as list) {
@@ -15,6 +15,26 @@
 @if (hint(); as text) {
   <p class="hint-bar">{{ text }}</p>
 }
+
+<!-- The period (AC-60): presets or custom dates; figures are as of the end date, totals cover the period. -->
+<section class="range panel" [attr.aria-label]="t('range.presets')">
+  <div class="range-presets chips" role="group" [attr.aria-label]="t('range.presets')">
+    @for (p of presets; track p.key) {
+      <button type="button" class="chip" [attr.aria-pressed]="preset() === p.key" (click)="setPreset(p.days)">{{ t(p.label) }}</button>
+    }
+  </div>
+  <div class="range-dates">
+    <label>
+      <span>{{ t('range.from') }}</span>
+      <input type="date" name="from" [value]="period().from" [max]="period().to" (change)="setFrom($any($event.target).value)" />
+    </label>
+    <label>
+      <span>{{ t('range.to') }}</span>
+      <input type="date" name="to" [value]="period().to" [min]="period().from" [max]="today" (change)="setTo($any($event.target).value)" />
+    </label>
+  </div>
+  <p class="period" aria-live="polite">{{ periodLabel() }}</p>
+</section>
 
 @if (error(); as message) {
   <p class="banner error" role="alert">{{ message }}</p>
@@ -87,19 +107,25 @@
             <th class="num" [attr.aria-sort]="ariaSort('age')"><button type="button" class="sort" (click)="sortBy('age')">{{ t('squad.col.age') }}</button></th>
             <th [attr.aria-sort]="ariaSort('sex')"><button type="button" class="sort" (click)="sortBy('sex')">{{ t('squad.col.sex') }}</button></th>
             <th class="num" [attr.aria-sort]="ariaSort('todayLoad')">
-              <button type="button" class="sort" (click)="sortBy('todayLoad')">{{ t('squad.col.loadToday') }}</button>
-              <app-info-tip [label]="t('squad.col.loadToday')" [text]="t('squad.tip.loadToday')" />
+              <button type="button" class="sort" (click)="sortBy('todayLoad')">{{ loadColumn() }}</button>
+              <app-info-tip [label]="loadColumn()" [text]="t('squad.tip.loadToday')" />
             </th>
-            <th class="num">
-              {{ t('squad.col.weekAvg') }}
+            @if (isRange()) {
+              <th class="num">
+                {{ t('squad.col.loadPeriod') }}
+                <app-info-tip [label]="t('squad.col.loadPeriod')" [text]="t('squad.tip.loadPeriod')" />
+              </th>
+            }
+            <th class="num" [attr.aria-sort]="ariaSort('acuteLoad')">
+              <button type="button" class="sort" (click)="sortBy('acuteLoad')">{{ t('squad.col.weekAvg') }}</button>
               <app-info-tip [label]="t('squad.col.weekAvg')" [text]="t('squad.tip.weekAvg')" />
             </th>
-            <th class="num">
-              {{ t('squad.col.monthAvg') }}
+            <th class="num" [attr.aria-sort]="ariaSort('chronicLoad')">
+              <button type="button" class="sort" (click)="sortBy('chronicLoad')">{{ t('squad.col.monthAvg') }}</button>
               <app-info-tip [label]="t('squad.col.monthAvg')" [text]="t('squad.tip.monthAvg')" />
             </th>
-            <th class="num">
-              {{ t('squad.col.weekVsMonth') }}
+            <th class="num" [attr.aria-sort]="ariaSort('ratio')">
+              <button type="button" class="sort" (click)="sortBy('ratio')">{{ t('squad.col.weekVsMonth') }}</button>
               <app-info-tip [label]="t('squad.col.weekVsMonth')" [text]="t('squad.tip.weekVsMonth')" />
             </th>
             <th [attr.aria-sort]="ariaSort('readiness')"><button type="button" class="sort" (click)="sortBy('readiness')">{{ t('squad.col.readiness') }}</button></th>
@@ -125,7 +151,16 @@
               <td class="nowrap" [attr.data-label]="t('squad.col.sport')">{{ r.sport }}</td>
               <td class="num" [attr.data-label]="t('squad.col.age')">{{ r.age ?? '–' }}</td>
               <td [attr.data-label]="t('squad.col.sex')">{{ t(sexLabel(r.sex)) }}</td>
-              <td class="num" [attr.data-label]="t('squad.col.loadToday')">{{ i18n.number(r.todayLoad) }}</td>
+              <td class="num" [attr.data-label]="loadColumn()">{{ i18n.number(r.todayLoad) }}</td>
+              @if (isRange()) {
+                <td class="num" [attr.data-label]="t('squad.col.loadPeriod')">
+                  <span class="stacked">
+                    <strong>{{ i18n.number(r.range.totalLoad) }}</strong>
+                    <span class="muted">{{ t('squad.perDay', { value: i18n.number(r.range.averageDailyLoad) }) }}</span>
+                    <span class="muted">{{ t('squad.sessions', { n: r.range.sessions }) }}</span>
+                  </span>
+                </td>
+              }
               <td class="num" [attr.data-label]="t('squad.col.weekAvg')">{{ i18n.number(r.acuteLoad) }}</td>
               <td class="num" [attr.data-label]="t('squad.col.monthAvg')">{{ i18n.number(r.chronicLoad) }}</td>
               <td class="num" [attr.data-label]="t('squad.col.weekVsMonth')">
@@ -143,6 +178,16 @@
                   </span>
                 } @else {
                   <span class="muted">–</span>
+                }
+                @if (isRange() && r.range.wellnessDays > 0) {
+                  <span class="muted period-wellness">
+                    {{ t('squad.periodWellness', {
+                      sleep: i18n.number(r.range.averageSleep ?? 0, 1, 0),
+                      soreness: i18n.number(r.range.averageSoreness ?? 0, 1, 0),
+                      mood: i18n.number(r.range.averageMood ?? 0, 1, 0),
+                      days: r.range.wellnessDays
+                    }) }}
+                  </span>
                 }
               </td>
               <td [attr.data-label]="t('squad.col.nutrition')">
@@ -183,6 +228,10 @@
     </div>
   }
 
+  @if (visible().length > 1) {
+    <app-load-compare [rows]="visible()" />
+  }
+
   <p class="footnote">{{ t('squad.footnote') }}</p>
 
   @if (isCoach()) {
@@ -207,7 +256,7 @@
 }
 
 @if (editing() !== null) {
-  <app-athlete-form [athlete]="editingAthlete()" [sports]="sports()" (saved)="saved($event)" (cancelled)="editing.set(null)" />
+  <app-athlete-form [athlete]="editingAthlete()" (saved)="saved($event)" (cancelled)="editing.set(null)" />
 }
 
 @if (archiving(); as row) {

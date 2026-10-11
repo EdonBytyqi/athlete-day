@@ -9,7 +9,11 @@ public sealed class Athlete
     public int Id { get; set; }
     public required string Code { get; set; }
     public required string DisplayName { get; set; }
-    public required string Sport { get; set; }
+
+    /// <summary>From the managed sports list (ADR-10).</summary>
+    public int SportId { get; set; }
+    public Sport Sport { get; set; } = null!;
+
     public decimal BodyMassKg { get; set; }
 
     /// <summary>Only the year (data minimisation); null for athletes created before it was recorded.</summary>
@@ -18,6 +22,14 @@ public sealed class Athlete
 
     /// <summary>Set when a coach archives the athlete. Archived athletes are hidden by a global query filter.</summary>
     public DateTimeOffset? ArchivedAt { get; set; }
+}
+
+/// <summary>An entry of the sports list, managed by the admin. Retired sports stay on existing athletes.</summary>
+public sealed class Sport
+{
+    public int Id { get; set; }
+    public required string Name { get; set; }
+    public DateTimeOffset? RetiredAt { get; set; }
 }
 
 public sealed class TrainingSession

@@ -13,6 +13,7 @@ public sealed record AthleteDetailsDto(
     int Id,
     string Code,
     string DisplayName,
+    int SportId,
     string Sport,
     int? BirthYear,
     Sex Sex,
@@ -57,7 +58,27 @@ public sealed record DashboardRowDto(
     WellnessSummaryDto? Wellness,
     ReadinessDto Readiness,
     TrainingRestriction Restriction,
-    NutritionTodayDto? Nutrition);
+    NutritionTodayDto? Nutrition,
+    DashboardRangeDto Range);
+
+/// <summary>
+/// Figures over the chosen period (both dates included). Average daily load counts rest days as 0;
+/// wellness averages cover the days with a morning check.
+/// </summary>
+public sealed record DashboardRangeDto(
+    DateOnly From,
+    DateOnly To,
+    int Days,
+    int TotalLoad,
+    double AverageDailyLoad,
+    int Sessions,
+    int WellnessDays,
+    decimal? AverageSleep,
+    double? AverageSoreness,
+    double? AverageMood);
+
+/// <summary>An entry of the managed sports list (ADR-10). Retired sports stay on existing athletes.</summary>
+public sealed record SportDto(int Id, string Name, bool Retired);
 
 public sealed record LoadTrendPointDto(DateOnly Date, int DailyLoad, double Acute7, double Chronic28);
 

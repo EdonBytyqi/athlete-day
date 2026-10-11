@@ -21,7 +21,7 @@ export const SCREENS_BY_ROLE: Record<Role, readonly string[]> = {
   Physio: ['dashboard', 'imports'],
   Nutrition: ['dashboard', 'kitchen'],
   Kitchen: ['kitchen'],
-  Admin: ['audit'],
+  Admin: ['audit', 'settings'],
   Athlete: [],
 };
 

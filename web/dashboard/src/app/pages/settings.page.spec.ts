@@ -51,6 +51,7 @@ describe('SettingsPage', () => {
     const name = el.querySelector<HTMLInputElement>('input[name="newSport"]')!;
     name.value = 'Judo';
     name.dispatchEvent(new Event('input'));
+    await settle(); // the Add button enables once a name is typed
     el.querySelector<HTMLButtonElement>('button.add-sport')!.click();
     await settle();
     const add = controller.expectOne((r) => r.method === 'POST' && r.url === '/api/sports');
@@ -68,6 +69,7 @@ describe('SettingsPage', () => {
     const input = rowing.querySelector<HTMLInputElement>('input.sport-name')!;
     input.value = 'Rowing (sweep)';
     input.dispatchEvent(new Event('input'));
+    await settle(); // Save enables once the name differs
     rowing.querySelector<HTMLButtonElement>('button.save')!.click();
     await settle();
     const rename = controller.expectOne((r) => r.method === 'PUT' && r.url === '/api/sports/1');

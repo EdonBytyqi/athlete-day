@@ -75,6 +75,8 @@ describe('DashboardPage', () => {
     const choose = async (selector: string, value: string) => {
       const select = el.querySelector<HTMLSelectElement>(selector)!;
       select.value = value;
+      // A browser fires both when a choice is made.
+      select.dispatchEvent(new Event('input'));
       select.dispatchEvent(new Event('change'));
       fixture.detectChanges();
       await fixture.whenStable();
