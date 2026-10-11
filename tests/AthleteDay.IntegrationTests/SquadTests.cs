@@ -44,6 +44,18 @@ public sealed class SquadTests(ApiFactory api)
     }
 
     [Fact]
+    [Trait("AC", "AC-32")]
+    public async Task Athletes_added_at_the_same_time_get_different_codes()
+    {
+        var responses = await Task.WhenAll(Enumerable.Range(1, 8).Select(i =>
+            api.ClientAs(Roles.Coach).PostAsJsonAsync("/api/athletes", NewAthlete($"Parallel {i}"))));
+
+        Assert.All(responses, r => Assert.Equal(HttpStatusCode.Created, r.StatusCode));
+        var codes = await Task.WhenAll(responses.Select(async r => (await r.ReadAsync<AthleteDetailsDto>()).Code));
+        Assert.Equal(codes.Length, codes.Distinct().Count());
+    }
+
+    [Fact]
     [Trait("AC", "AC-33")]
     public async Task Invalid_athlete_returns_400_with_an_error_per_field()
     {
@@ -172,6 +184,17 @@ public sealed class SquadTests(ApiFactory api)
         var audit = await api.ClientAs(Roles.Admin).GetFromJsonAsync<List<AuditEntryDto>>("/api/audit?take=500");
         Assert.Contains(audit!, a => a is { User: "lena", Role: Roles.Coach, Action: "Changed", Resource: "Athlete" }
                                      && a.AthleteId == athlete.Id);
+    }
+
+    [Fact]
+    [Trait("AC", "AC-36")]
+    public async Task Adding_an_athlete_is_audited_with_its_id()
+    {
+        var response = await api.ClientAs(Roles.Coach, "lena").PostAsJsonAsync("/api/athletes", NewAthlete());
+        var athlete = await response.ReadAsync<AthleteDetailsDto>();
+
+        var audit = await api.ClientAs(Roles.Admin).GetFromJsonAsync<List<AuditEntryDto>>("/api/audit?take=500");
+        Assert.Contains(audit!, a => a is { User: "lena", Action: "Changed", Resource: "Athlete" } && a.AthleteId == athlete.Id);
     }
 
     [Fact]
