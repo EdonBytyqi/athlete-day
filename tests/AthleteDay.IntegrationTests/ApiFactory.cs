@@ -76,9 +76,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     }
 
     /// <summary>Each test creates its own athlete so tests never depend on each other's data.</summary>
-    public async Task<Athlete> CreateAthleteAsync(decimal bodyMassKg = 70m)
+    public async Task<Athlete> CreateAthleteAsync(decimal bodyMassKg = 70m, string sport = "Testing")
     {
-        var sportId = await SportIdAsync();
+        var sportId = await SportIdAsync(sport);
         await using var scope = Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var athlete = new Athlete
