@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Version | 1.0 |
-| Status | Baseline |
-| Date | 2026-10-10 |
+| Version | 1.1 |
+| Status | Draft |
+| Date | 2026-10-11 |
 
 > **How this version came about.** v1.0 was written *after* the first implementation, to capture what the system does and
 > to link every acceptance criterion to a test. From v1.1 on, every change starts here: spec first, then failing tests,
@@ -19,7 +19,7 @@ Athlete Day records one athlete's day across these disciplines and shows each ro
 
 | Role | Goal |
 |---|---|
-| Coach | Plan training from load and readiness; log sessions; import device data |
+| Coach | Plan training from load and readiness; log sessions; import device data; manage the squad |
 | Athlete | Report a morning wellness check quickly |
 | Nutrition | Set daily energy and carbohydrate targets |
 | Physio | Keep health notes and training restrictions |
@@ -29,7 +29,8 @@ Athlete Day records one athlete's day across these disciplines and shows each ro
 ## 3. Scope
 
 **In scope:** session logging, wellness checks, load monitoring, readiness flags, nutrition targets, kitchen view,
-physio notes, device CSV import, audit log, live dashboard updates.
+physio notes, device CSV import, audit log, live dashboard updates, squad management (add, edit and archive athletes),
+sorting and filtering the squad dashboard.
 
 **Out of scope (v1):** real sign-in (demo personas only), Azure deployment, notifications, athlete-facing dashboard,
 medical advice of any kind.
@@ -47,6 +48,10 @@ medical advice of any kind.
 | Readiness thresholds | Sleep < 6 h · soreness ≥ 4/5 · mood ≤ 2/5 · ratio > 1.3 or < 0.8 · any physio restriction |
 | Portion | Energy target < 2200 kcal → S · < 3000 → M · < 3800 → L · otherwise XL |
 | Carbohydrates (g) | Target g/kg × body mass, rounded half away from zero |
+| Age | Current year (Europe/Zurich) − birth year, i.e. the age reached this year. Only the birth year is stored. |
+| Sex | Female, Male or Not stated |
+| Athlete code | `ATH-` plus a three-digit number, assigned by the system (highest existing number + 1) and never changed |
+| Archived athlete | Hidden from every list and form and accepts no new data; its history is kept and it can be restored |
 
 ## 5. Functional requirements
 
@@ -152,6 +157,31 @@ Each acceptance criterion (AC) is verified by at least one automated test tagged
 |---|---|---|
 | AC-29 | The API's published OpenAPI document matches [openapi.json](openapi.json). An API change starts by changing that file. | Integration |
 
+### F11 Squad management (coach)
+
+*As a coach, I want to add, edit and archive athletes myself, so the squad on screen matches the squad in the hall.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-32 | A coach can add an athlete with name, sport, birth year, sex and body mass; the response is 201 and the system assigns the next free code (section 4). | Integration |
+| AC-33 | Name and sport are required (2–60 characters), the birth year must give an age between 10 and 70, body mass is 30–200 kg; an invalid request returns 400 with one error entry per invalid field. | Unit, Integration |
+| AC-34 | A coach can edit an athlete's name, sport, birth year, sex and body mass; the code does not change. An unknown or archived athlete returns 404. | Integration |
+| AC-35 | Deleting an athlete archives it: it disappears from the dashboard, the athlete list and the kitchen view, and new data for it is rejected; its history is kept, and a coach can list archived athletes and restore them. | Integration |
+| AC-36 | Only the coach can add, edit, archive or restore athletes; every other role gets 403. Each of these changes is written to the audit log and pushes a change signal. | Integration |
+| AC-37 | Each dashboard row contains the athlete's age and sex; the kitchen view does not change (AC-20). | Integration |
+
+### F12 Squad dashboard usability
+
+*As anyone on the staff, I want to find an athlete and understand the numbers without asking someone.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-38 | The dashboard sorts by name, sport, age, sex, today's load or readiness when a column header is clicked; a second click reverses the order, and the sorted column is marked with `aria-sort`. | Angular |
+| AC-39 | A search box filters by name or code and sport chips filter by sport; when nothing matches, the page says so and offers to clear the filters. | Angular |
+| AC-40 | Column headers use plain language, and every load column explains its meaning in a tooltip that also opens with the keyboard. | Angular |
+| AC-41 | The coach sees *Add athlete* and actions per row (log session, details, edit, archive); other roles see none of them. Archiving asks for confirmation and ends with a message that offers *Undo*. | Angular |
+| AC-42 | *Log session* opens the staff input form with the athlete already selected. | Angular |
+
 ## 6. Non-functional requirements
 
 | ID | Requirement |
@@ -167,3 +197,4 @@ Each acceptance criterion (AC) is verified by at least one automated test tagged
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 2026-10-10 | Baseline written after the first implementation; all ACs linked to tests. |
+| 1.1 | 2026-10-11 | F11 squad management (AC-32–AC-37) and F12 dashboard usability (AC-38–AC-42); age, sex, code and archive rules in section 4. |
