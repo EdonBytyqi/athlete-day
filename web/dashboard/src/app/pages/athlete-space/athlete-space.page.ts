@@ -7,7 +7,7 @@ import { TranslationKey } from '../../i18n/catalogue';
 import { I18n } from '../../i18n/i18n.service';
 import { logSessionUrl } from '../../shared/staff-url';
 
-const SECTIONS = ['plan', 'performance', 'sessions', 'reviews'] as const;
+const SECTIONS = ['plan', 'performance', 'sessions', 'reviews', 'documents'] as const;
 
 /**
  * One place per athlete (AC-66): header, a searchable selector grouped by sport, and the sections as child routes.
@@ -73,6 +73,7 @@ const SECTIONS = ['plan', 'performance', 'sessions', 'reviews'] as const;
       <a [routerLink]="['/athletes', id(), 'performance']" routerLinkActive="active">{{ t('space.sections.performance') }}</a>
       <a [routerLink]="['/athletes', id(), 'sessions']" routerLinkActive="active">{{ t('space.sections.sessions') }}</a>
       <a [routerLink]="['/athletes', id(), 'reviews']" routerLinkActive="active">{{ t('space.sections.reviews') }}</a>
+      <a [routerLink]="['/athletes', id(), 'documents']" routerLinkActive="active">{{ t('space.sections.documents') }}</a>
     </nav>
 
     <router-outlet />

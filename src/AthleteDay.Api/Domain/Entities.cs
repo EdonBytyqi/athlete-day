@@ -120,6 +120,23 @@ public sealed class PlanDayChangeSession
     public string? Note { get; set; }
 }
 
+/// <summary>An athlete document's metadata; the file lives in Blob Storage under <see cref="BlobName"/> (ADR-15).</summary>
+public sealed class AthleteDocument
+{
+    public int Id { get; set; }
+    public int AthleteId { get; set; }
+    public DocumentType Type { get; set; }
+    public required string Title { get; set; }
+    public required string FileName { get; set; }
+    public required string ContentType { get; set; }
+    public long SizeBytes { get; set; }
+    public required string Sha256 { get; set; }
+    /// <summary>A random name, so storage carries no personal data.</summary>
+    public required string BlobName { get; set; }
+    public required string UploadedBy { get; set; }
+    public DateTimeOffset UploadedAt { get; set; }
+}
+
 public sealed class WellnessCheck
 {
     public int Id { get; set; }

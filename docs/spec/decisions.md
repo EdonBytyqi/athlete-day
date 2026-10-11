@@ -128,3 +128,17 @@ Short records of the decisions that shape the code. Format: context → decision
 * **Consequence:** simple to explain and to show; a change never edits the standard week, and the standard week can be
   rewritten without losing the dated changes. A change replaces the whole day rather than single sessions, which keeps
   "what applies on this date" unambiguous.
+
+## ADR-15 Documents in Blob Storage, metadata in SQL, served only by the API
+
+* **Context:** athlete documents range from a training certificate to a medical report or a passport scan. They are
+  files, not rows, and who may see them depends on the type (AC-85 – AC-90).
+* **Decision:** the file goes to a private Blob container (`athlete-documents`) under a random name, behind an
+  `IDocumentStore` interface (Azurite locally, in memory in tests, like the device import). SQL holds the metadata and
+  the access rule works on the type: `DocumentAccess` in `AthleteDay.Core` decides which roles see which types. Every
+  download goes through the API, which checks the type, writes the audit entry and streams the file; no SAS links are
+  handed out. A document the role may not see answers 404, not 403, so its existence does not leak. File types are
+  recognised by their first bytes and served as attachments with `nosniff`.
+* **Consequence:** one place for the rule and one audit trail. Large downloads cost API bandwidth, which is fine at
+  squad scale. Blob names carry no personal data. In production the container would add malware scanning (e.g.
+  Defender for Storage) and soft delete; both are configuration, not code.

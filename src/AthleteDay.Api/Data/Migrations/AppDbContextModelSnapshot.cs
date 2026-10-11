@@ -68,6 +68,69 @@ namespace AthleteDay.Api.Data.Migrations
                     b.ToTable("Athletes");
                 });
 
+            modelBuilder.Entity("AthleteDay.Api.Domain.AthleteDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AthleteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BlobName")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Sha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UploadedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlobName")
+                        .IsUnique();
+
+                    b.HasIndex("AthleteId", "UploadedAt");
+
+                    b.ToTable("AthleteDocuments");
+                });
+
             modelBuilder.Entity("AthleteDay.Api.Domain.AuditEntry", b =>
                 {
                     b.Property<long>("Id")
@@ -621,6 +684,15 @@ namespace AthleteDay.Api.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Sport");
+                });
+
+            modelBuilder.Entity("AthleteDay.Api.Domain.AthleteDocument", b =>
+                {
+                    b.HasOne("AthleteDay.Api.Domain.Athlete", null)
+                        .WithMany()
+                        .HasForeignKey("AthleteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AthleteDay.Api.Domain.DeviceMeasurement", b =>

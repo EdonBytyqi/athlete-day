@@ -72,3 +72,13 @@ public enum PlanDaySource
     Standard,
     Changed
 }
+
+/// <summary>The kind of an athlete document; it decides who may see it (spec section 4, ADR-15).</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<DocumentType>))]
+public enum DocumentType
+{
+    Medical,
+    GovernmentId,
+    Certificate,
+    General
+}

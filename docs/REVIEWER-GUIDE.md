@@ -131,7 +131,7 @@ Each step names the files and what is worth checking in them.
 
 | # | Read | Look for |
 |---|---|---|
-| 1 | [`docs/spec/requirements.md`](spec/requirements.md) | Roles, domain rules (section 4), acceptance criteria AC-01 to AC-84. Everything below traces back here. |
+| 1 | [`docs/spec/requirements.md`](spec/requirements.md) | Roles, domain rules (section 4), acceptance criteria AC-01 to AC-92. Everything below traces back here. |
 | 2 | [`Program.cs`](../src/AthleteDay.Api/Program.cs) | The composition root: data, auth, storage adapters (Azure or in-memory), worker, SignalR, startup migration and seed. |
 | 3 | [`Auth/Policies.cs`](../src/AthleteDay.Api/Auth/Policies.cs), [`Auth/DemoAuthenticationHandler.cs`](../src/AthleteDay.Api/Auth/DemoAuthenticationHandler.cs) | One policy per need, not per screen. The handler is the only part that changes for Entra ID. |
 | 4 | [`Endpoints/`](../src/AthleteDay.Api/Endpoints) | `StaffInputEndpoints` (writes), `ReportEndpoints` (dashboard, kitchen DTO, audit), `AthleteEndpoints` (squad management), `ImportEndpoints` (upload). Note `TypedResults` and the `.Audited(...)` filter. |
@@ -145,7 +145,7 @@ Each step names the files and what is worth checking in them.
 | 12 | Blazor: [`Services/StaffApi.cs`](../src/AthleteDay.Staff/Services/StaffApi.cs), [`Components/ServerValidator.cs`](../src/AthleteDay.Staff/Components/ServerValidator.cs) | Server-side validation errors shown on the right form field. |
 | 13 | Tests: [`ApiFactory.cs`](../tests/AthleteDay.IntegrationTests/ApiFactory.cs), [`ApiTests.cs`](../tests/AthleteDay.IntegrationTests/ApiTests.cs), [`SquadTests.cs`](../tests/AthleteDay.IntegrationTests/SquadTests.cs), [`ContractAndEventTests.cs`](../tests/AthleteDay.IntegrationTests/ContractAndEventTests.cs), [`SpecTraceabilityTests.cs`](../tests/AthleteDay.UnitTests/SpecTraceabilityTests.cs) | A real SQL Server per run, each test creates its own athletes, and the contract and traceability checks. |
 
-Then [`docs/spec/decisions.md`](spec/decisions.md) (ADR-01 to ADR-14) gives the reasons behind the main choices.
+Then [`docs/spec/decisions.md`](spec/decisions.md) (ADR-01 to ADR-15) gives the reasons behind the main choices.
 
 ### Short path (10 minutes)
 
@@ -255,7 +255,7 @@ identity (AC-01); each endpoint additionally requires one policy.
 
 | Policy | Roles | Endpoints | Audited |
 |---|---|---|---|
-| `ReadAthletes` | Coach, Physio, Nutrition, Athlete | `GET /api/athletes` | – |
+| `ReadAthletes` | Coach, Physio, Nutrition, Athlete, Admin (names and codes, to file identity documents) | `GET /api/athletes` | – |
 | `ViewDashboard` | Coach, Physio, Nutrition | `GET /api/dashboard`, `GET /api/athletes/{id}`, `…/load-trend`, `…/sessions`, `…/measurements`, `…/progress`, `…/benchmarks` | Dashboard and the per-athlete reads |
 | `LogSessions` | Coach | `POST /api/sessions` | – |
 | `SubmitWellness` | Athlete (own data only, checked in code) | `PUT /api/wellness` | – |
@@ -271,6 +271,7 @@ identity (AC-01); each endpoint additionally requires one policy.
 | `CoachingNotes` | Coach, Physio | `GET …/session-notes`, `GET …/reviews` | Yes |
 | `WriteCoaching` | Coach | Goals (`PUT`/`DELETE …/goals/{test}`), `POST /api/sessions/{id}/notes`, `POST …/reviews`, the plan (`PUT …/plan/template`, `PUT`/`DELETE …/plan/days/{date}`) | Changes |
 | `ReadPlan` | Coach, Physio, Nutrition, Athlete (own plan only, checked in code) | `GET …/plan/week`, `GET …/plan/template` | – |
+| `Documents` | Coach, Physio, Admin; each document type is checked in code (medical: physio; government ID: admin; certificate and general: coach and physio), and a type the caller may not see answers 404 | `GET`/`POST …/documents`, `GET …/documents/{id}/content`, `DELETE …/documents/{id}` | Yes, every call |
 
 **Privacy by design (NFR-02).** A role's response shape has no field for data that role must not see.
 `KitchenRowDto` cannot carry health data, and AC-20 asserts the exact JSON property list. Age and sex appear in
@@ -293,9 +294,9 @@ feature branch: **spec → failing tests → code**. The squad management featur
 
 | Level | Where | What it covers | Count |
 |---|---|---|---|
-| Unit | [`tests/AthleteDay.UnitTests`](../tests/AthleteDay.UnitTests) | Core logic, request validation, spec traceability, resource parity, progress, benchmark and plan rules | 94 |
-| Integration | [`tests/AthleteDay.IntegrationTests`](../tests/AthleteDay.IntegrationTests) | The real API (`WebApplicationFactory`) against a real SQL Server, the import pipeline, SignalR, the OpenAPI contract | 99 |
-| Angular | `web/dashboard/src/**/*.spec.ts` (Vitest) | Role-dependent screens, sorting and filtering, dialogs, the persona interceptor, the charts, the athlete space and its plan | 52 |
+| Unit | [`tests/AthleteDay.UnitTests`](../tests/AthleteDay.UnitTests) | Core logic, request validation, spec traceability, resource parity, progress, benchmark, plan and document rules | 120 |
+| Integration | [`tests/AthleteDay.IntegrationTests`](../tests/AthleteDay.IntegrationTests) | The real API (`WebApplicationFactory`) against a real SQL Server, the import pipeline, SignalR, the OpenAPI contract | 115 |
+| Angular | `web/dashboard/src/**/*.spec.ts` (Vitest) | Role-dependent screens, sorting and filtering, dialogs, the persona interceptor, the charts, the athlete space with its plan and documents | 58 |
 | Staff | [`tests/AthleteDay.Staff.Tests`](../tests/AthleteDay.Staff.Tests) (bUnit) | Blazor components with the real persona, headers handler and API client over a fake API | 10 |
 
 Two checks keep the spec honest:

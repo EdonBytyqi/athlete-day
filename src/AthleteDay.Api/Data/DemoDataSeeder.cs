@@ -4,6 +4,7 @@ using AthleteDay.Api.Infrastructure;
 using AthleteDay.Api.Reports;
 using AthleteDay.Contracts;
 using AthleteDay.Core;
+using AthleteDay.Api.Documents;
 using Microsoft.EntityFrameworkCore;
 
 namespace AthleteDay.Api.Data;
@@ -13,7 +14,7 @@ namespace AthleteDay.Api.Data;
 /// No real athletes: names are invented, codes are pseudonymous. The scenario is built so the
 /// dashboard shows a mix: one load spike, one sore athlete, one physio restriction, one missing check-in.
 /// </summary>
-public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<DemoDataSeeder> logger)
+public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, IDocumentStore documents, ILogger<DemoDataSeeder> logger)
 {
     private sealed record Profile(string Code, string Name, string Sport, int Age, Sex Sex, decimal Mass, int Kcal, decimal Carbs, string? KitchenNote);
 
@@ -35,6 +36,10 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
     public async Task ResetAsync(CancellationToken ct = default)
     {
         await db.AuditEntries.ExecuteDeleteAsync(ct);
+        // Document files first, while their names are still known; then the metadata.
+        foreach (var blobName in await db.AthleteDocuments.Select(d => d.BlobName).ToListAsync(ct))
+            await documents.DeleteAsync(blobName, ct);
+        await db.AthleteDocuments.ExecuteDeleteAsync(ct);
         await db.ProgressReviews.ExecuteDeleteAsync(ct);
         await db.PlanDayChanges.ExecuteDeleteAsync(ct);
         await db.PlanTemplateSessions.ExecuteDeleteAsync(ct);
@@ -122,6 +127,7 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
         // Notes and a review refer to saved sessions and figures, so they come last.
         await AddSeedSessionNotesAsync(athletes, today, ct);
         await AddSeedReviewAsync(athletes[0], ct);
+        await AddSeedDocumentsAsync(athletes, ct);
 
         logger.LogInformation("Seeded synthetic demo data for {Count} athletes", athletes.Count);
     }
@@ -280,6 +286,64 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
             Change(athletes[4], monday.AddDays(5), "Physio restriction: no cutting or jumping",
                 new PlanDayChangeSession { Position = 0, Type = SessionType.Endurance, DurationMinutes = 45, Rpe = 4, Note = "Bike" }),
             Change(athletes[2], monday.AddDays(9), "Travel to the meeting"));
+    }
+
+    /// <summary>
+    /// One synthetic PDF per document type, each labelled as demo data (NFR-01): a certificate and a general document
+    /// for the coach and physio, a medical report for the physio only and a passport copy for the admin only.
+    /// </summary>
+    private async Task AddSeedDocumentsAsync(List<Athlete> athletes, CancellationToken ct)
+    {
+        var seeds = new (Athlete Athlete, DocumentType Type, string Title, string FileName, string By, int DaysAgo)[]
+        {
+            (athletes[1], DocumentType.Certificate, "Anti-doping e-learning 2026", "anti-doping-certificate.pdf", "lena", 30),
+            (athletes[0], DocumentType.General, "Training camp travel plan", "camp-travel-plan.pdf", "lena", 12),
+            (athletes[4], DocumentType.Medical, "Ankle examination report", "ankle-report.pdf", "jonas", 2),
+            (athletes[2], DocumentType.GovernmentId, "Passport copy", "passport.pdf", "admin", 60),
+        };
+        foreach (var seed in seeds)
+        {
+            var bytes = SyntheticPdf(seed.Title, $"{seed.Athlete.DisplayName} ({seed.Athlete.Code})");
+            var blobName = Guid.NewGuid().ToString("N");
+            using (var content = new MemoryStream(bytes))
+                await documents.SaveAsync(blobName, content, "application/pdf", ct);
+            db.AthleteDocuments.Add(new AthleteDocument
+            {
+                AthleteId = seed.Athlete.Id, Type = seed.Type, Title = seed.Title, FileName = seed.FileName,
+                ContentType = "application/pdf", SizeBytes = bytes.Length,
+                Sha256 = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(bytes)),
+                BlobName = blobName, UploadedBy = seed.By, UploadedAt = clock.Now.AddDays(-seed.DaysAgo)
+            });
+        }
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>A one-page PDF (ASCII text only) that says on its face that it is synthetic.</summary>
+    private static byte[] SyntheticPdf(string title, string subject)
+    {
+        static string Escape(string text) => text.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
+        var text = $"BT /F1 20 Tf 72 760 Td ({Escape(title)}) Tj /F1 12 Tf 0 -30 Td ({Escape(subject)}) Tj " +
+                   "0 -24 Td (SYNTHETIC DEMO DOCUMENT - not a real person, not a real record.) Tj ET";
+        string[] objects =
+        [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+            $"<< /Length {text.Length} >>\nstream\n{text}\nendstream",
+        ];
+        var pdf = new System.Text.StringBuilder("%PDF-1.4\n");
+        var offsets = new List<int>();
+        for (var i = 0; i < objects.Length; i++)
+        {
+            offsets.Add(pdf.Length);
+            pdf.Append($"{i + 1} 0 obj\n{objects[i]}\nendobj\n");
+        }
+        var xref = pdf.Length;
+        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (var offset in offsets) pdf.Append($"{offset:D10} 00000 n \n");
+        pdf.Append($"trailer\n<< /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        return System.Text.Encoding.ASCII.GetBytes(pdf.ToString());
     }
 
     /// <summary>A few goals: one open, one reached and one whose date has passed, so every status shows.</summary>

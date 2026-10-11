@@ -33,6 +33,7 @@ public sealed class StorageOptions
     public string? ConnectionString { get; set; }
     public string Container { get; set; } = "device-imports";
     public string Queue { get; set; } = "device-imports";
+    public string DocumentContainer { get; set; } = "athlete-documents";
 }
 
 // ---- Azure Blob Storage + Storage Queue (Azurite locally) ----------------------------------------------

@@ -4,7 +4,9 @@ import { TranslationKey } from '../i18n/catalogue';
 import { I18n } from '../i18n/i18n.service';
 import {
   AthleteDetails,
+  AthleteDocument,
   AthleteSummary,
+  DocumentType,
   Benchmark,
   Goal,
   Progress,
@@ -67,6 +69,29 @@ export class ApiService {
 
   addReview(athleteId: number, review: ReviewRequest) {
     return this.http.post<ProgressReview>(`/api/athletes/${athleteId}/reviews`, review);
+  }
+
+  // ---- athlete documents (spec v1.9) ----
+
+  documents(athleteId: number) {
+    return this.http.get<AthleteDocument[]>(`/api/athletes/${athleteId}/documents`);
+  }
+
+  uploadDocument(athleteId: number, file: File, type: DocumentType, title: string) {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    form.append('type', type);
+    form.append('title', title);
+    return this.http.post<AthleteDocument>(`/api/athletes/${athleteId}/documents`, form);
+  }
+
+  /** Through the API (never a storage link), so the persona headers, the type check and the audit apply (ADR-15). */
+  documentContent(athleteId: number, documentId: number) {
+    return this.http.get(`/api/athletes/${athleteId}/documents/${documentId}/content`, { responseType: 'blob' });
+  }
+
+  deleteDocument(athleteId: number, documentId: number) {
+    return this.http.delete<void>(`/api/athletes/${athleteId}/documents/${documentId}`);
   }
 
   // ---- training plans (spec v1.8) ----

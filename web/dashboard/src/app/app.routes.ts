@@ -14,6 +14,7 @@ export const routes: Routes = [
       { path: 'performance', loadComponent: () => import('./pages/athlete-space/performance.section').then((m) => m.PerformanceSection) },
       { path: 'sessions', loadComponent: () => import('./pages/athlete-space/sessions.section').then((m) => m.SessionsSection) },
       { path: 'reviews', loadComponent: () => import('./pages/athlete-space/reviews.section').then((m) => m.ReviewsSection) },
+      { path: 'documents', loadComponent: () => import('./pages/athlete-space/documents.section').then((m) => m.DocumentsSection) },
     ],
   },
   { path: 'kitchen', title: 'Kitchen · Athlete Day', loadComponent: () => import('./pages/kitchen.page').then((m) => m.KitchenPage) },

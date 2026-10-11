@@ -219,3 +219,8 @@ public sealed record PlanDayDto(
     int LoggedSessions);
 
 public sealed record WeekPlanDto(int AthleteId, DateOnly WeekStart, IReadOnlyList<PlanDayDto> Days, int PlannedLoad, int LoggedLoad);
+
+/// <summary>An athlete document's metadata (AC-85); the file itself is downloaded separately.</summary>
+public sealed record DocumentDto(
+    int Id, int AthleteId, DocumentType Type, string Title, string FileName, string ContentType, long SizeBytes,
+    string Sha256, string UploadedBy, DateTimeOffset UploadedAt) : IAthleteScoped;
