@@ -34,6 +34,7 @@ describe('AthleteSpacePage', () => {
                 { path: 'performance', component: SectionStub },
                 { path: 'sessions', component: SectionStub },
                 { path: 'reviews', component: SectionStub },
+                { path: 'documents', component: SectionStub },
               ],
             },
           ],
@@ -68,6 +69,7 @@ describe('AthleteSpacePage', () => {
       'Performance',
       'Sessions and notes',
       'Reviews',
+      'Documents',
     ]);
     expect([...el.querySelectorAll('select.athlete-select optgroup')].map((g) => g.getAttribute('label'))).toEqual([
       'Alpine skiing',

@@ -87,4 +87,30 @@ describe('SettingsPage', () => {
     const retire = controller.expectOne((r) => r.method === 'PUT' && r.url === '/api/sports/1');
     expect(retire.request.body).toEqual({ name: 'Rowing (sweep)', retired: true });
   });
+
+  it('[AC-92] the admin keeps identity documents per athlete', async () => {
+    const { el, settle } = await render();
+    controller.expectOne('/api/athletes').flush([
+      { id: 1, code: 'ATH-001', displayName: 'Lea', sport: 'Sprint' },
+      { id: 2, code: 'ATH-002', displayName: 'Elias', sport: 'Ice hockey' },
+    ]);
+    await settle();
+
+    const panel = el.querySelector<HTMLElement>('.identity-documents')!;
+    const select = panel.querySelector<HTMLSelectElement>('select.document-athlete')!;
+    select.value = '2';
+    select.dispatchEvent(new Event('change'));
+    await settle();
+    controller.expectOne('/api/athletes/2/documents').flush([
+      {
+        id: 4, athleteId: 2, type: 'GovernmentId', title: 'Passport', fileName: 'passport.png', contentType: 'image/png',
+        sizeBytes: 120_000, sha256: 'cd'.repeat(32), uploadedBy: 'admin', uploadedAt: '2026-10-11T08:30:00+00:00',
+      },
+    ]);
+    await settle();
+
+    expect(panel.querySelectorAll('.document-row')).toHaveLength(1);
+    expect(panel.querySelector('.document-row')?.textContent).toContain('Passport');
+    expect([...panel.querySelectorAll<HTMLOptionElement>('select[name="type"] option')].map((o) => o.value)).toEqual(['GovernmentId']);
+  });
 });
