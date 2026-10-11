@@ -14,6 +14,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<ProgressReview> ProgressReviews => Set<ProgressReview>();
     public DbSet<PlanTemplateSession> PlanTemplateSessions => Set<PlanTemplateSession>();
     public DbSet<PlanDayChange> PlanDayChanges => Set<PlanDayChange>();
+    public DbSet<AthleteDocument> AthleteDocuments => Set<AthleteDocument>();
     public DbSet<WellnessCheck> WellnessChecks => Set<WellnessCheck>();
     public DbSet<NutritionTarget> NutritionTargets => Set<NutritionTarget>();
     public DbSet<PhysioNote> PhysioNotes => Set<PhysioNote>();
@@ -97,6 +98,20 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             e.HasIndex(c => new { c.AthleteId, c.Date }).IsUnique();
             // The sessions belong to the change and live and die with it.
             e.OwnsMany(c => c.Sessions, s => s.ToTable("PlanDayChangeSessions"));
+        });
+
+        b.Entity<AthleteDocument>(e =>
+        {
+            e.HasOne<Athlete>().WithMany().HasForeignKey(d => d.AthleteId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(d => new { d.AthleteId, d.UploadedAt });
+            e.HasIndex(d => d.BlobName).IsUnique();
+            e.Property(d => d.Type).HasConversion<string>().HasMaxLength(20);
+            e.Property(d => d.Title).HasMaxLength(100);
+            e.Property(d => d.FileName).HasMaxLength(255);
+            e.Property(d => d.ContentType).HasMaxLength(50);
+            e.Property(d => d.Sha256).HasMaxLength(64).IsFixedLength();
+            e.Property(d => d.BlobName).HasMaxLength(64);
+            e.Property(d => d.UploadedBy).HasMaxLength(100);
         });
 
         b.Entity<WellnessCheck>(e =>

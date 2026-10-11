@@ -507,6 +507,24 @@ h3.sub { font-size: 0.95rem; margin: 1.25rem 0 0.4rem; }
 .snapshot { margin-top: 0.5rem; padding: 0.75rem; border-radius: var(--radius); background: var(--surface-tint); }
 .snapshot .figures { grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); }
 
+.upload-document { display: grid; gap: 0.6rem; }
+.upload-document h3 { margin: 0; }
+.upload-document p { margin: 0; }
+.upload-fields { display: grid; gap: 0.6rem; grid-template-columns: minmax(0, 12rem) minmax(0, 1fr) minmax(0, 1fr); align-items: end; }
+.upload-fields label, .document-athlete-label { display: grid; gap: 0.25rem; font-size: 0.85rem; font-weight: 600; min-width: 0; }
+.upload-fields input, .upload-fields select, .document-athlete {
+  font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem 0.6rem; min-width: 0; max-width: 100%;
+}
+.document-athlete-label { max-width: 24rem; margin-bottom: 0.75rem; }
+.document-list { list-style: none; margin: 0.75rem 0 0; padding: 0; display: grid; gap: 0.5rem; }
+.document-row { margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.document-main { display: grid; gap: 0.2rem; min-width: 0; justify-items: start; }
+.document-meta { font-size: 0.85rem; overflow-wrap: anywhere; }
+.document-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.confirm-text { font-weight: 600; color: var(--danger); }
+.tag[data-type='Medical'] { background: var(--danger-soft); color: var(--danger); }
+.tag[data-type='GovernmentId'] { background: var(--warn-soft); color: var(--warn); }
+
 .plan-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
 .plan-head h2 { margin-top: 0; }
 .plan-toolbar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0 0.75rem; }
@@ -545,6 +563,8 @@ h3.sub { font-size: 0.95rem; margin: 1.25rem 0 0.4rem; }
   .weeks, .review-weeks { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .note-form { flex-direction: column; align-items: stretch; }
+  .upload-fields { grid-template-columns: minmax(0, 1fr); }
+  .document-actions { width: 100%; }
 }
 .goal-note { display: block; font-weight: 400; font-size: 0.85rem; }
 .template-days { display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); align-items: start; }

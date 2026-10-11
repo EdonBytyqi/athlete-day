@@ -307,3 +307,20 @@ export interface PlannedSessionRequest {
   rpe: number;
   note: string | null;
 }
+
+// ---- Athlete documents (spec v1.9) ----
+
+export type DocumentType = 'Medical' | 'GovernmentId' | 'Certificate' | 'General';
+
+export interface AthleteDocument {
+  id: number;
+  athleteId: number;
+  type: DocumentType;
+  title: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  sha256: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}

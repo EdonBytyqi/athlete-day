@@ -1,13 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { ApiService, describeError } from '../api/api.service';
-import { Sport } from '../api/models';
+import { AthleteSummary, Sport } from '../api/models';
 import { PersonaService } from '../api/persona.service';
 import { I18n } from '../i18n/i18n.service';
+import { DocumentsPanel } from '../shared/documents-panel';
 import { ToastService } from '../shared/toast.service';
 
-/** Admin settings: the managed sports list (AC-63 – AC-65, ADR-10). */
+/** Admin settings: the managed sports list (AC-63 – AC-65, ADR-10) and identity documents (AC-92, ADR-15). */
 @Component({
   selector: 'app-settings-page',
+  imports: [DocumentsPanel],
   template: `
     <header class="page-head">
       <div>
@@ -59,6 +61,23 @@ import { ToastService } from '../shared/toast.service';
         }
       </ul>
     </section>
+
+    <section class="panel identity-documents">
+      <h2>{{ t('settings.identityDocuments') }}</h2>
+      <p class="muted">{{ t('settings.identityLead') }}</p>
+      <label class="document-athlete-label">
+        {{ t('space.selectLabel') }}
+        <select class="document-athlete" (change)="documentAthlete.set(+$any($event.target).value || null)">
+          <option value="" [selected]="documentAthlete() === null">{{ t('space.choose') }}</option>
+          @for (a of athletes(); track a.id) {
+            <option [value]="'' + a.id" [selected]="a.id === documentAthlete()">{{ a.displayName }} ({{ a.code }})</option>
+          }
+        </select>
+      </label>
+      @if (documentAthlete(); as athleteId) {
+        <app-documents-panel [athleteId]="athleteId" />
+      }
+    </section>
   `,
 })
 export class SettingsPage {
@@ -68,6 +87,8 @@ export class SettingsPage {
   protected readonly t = inject(I18n).t;
 
   protected readonly sports = signal<Sport[]>([]);
+  protected readonly athletes = signal<AthleteSummary[]>([]);
+  protected readonly documentAthlete = signal<number | null>(null);
   protected readonly newName = signal('');
   protected readonly error = signal<string | null>(null);
   /** Unsaved renames, by sport id. */
@@ -75,6 +96,10 @@ export class SettingsPage {
 
   constructor() {
     this.load();
+    this.api.athletes().subscribe({
+      next: (athletes) => this.athletes.set(athletes),
+      error: (e) => this.error.set(this.describe(e)),
+    });
   }
 
   protected draft(sport: Sport): string {

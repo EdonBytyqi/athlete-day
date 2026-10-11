@@ -17,4 +17,7 @@
   <data name="UnknownTest" xml:space="preserve"><value>Unbekannter Test '{0}'.</value></data>
   <data name="GoalOutOfRange" xml:space="preserve"><value>Das Ziel muss für {3} zwischen {0} und {1} {2} liegen.</value></data>
   <data name="ProgressWeeksRange" xml:space="preserve"><value>weeks muss zwischen 4 und 52 liegen.</value></data>
+  <data name="DocumentType" xml:space="preserve"><value>Wählen Sie eine Dokumentart: Medical, GovernmentId, Certificate oder General.</value></data>
+  <data name="DocumentTitle" xml:space="preserve"><value>Geben Sie einen Titel mit 1 bis 100 Zeichen ein.</value></data>
+  <data name="DocumentFile" xml:space="preserve"><value>Wählen Sie eine PDF-, JPEG- oder PNG-Datei bis 10 MB.</value></data>
 </root>

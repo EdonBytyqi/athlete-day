@@ -25,9 +25,11 @@ public static class Policies
     public const string CoachingNotes = nameof(CoachingNotes);
     public const string WriteCoaching = nameof(WriteCoaching);
     public const string ReadPlan = nameof(ReadPlan);
+    public const string Documents = nameof(Documents);
 
     public static AuthorizationBuilder AddAthleteDayPolicies(this AuthorizationBuilder builder) => builder
-        .AddPolicy(ReadAthletes, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Nutrition, Roles.Athlete))
+        // The admin needs names and codes to file identity documents (AC-92).
+        .AddPolicy(ReadAthletes, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Nutrition, Roles.Athlete, Roles.Admin))
         .AddPolicy(LogSessions, p => p.RequireRole(Roles.Coach))
         .AddPolicy(ViewDashboard, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Nutrition))
         .AddPolicy(SubmitWellness, p => p.RequireRole(Roles.Athlete))
@@ -44,5 +46,7 @@ public static class Policies
         .AddPolicy(CoachingNotes, p => p.RequireRole(Roles.Coach, Roles.Physio))
         .AddPolicy(WriteCoaching, p => p.RequireRole(Roles.Coach))
         // Training plans: the athlete reads only their own (checked in the endpoint, like the morning check).
-        .AddPolicy(ReadPlan, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Nutrition, Roles.Athlete));
+        .AddPolicy(ReadPlan, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Nutrition, Roles.Athlete))
+        // Documents (ADR-15): only roles that see at least one document type; the type is checked per document.
+        .AddPolicy(Documents, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Admin));
 }

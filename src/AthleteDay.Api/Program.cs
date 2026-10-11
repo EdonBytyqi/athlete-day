@@ -1,6 +1,7 @@
 using AthleteDay.Api.Auth;
 using AthleteDay.Api.Data;
 using AthleteDay.Api.Endpoints;
+using AthleteDay.Api.Documents;
 using AthleteDay.Api.Imports;
 using AthleteDay.Api.Infrastructure;
 using AthleteDay.Api.Realtime;
@@ -45,6 +46,11 @@ else
         new QueueClient(storage.ConnectionString, storage.Queue)));
 }
 builder.Services.AddScoped<ImportProcessor>();
+
+// ---- Athlete documents: files in Blob Storage, metadata in SQL (ADR-15) ---------------------------------
+builder.Services.AddSingleton<IDocumentStore>(string.IsNullOrWhiteSpace(storage.ConnectionString)
+    ? new InMemoryDocumentStore()
+    : new BlobDocumentStore(new BlobContainerClient(storage.ConnectionString, storage.DocumentContainer)));
 if (builder.Configuration.GetValue("Import:RunWorker", true))
 {
     builder.Services.AddHostedService<ImportWorker>();
@@ -91,7 +97,8 @@ app.MapGroup("/api")
     .MapImportEndpoints()
     .MapSportEndpoints()
     .MapAthleteSpaceEndpoints()
-    .MapPlanEndpoints();
+    .MapPlanEndpoints()
+    .MapDocumentEndpoints();
 
 await PrepareDatabaseAsync(app);
 

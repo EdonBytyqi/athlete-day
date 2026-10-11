@@ -1514,6 +1514,196 @@
           }
         }
       }
+    },
+    "/api/athletes/{athleteId}/documents": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "The athlete\u0027s documents of the types the caller may see, newest first",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Upload a PDF, JPEG or PNG (up to 10 MB) of a type the caller may see",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "$ref": "#/components/schemas/IFormFile"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/athletes/{athleteId}/documents/{documentId}/content": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Download the file as an attachment",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/athletes/{athleteId}/documents/{documentId}": {
+      "delete": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Delete the document and its file",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1999,6 +2189,77 @@
             "$ref": "#/components/schemas/DashboardRangeDto"
           }
         }
+      },
+      "DocumentDto": {
+        "required": [
+          "id",
+          "athleteId",
+          "type",
+          "title",
+          "fileName",
+          "contentType",
+          "sizeBytes",
+          "sha256",
+          "uploadedBy",
+          "uploadedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "athleteId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "uploadedBy": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DocumentType": {
+        "enum": [
+          "Medical",
+          "GovernmentId",
+          "Certificate",
+          "General"
+        ]
       },
       "GoalDto": {
         "required": [
@@ -3629,6 +3890,9 @@
     },
     {
       "name": "Training plan"
+    },
+    {
+      "name": "Documents"
     }
   ]
 }
