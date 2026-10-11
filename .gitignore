@@ -12,3 +12,6 @@ __azurite_db_*.json
 __blobstorage__/
 __queuestorage__/
 .azurite/
+
+# Personal notes, never committed
+docs/INTERVIEW-WALKTHROUGH.md

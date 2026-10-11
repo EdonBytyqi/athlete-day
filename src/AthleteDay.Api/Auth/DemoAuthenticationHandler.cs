@@ -8,7 +8,7 @@ namespace AthleteDay.Api.Auth;
 
 /// <summary>
 /// Demo-only authentication: the persona switcher in the UI sends a user name and a role as headers.
-/// It lets the interview demo switch roles in one click. In production this handler is replaced by
+/// It lets the demo switch roles in one click. In production this handler is replaced by
 /// Entra ID (JWT bearer); the policies and endpoints stay exactly the same.
 /// </summary>
 public sealed class DemoAuthenticationHandler(
