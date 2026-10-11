@@ -61,6 +61,7 @@ const SECTIONS = ['plan', 'performance', 'sessions', 'reviews', 'documents'] as 
             </select>
           </label>
         </div>
+        <a class="button secondary compare" routerLink="/versus" [queryParams]="{ a: id() }">{{ t('versus.compare') }}</a>
         @if (isCoach()) {
           <a class="button" [href]="logSessionUrl()" target="_blank" rel="noopener">{{ t('athlete.logSession') }}</a>
         }

@@ -88,6 +88,47 @@ public sealed class AthleteFigures(AppDbContext db, AppClock clock)
         return (from, today, snapshot);
     }
 
+    /// <summary>One athlete's side of a comparison (AC-93): sessions from 27 days before the end, for the ratio.</summary>
+    public async Task<VersusData> VersusDataAsync(int athleteId, DateOnly from, DateOnly to, CancellationToken ct)
+    {
+        var loadFrom = new[] { from, to.AddDays(-(LoadCalculator.ChronicDays - 1)) }.Min();
+        var loads = await LoadsAsync(athleteId, loadFrom, to, ct);
+        var tests = await db.DeviceMeasurements.AsNoTracking()
+            .Where(m => m.AthleteId == athleteId && m.Date >= from && m.Date <= to)
+            .Select(m => new DeviceResult(m.TestType, m.Date, m.Value))
+            .ToListAsync(ct);
+        return new VersusData(loads, await WellnessAsync(athleteId, from, to, ct), tests);
+    }
+
+    /// <summary>The athlete's current insights (AC-97, AC-98).</summary>
+    public async Task<IReadOnlyList<InsightDto>> InsightsAsync(int athleteId, CancellationToken ct)
+    {
+        var today = clock.Today;
+        var from = today.AddDays(-(LoadCalculator.ChronicDays - 1));
+        var tests = await db.DeviceMeasurements.AsNoTracking()
+            .Where(m => m.AthleteId == athleteId)
+            .Select(m => new DeviceResult(m.TestType, m.Date, m.Value))
+            .ToListAsync(ct);
+        var goals = await db.Goals.AsNoTracking().Where(g => g.AthleteId == athleteId)
+            .Select(g => new GoalDto(g.TestType, g.Target, g.TargetDate, g.Note, g.SetBy))
+            .ToListAsync(ct);
+        var lastWeek = await Endpoints.PlanEndpoints.WeekAsync(db, athleteId, ProgressCalculator.WeekStart(today).AddDays(-7), ct);
+
+        return InsightRules.Evaluate(new InsightInput(
+            today,
+            await LoadsAsync(athleteId, from, today, ct),
+            await WellnessAsync(athleteId, from, today, ct),
+            tests,
+            goals,
+            new PlanWeekLoad(lastWeek.PlannedLoad, lastWeek.LoggedLoad)));
+    }
+
+    private Task<List<DailyLoad>> LoadsAsync(int athleteId, DateOnly from, DateOnly to, CancellationToken ct) =>
+        db.TrainingSessions.AsNoTracking()
+            .Where(s => s.AthleteId == athleteId && s.Date >= from && s.Date <= to)
+            .Select(s => new DailyLoad(s.Date, s.Rpe * s.DurationMinutes))
+            .ToListAsync(ct);
+
     private Task<List<WellnessSummaryDto>> WellnessAsync(int athleteId, DateOnly from, DateOnly to, CancellationToken ct) =>
         db.WellnessChecks.AsNoTracking()
             .Where(w => w.AthleteId == athleteId && w.Date >= from && w.Date <= to)

@@ -98,7 +98,8 @@ app.MapGroup("/api")
     .MapSportEndpoints()
     .MapAthleteSpaceEndpoints()
     .MapPlanEndpoints()
-    .MapDocumentEndpoints();
+    .MapDocumentEndpoints()
+    .MapVersusEndpoints();
 
 await PrepareDatabaseAsync(app);
 

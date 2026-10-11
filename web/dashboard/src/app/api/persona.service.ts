@@ -17,9 +17,9 @@ export const PERSONAS: readonly Persona[] = [
 
 /** Which screens each role may open. The API enforces the same rules; this only keeps the UI tidy. */
 export const SCREENS_BY_ROLE: Record<Role, readonly string[]> = {
-  Coach: ['dashboard', 'imports'],
-  Physio: ['dashboard', 'imports'],
-  Nutrition: ['dashboard', 'kitchen'],
+  Coach: ['dashboard', 'versus', 'imports'],
+  Physio: ['dashboard', 'versus', 'imports'],
+  Nutrition: ['dashboard', 'versus', 'kitchen'],
   Kitchen: ['kitchen'],
   Admin: ['audit', 'settings'],
   Athlete: [],

@@ -82,3 +82,35 @@ public enum DocumentType
     Certificate,
     General
 }
+
+/// <summary>Which of two athletes is better on one metric (Versus ranking, spec section 4).</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<VersusWinner>))]
+public enum VersusWinner
+{
+    A,
+    B,
+    Even,
+    NotRanked
+}
+
+/// <summary>The kinds of insight (spec section 4, ADR-16).</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<InsightKind>))]
+public enum InsightKind
+{
+    LoadSpike,
+    SleepFalling,
+    SorenessRising,
+    GoalAtRisk,
+    PersonalBest,
+    LoadDrop,
+    MissingCheckIns,
+    PlanOffTrack
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<InsightTone>))]
+public enum InsightTone
+{
+    Attention,
+    Positive,
+    Info
+}

@@ -20,4 +20,5 @@
   <data name="DocumentType" xml:space="preserve"><value>Wählen Sie eine Dokumentart: Medical, GovernmentId, Certificate oder General.</value></data>
   <data name="DocumentTitle" xml:space="preserve"><value>Geben Sie einen Titel mit 1 bis 100 Zeichen ein.</value></data>
   <data name="DocumentFile" xml:space="preserve"><value>Wählen Sie eine PDF-, JPEG- oder PNG-Datei bis 10 MB.</value></data>
+  <data name="VersusSameAthlete" xml:space="preserve"><value>Wählen Sie zwei verschiedene Personen.</value></data>
 </root>

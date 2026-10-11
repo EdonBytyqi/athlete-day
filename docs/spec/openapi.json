@@ -766,6 +766,121 @@
         }
       }
     },
+    "/api/versus": {
+      "get": {
+        "tags": [
+          "Versus"
+        ],
+        "summary": "Two athletes side by side over a period (default the last 28 days), with the better one per metric",
+        "parameters": [
+          {
+            "name": "a",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "b",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersusDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/athletes/{athleteId}/insights": {
+      "get": {
+        "tags": [
+          "Athlete space"
+        ],
+        "summary": "Rule-based insights with the figures behind them, attention first",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InsightDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/api/imports": {
       "post": {
         "tags": [
@@ -2503,6 +2618,59 @@
           "Failed"
         ]
       },
+      "InsightDto": {
+        "required": [
+          "kind",
+          "tone",
+          "testType",
+          "figures"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/InsightKind"
+          },
+          "tone": {
+            "$ref": "#/components/schemas/InsightTone"
+          },
+          "testType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "figures": {
+            "type": "object",
+            "additionalProperties": {
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+              "type": [
+                "number",
+                "string"
+              ],
+              "format": "double"
+            }
+          }
+        }
+      },
+      "InsightKind": {
+        "enum": [
+          "LoadSpike",
+          "SleepFalling",
+          "SorenessRising",
+          "GoalAtRisk",
+          "PersonalBest",
+          "LoadDrop",
+          "MissingCheckIns",
+          "PlanOffTrack"
+        ]
+      },
+      "InsightTone": {
+        "enum": [
+          "Attention",
+          "Positive",
+          "Info"
+        ]
+      },
       "KitchenRowDto": {
         "required": [
           "athleteCode",
@@ -3612,6 +3780,116 @@
           }
         }
       },
+      "VersusAthleteDto": {
+        "required": [
+          "id",
+          "code",
+          "displayName",
+          "sport"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "code": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "sport": {
+            "type": "string"
+          }
+        }
+      },
+      "VersusDto": {
+        "required": [
+          "from",
+          "to",
+          "a",
+          "b",
+          "metrics"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "a": {
+            "$ref": "#/components/schemas/VersusAthleteDto"
+          },
+          "b": {
+            "$ref": "#/components/schemas/VersusAthleteDto"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VersusMetricDto"
+            }
+          }
+        }
+      },
+      "VersusMetricDto": {
+        "required": [
+          "key",
+          "unit",
+          "a",
+          "b",
+          "winner"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "unit": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "a": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "b": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "winner": {
+            "$ref": "#/components/schemas/VersusWinner"
+          }
+        }
+      },
+      "VersusWinner": {
+        "enum": [
+          "A",
+          "B",
+          "Even",
+          "NotRanked"
+        ]
+      },
       "WeeklyProgressDto": {
         "required": [
           "weekStart",
@@ -3881,6 +4159,9 @@
     },
     {
       "name": "Athlete space"
+    },
+    {
+      "name": "Versus"
     },
     {
       "name": "Device import"

@@ -1,9 +1,17 @@
+using System.Text.Json.Serialization;
+
 namespace AthleteDay.Contracts;
 
 /// <summary>A response about one athlete. The audit log reads the id from it when the route has none (e.g. a create).</summary>
 public interface IAthleteScoped
 {
     int AthleteId { get; }
+}
+
+/// <summary>A response about several athletes (e.g. a comparison); the audit log writes one entry per athlete.</summary>
+public interface IAthletesScoped
+{
+    IReadOnlyList<int> AthleteIds { get; }
 }
 
 public sealed record AthleteDto(int Id, string Code, string DisplayName, string Sport);
@@ -224,3 +232,20 @@ public sealed record WeekPlanDto(int AthleteId, DateOnly WeekStart, IReadOnlyLis
 public sealed record DocumentDto(
     int Id, int AthleteId, DocumentType Type, string Title, string FileName, string ContentType, long SizeBytes,
     string Sha256, string UploadedBy, DateTimeOffset UploadedAt) : IAthleteScoped;
+
+// ---- Versus mode and insights (spec v1.10) ----
+
+public sealed record VersusAthleteDto(int Id, string Code, string DisplayName, string Sport);
+
+/// <summary>One metric of a comparison. Keys: totalLoad, sessions, averageLoad, ratio, sleep, soreness, mood, checkIns, or a device test type.</summary>
+public sealed record VersusMetricDto(string Key, string? Unit, decimal? A, decimal? B, VersusWinner Winner);
+
+public sealed record VersusDto(DateOnly From, DateOnly To, VersusAthleteDto A, VersusAthleteDto B, IReadOnlyList<VersusMetricDto> Metrics)
+    : IAthletesScoped
+{
+    [JsonIgnore]
+    public IReadOnlyList<int> AthleteIds => [A.Id, B.Id];
+}
+
+/// <summary>A finding with the figures that triggered it; the client words it (ADR-16).</summary>
+public sealed record InsightDto(InsightKind Kind, InsightTone Tone, string? TestType, IReadOnlyDictionary<string, decimal> Figures);

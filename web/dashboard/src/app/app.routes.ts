@@ -17,6 +17,7 @@ export const routes: Routes = [
       { path: 'documents', loadComponent: () => import('./pages/athlete-space/documents.section').then((m) => m.DocumentsSection) },
     ],
   },
+  { path: 'versus', title: 'Versus · Athlete Day', loadComponent: () => import('./pages/versus.page').then((m) => m.VersusPage) },
   { path: 'kitchen', title: 'Kitchen · Athlete Day', loadComponent: () => import('./pages/kitchen.page').then((m) => m.KitchenPage) },
   { path: 'imports', title: 'Device import · Athlete Day', loadComponent: () => import('./pages/imports.page').then((m) => m.ImportsPage) },
   { path: 'settings', title: 'Settings · Athlete Day', loadComponent: () => import('./pages/settings.page').then((m) => m.SettingsPage) },
