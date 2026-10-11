@@ -97,4 +97,20 @@
   <data name="ApiAnswered" xml:space="preserve"><value>Die API antwortete mit {0} {1}.</value></data>
   <data name="NotFoundTitle" xml:space="preserve"><value>Nicht gefunden</value></data>
   <data name="NotFoundText" xml:space="preserve"><value>Diese Seite gibt es leider nicht.</value></data>
+  <data name="NavMyWeek" xml:space="preserve"><value>Meine Woche</value></data>
+  <data name="MyWeekTitle" xml:space="preserve"><value>Meine Trainingswoche</value></data>
+  <data name="MyWeekLead" xml:space="preserve"><value>Dein Plan von Montag bis Sonntag. Vom Coach geänderte Tage sind markiert.</value></data>
+  <data name="WeekOf" xml:space="preserve"><value>Woche ab {0}</value></data>
+  <data name="ChangedDay" xml:space="preserve"><value>Geändert: {0}</value></data>
+  <data name="ChangedNoReason" xml:space="preserve"><value>Für diesen Tag geändert</value></data>
+  <data name="RestDay" xml:space="preserve"><value>Ruhetag</value></data>
+  <data name="PlannedLoad" xml:space="preserve"><value>Geplante Belastung: {0} AU</value></data>
+  <data name="PlannedSession" xml:space="preserve"><value>{0} · {1} min · RPE {2}</value></data>
+  <data name="Day_1" xml:space="preserve"><value>Montag</value></data>
+  <data name="Day_2" xml:space="preserve"><value>Dienstag</value></data>
+  <data name="Day_3" xml:space="preserve"><value>Mittwoch</value></data>
+  <data name="Day_4" xml:space="preserve"><value>Donnerstag</value></data>
+  <data name="Day_5" xml:space="preserve"><value>Freitag</value></data>
+  <data name="Day_6" xml:space="preserve"><value>Samstag</value></data>
+  <data name="Day_7" xml:space="preserve"><value>Sonntag</value></data>
 </root>

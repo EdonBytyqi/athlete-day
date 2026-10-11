@@ -19,8 +19,11 @@ import {
   LoadTrend,
   Measurement,
   PhysioNote,
+  PlannedSessionRequest,
+  PlanTemplate,
   Sport,
   TrainingSession,
+  WeekPlan,
   WellnessDay,
 } from './models';
 
@@ -64,6 +67,28 @@ export class ApiService {
 
   addReview(athleteId: number, review: ReviewRequest) {
     return this.http.post<ProgressReview>(`/api/athletes/${athleteId}/reviews`, review);
+  }
+
+  // ---- training plans (spec v1.8) ----
+
+  planWeek(athleteId: number, start: string | null) {
+    return this.http.get<WeekPlan>(`/api/athletes/${athleteId}/plan/week`, start ? { params: { start } } : {});
+  }
+
+  planTemplate(athleteId: number) {
+    return this.http.get<PlanTemplate>(`/api/athletes/${athleteId}/plan/template`);
+  }
+
+  setPlanTemplate(athleteId: number, days: { dayOfWeek: number; sessions: PlannedSessionRequest[] }[]) {
+    return this.http.put<PlanTemplate>(`/api/athletes/${athleteId}/plan/template`, { days });
+  }
+
+  changePlanDay(athleteId: number, date: string, change: { reason: string | null; sessions: PlannedSessionRequest[] }) {
+    return this.http.put<void>(`/api/athletes/${athleteId}/plan/days/${date}`, change);
+  }
+
+  resetPlanDay(athleteId: number, date: string) {
+    return this.http.delete<void>(`/api/athletes/${athleteId}/plan/days/${date}`);
   }
 
   athlete(id: number) {

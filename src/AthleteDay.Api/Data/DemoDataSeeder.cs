@@ -3,6 +3,7 @@ using AthleteDay.Api.Domain;
 using AthleteDay.Api.Infrastructure;
 using AthleteDay.Api.Reports;
 using AthleteDay.Contracts;
+using AthleteDay.Core;
 using Microsoft.EntityFrameworkCore;
 
 namespace AthleteDay.Api.Data;
@@ -35,6 +36,8 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
     {
         await db.AuditEntries.ExecuteDeleteAsync(ct);
         await db.ProgressReviews.ExecuteDeleteAsync(ct);
+        await db.PlanDayChanges.ExecuteDeleteAsync(ct);
+        await db.PlanTemplateSessions.ExecuteDeleteAsync(ct);
         await db.Goals.ExecuteDeleteAsync(ct);
         await db.SessionNotes.ExecuteDeleteAsync(ct);
         await db.ImportRowErrors.ExecuteDeleteAsync(ct);
@@ -112,6 +115,7 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
 
         AddSeedMeasurements(athletes, today);
         AddSeedGoals(athletes, today);
+        AddSeedPlans(athletes, today);
 
         await db.SaveChangesAsync(ct);
 
@@ -230,6 +234,52 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
 
         job.TotalRows = job.ImportedRows = rows;
         db.ImportJobs.Add(job);
+    }
+
+    /// <summary>
+    /// A standard week for everyone, shaped by the sport, and three dated changes with a reason (ADR-14):
+    /// a lighter day after the camp, a day adapted to a physio restriction, and a cancelled day next week.
+    /// </summary>
+    private void AddSeedPlans(List<Athlete> athletes, DateOnly today)
+    {
+        foreach (var (athlete, index) in athletes.Select((a, i) => (a, i)))
+        {
+            var sport = Profiles[index].Sport;
+            var main = sport switch
+            {
+                "Ice hockey" => SessionType.OnIce,
+                "Sprint" or "Football" => SessionType.Speed,
+                "Alpine skiing" => SessionType.Technique,
+                _ => SessionType.Endurance
+            };
+            var week = new (int Day, SessionType Type, int Minutes, int Rpe, string? Note)[]
+            {
+                (1, SessionType.Strength, 60, 6, null),
+                (2, main, 90, 7, null),
+                (3, SessionType.Recovery, 30, 2, "Mobility and easy bike"),
+                (4, SessionType.Technique, 75, 5, null),
+                (5, SessionType.Strength, 60, 6, null),
+                (5, main, 30, 7, "Short and sharp"),
+                (6, main, 90, 8, sport is "Ice hockey" or "Football" ? "Match or match simulation" : "Race simulation"),
+            };
+            db.PlanTemplateSessions.AddRange(week.Select((w, position) => new PlanTemplateSession
+            {
+                AthleteId = athlete.Id, DayOfWeek = w.Day, Position = position, Type = w.Type,
+                DurationMinutes = w.Minutes, Rpe = w.Rpe, Note = w.Note
+            }));
+        }
+
+        var monday = ProgressCalculator.WeekStart(today);
+        PlanDayChange Change(Athlete a, DateOnly date, string reason, params PlanDayChangeSession[] sessions) => new()
+        {
+            AthleteId = a.Id, Date = date, Reason = reason, Sessions = [.. sessions], ChangedBy = "lena", ChangedAt = clock.Now
+        };
+        db.PlanDayChanges.AddRange(
+            Change(athletes[1], monday.AddDays(3), "Lighter after the camp",
+                new PlanDayChangeSession { Position = 0, Type = SessionType.Recovery, DurationMinutes = 40, Rpe = 3 }),
+            Change(athletes[4], monday.AddDays(5), "Physio restriction: no cutting or jumping",
+                new PlanDayChangeSession { Position = 0, Type = SessionType.Endurance, DurationMinutes = 45, Rpe = 4, Note = "Bike" }),
+            Change(athletes[2], monday.AddDays(9), "Travel to the meeting"));
     }
 
     /// <summary>A few goals: one open, one reached and one whose date has passed, so every status shows.</summary>

@@ -23,12 +23,25 @@ public sealed class FakeApi : HttpMessageHandler
 
     public List<SentRequest> Requests { get; } = [];
 
+    /// <summary>A week with one standard and one changed day, for the athlete's own plan view.</summary>
+    public static WeekPlanDto WeekPlan(int athleteId)
+    {
+        var monday = new DateOnly(2026, 10, 12);
+        var days = Enumerable.Range(0, 7).Select(i => new PlanDayDto(monday.AddDays(i), i + 1, PlanDaySource.Standard, null, [], 0, 0, 0)).ToList();
+        days[0] = days[0] with { Sessions = [new(SessionType.Strength, 60, 6, null, 360)], PlannedLoad = 360 };
+        days[2] = days[2] with { Source = PlanDaySource.Changed, Reason = "Match moved", Sessions = [new(SessionType.Technique, 40, 4, null, 160)], PlannedLoad = 160 };
+        return new WeekPlanDto(athleteId, monday, days, 520, 0);
+    }
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
         string? Header(string name) => request.Headers.TryGetValues(name, out var values) ? values.Single() : null;
         var path = request.RequestUri!.AbsolutePath;
         var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(ct);
         Requests.Add(new(request.Method, path, Header(DemoHeaders.User), Header(DemoHeaders.Role), body));
+
+        if (path.StartsWith("/api/athletes/") && path.EndsWith("/plan/week"))
+            return new(HttpStatusCode.OK) { Content = JsonContent.Create(WeekPlan(int.Parse(path.Split('/')[3]))) };
 
         return path switch
         {

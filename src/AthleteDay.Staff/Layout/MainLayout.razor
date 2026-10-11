@@ -31,6 +31,7 @@
     <NavLink href="" Match="NavLinkMatch.All">@L["NavOverview"]</NavLink>
     @if (Persona.Is(Roles.Coach)) { <NavLink href="sessions/new">@L["NavLogSession"]</NavLink> }
     @if (Persona.Is(Roles.Athlete)) { <NavLink href="wellness">@L["NavMorningCheck"]</NavLink> }
+    @if (Persona.Is(Roles.Athlete)) { <NavLink href="my-week">@L["NavMyWeek"]</NavLink> }
     @if (Persona.Is(Roles.Nutrition)) { <NavLink href="nutrition">@L["NavNutrition"]</NavLink> }
     @if (Persona.Is(Roles.Physio)) { <NavLink href="physio">@L["NavPhysio"]</NavLink> }
 </nav>

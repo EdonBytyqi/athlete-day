@@ -31,6 +31,9 @@ public sealed class StaffApi(HttpClient http, PersonaState persona, IStringLocal
     public Task<ApiResult<NutritionTodayDto>> SetNutritionAsync(NutritionTargetRequest request) =>
         SendAsync<NutritionTodayDto>(() => http.PutAsJsonAsync("api/nutrition-targets", request));
 
+    public Task<ApiResult<WeekPlanDto>> GetWeekPlanAsync(int athleteId) =>
+        SendAsync<WeekPlanDto>(() => http.GetAsync($"api/athletes/{athleteId}/plan/week"));
+
     public Task<ApiResult<PhysioNoteDto>> AddPhysioNoteAsync(PhysioNoteRequest request) =>
         SendAsync<PhysioNoteDto>(() => http.PostAsJsonAsync("api/physio-notes", request));
 

@@ -130,7 +130,7 @@ cd web/dashboard; npx ng test --watch=false
 
 1. **Dashboard** as *Lena · coach*: pick **Last 7 days**, sort by week average, filter *Ice hockey*. Hover a **?** to explain a column; scroll to **Compare the squad** and switch to *Week vs month*.
 2. **⋯ → Log session** on Lea: the staff form opens with Lea selected. Log 75 min at RPE 8; the form shows the load live.
-3. **Dashboard**: the row updates without a refresh (SignalR). Click **Elias**: his athlete space shows the camp week as a load spike, his session notes and his goals; switch athletes with the selector and the section stays open.
+3. **Dashboard**: the row updates without a refresh (SignalR). Click **Elias**: his athlete space shows the camp week as a load spike, his session notes and his goals; switch athletes with the selector and the section stays open. Open **Plan**: Thursday is changed ("Lighter after the camp"); use **Change day** or **Edit standard week**. Athletes see their own week in the staff app under **My week**.
 4. Switch persona to **Kitchen**: the app jumps to portions and carbs. Health data is not hidden in the UI; the API never sends it.
 5. **Device import** as coach: upload `samples/device-export-broken.csv` → 2 rows imported, 8 rejected, each with column and reason.
 6. **+ Add athlete** (sport from the managed list), then **⋯ → Archive** with *Undo*. As Admin: **Settings** (sports list) and the **audit log**; then the green **CI run**.

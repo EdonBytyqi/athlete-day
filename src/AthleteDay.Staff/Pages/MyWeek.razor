@@ -1,0 +1,85 @@
+@page "/my-week"
+@implements IDisposable
+@using System.Globalization
+@inject StaffApi Api
+@inject PersonaState Persona
+
+<PageTitle>@L["PageTitle", L["NavMyWeek"]]</PageTitle>
+
+@* The athlete's own plan, read-only (AC-84). The API checks it is their own. *@
+<RoleGate Role="@Roles.Athlete">
+    <h1>@L["MyWeekTitle"]</h1>
+    <p class="lead">@L["MyWeekLead"]</p>
+
+    @if (Persona.SignedInAthlete is null)
+    {
+        <div class="notice">@L["ChooseNameFirst"]</div>
+    }
+    else if (_error is not null)
+    {
+        <ResultBanner Error="@_error" />
+    }
+    else if (_week is { } week)
+    {
+        <p class="muted">@L["WeekOf", week.WeekStart.ToString("d", CultureInfo.CurrentCulture)]</p>
+        <ol class="plan-week">
+            @foreach (var day in week.Days)
+            {
+                <li class="plan-day @(day.Source == PlanDaySource.Changed ? "changed" : "")">
+                    <h2>@L[$"Day_{day.DayOfWeek}"] <span class="muted">@day.Date.ToString("d", CultureInfo.CurrentCulture)</span></h2>
+                    @if (day.Source == PlanDaySource.Changed)
+                    {
+                        <p class="plan-reason">@(day.Reason is { } reason ? L["ChangedDay", reason] : L["ChangedNoReason"])</p>
+                    }
+                    @if (day.Sessions.Count == 0)
+                    {
+                        <p class="muted">@L["RestDay"]</p>
+                    }
+                    else
+                    {
+                        <ul>
+                            @foreach (var s in day.Sessions)
+                            {
+                                <li>
+                                    @L["PlannedSession", L[$"SessionType_{s.Type}"], s.DurationMinutes, s.Rpe]
+                                    @if (s.Note is { } note) { <span class="muted"> · @note</span> }
+                                </li>
+                            }
+                        </ul>
+                        <p class="muted">@L["PlannedLoad", day.PlannedLoad]</p>
+                    }
+                </li>
+            }
+        </ol>
+    }
+</RoleGate>
+
+@code {
+    private WeekPlanDto? _week;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Persona.Changed += OnPersonaChanged;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _week = null;
+        _error = null;
+        if (Persona.SignedInAthlete is not { } me) return;
+
+        var result = await Api.GetWeekPlanAsync(me.Id);
+        _week = result.Value;
+        _error = result.Error;
+    }
+
+    private void OnPersonaChanged() => InvokeAsync(async () =>
+    {
+        await LoadAsync();
+        StateHasChanged();
+    });
+
+    public void Dispose() => Persona.Changed -= OnPersonaChanged;
+}

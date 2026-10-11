@@ -264,3 +264,46 @@ export interface AthleteSummary {
   displayName: string;
   sport: string;
 }
+
+// ---- Training plans (spec v1.8) ----
+
+export type PlanDaySource = 'Standard' | 'Changed';
+
+export interface PlannedSession {
+  type: string;
+  durationMinutes: number;
+  rpe: number;
+  note: string | null;
+  plannedLoad: number;
+}
+
+export interface PlanDay {
+  date: string;
+  dayOfWeek: number;
+  source: PlanDaySource;
+  reason: string | null;
+  sessions: PlannedSession[];
+  plannedLoad: number;
+  loggedLoad: number;
+  loggedSessions: number;
+}
+
+export interface WeekPlan {
+  athleteId: number;
+  weekStart: string;
+  days: PlanDay[];
+  plannedLoad: number;
+  loggedLoad: number;
+}
+
+export interface PlanTemplate {
+  athleteId: number;
+  days: { dayOfWeek: number; sessions: PlannedSession[] }[];
+}
+
+export interface PlannedSessionRequest {
+  type: string;
+  durationMinutes: number;
+  rpe: number;
+  note: string | null;
+}

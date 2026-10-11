@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.7 |
+| Version | 1.8 |
 | Status | Current |
 | Date | 2026-10-11 |
 
@@ -60,6 +60,7 @@ medical advice of any kind.
 | Trend (last 4 weeks vs the 4 before) | Load and sessions: up or down when they differ by more than 10 %, otherwise stable. Sleep, soreness and mood: up or down when the averages differ by more than 0.3, otherwise stable. Up is good for sleep and mood, bad for soreness; for load and sessions it is neither, only a change to talk about. |
 | Device test direction | Higher is better for CMJ, SJ, GPS_DISTANCE and GPS_HSR; lower is better for SPRINT_30M. |
 | Goal status | *Reached* when the latest result meets the target; *behind* when the goal date has passed without that; otherwise *open*. |
+| Plan day | The standard week's sessions for that weekday, unless the coach changed the date: then exactly the changed sessions (none = cancelled day). Planned load = planned RPE × planned minutes. |
 
 ## 5. Functional requirements
 
@@ -299,6 +300,21 @@ best.*
 | AC-76 | Coach and physio read an athlete's reviews, newest first. Other roles get 403, and reads are audited. | Integration |
 | AC-77 | The Reviews section lists past reviews with their snapshot figures, and the coach can write a new one for the last 4, 12 or 26 weeks. | Angular |
 
+### F23 Weekly training plans
+
+*As a coach, I want a standard week per athlete that I can change for single days, so the plan stays clear and still
+fits what happens.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-78 | Each athlete has a standard week: per weekday up to 3 planned sessions (type, 5–300 minutes, RPE 1–10, optional note up to 200 characters). The coach replaces it as a whole; other roles get 403; invalid sessions return 400. Changing one athlete's plan leaves every other athlete's plan unchanged. | Unit, Integration |
+| AC-79 | The week plan (Monday to Sunday, default the current week) shows for each day either the standard week's sessions or, if the coach changed that date, the changed sessions. Each day says whether it is *standard* or *changed* (with the reason), and every session shows its planned load (RPE × minutes). | Unit, Integration |
+| AC-80 | The coach changes a single date: other sessions, an added session, or none at all (a cancelled day, with a reason). The change can be undone, which brings back the standard week for that date. The standard week itself is not touched. | Integration |
+| AC-81 | The week plan compares planned and logged load per day and for the whole week. | Unit, Integration |
+| AC-82 | Coach, physio and nutrition read every athlete's plan; an athlete reads only their own; the kitchen gets 403. | Integration |
+| AC-83 | The athlete space has a Plan section: a week view with previous and next week, changed days clearly marked, planned against logged load. The coach edits the standard week and changes or resets single days there. | Angular |
+| AC-84 | In the staff app, a signed-in athlete sees their own week plan, read-only, with changed days marked. | Staff |
+
 ## 6. Non-functional requirements
 
 | ID | Requirement |
@@ -323,3 +339,4 @@ best.*
 | 1.5 | 2026-10-11 | F15 English and German (AC-53–AC-57); NFR-06 responsive layout and NFR-07 light design; language rule in section 4. Phase 1 of the "enhance the hub" brief. |
 | 1.6 | 2026-10-11 | F16 date range (AC-58–AC-60), F17 week and month comparison (AC-61–AC-62), F18 managed sports list (AC-63–AC-65); date range and sport rules in section 4. Phase 2. |
 | 1.7 | 2026-10-11 | F19 athlete space (AC-66–AC-68), F20 benchmarks and goals (AC-69–AC-71), F21 session notes (AC-72–AC-74), F22 progress reviews (AC-75–AC-77); week, trend, test direction and goal status rules in section 4. Phase 3. |
+| 1.8 | 2026-10-11 | F23 weekly training plans (AC-78–AC-84); plan day rule in section 4. Phase 4. |

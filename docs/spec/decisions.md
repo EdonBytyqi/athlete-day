@@ -117,3 +117,14 @@ Short records of the decisions that shape the code. Format: context → decision
   review. Reviews cannot be edited afterwards; a new review is written instead.
 * **Consequence:** reviews read like signed documents and stay consistent with their text. The JSON is versioned by
   the DTO shape, so old snapshots must stay readable when the DTO grows (new fields optional).
+
+## ADR-14 Training plans: a standard week plus whole-day changes
+
+* **Context:** plans are weekly, but single days change (a match moved, a sore athlete, a camp). The coach must see at
+  a glance which sessions come from the standard week and which were changed for that date (AC-78 – AC-80).
+* **Decision:** a standard week per athlete (sessions per weekday) and, separately, *day changes*: for one date, the
+  complete list of sessions that replaces the standard day (an empty list cancels it), with a reason. The week view
+  merges both in `AthleteDay.Core` and marks each day as standard or changed. Undoing a change deletes it.
+* **Consequence:** simple to explain and to show; a change never edits the standard week, and the standard week can be
+  rewritten without losing the dated changes. A change replaces the whole day rather than single sessions, which keeps
+  "what applies on this date" unambiguous.

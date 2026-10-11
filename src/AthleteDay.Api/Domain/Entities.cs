@@ -86,6 +86,40 @@ public sealed class ProgressReview
     public required string SnapshotJson { get; set; }
 }
 
+/// <summary>One session of an athlete's standard week (ADR-14). Weekday 1 = Monday … 7 = Sunday.</summary>
+public sealed class PlanTemplateSession
+{
+    public int Id { get; set; }
+    public int AthleteId { get; set; }
+    public int DayOfWeek { get; set; }
+    public int Position { get; set; }
+    public SessionType Type { get; set; }
+    public int DurationMinutes { get; set; }
+    public int Rpe { get; set; }
+    public string? Note { get; set; }
+}
+
+/// <summary>A changed date: its sessions replace the standard ones; none = cancelled day (ADR-14).</summary>
+public sealed class PlanDayChange
+{
+    public int Id { get; set; }
+    public int AthleteId { get; set; }
+    public DateOnly Date { get; set; }
+    public string? Reason { get; set; }
+    public List<PlanDayChangeSession> Sessions { get; set; } = [];
+    public required string ChangedBy { get; set; }
+    public DateTimeOffset ChangedAt { get; set; }
+}
+
+public sealed class PlanDayChangeSession
+{
+    public int Position { get; set; }
+    public SessionType Type { get; set; }
+    public int DurationMinutes { get; set; }
+    public int Rpe { get; set; }
+    public string? Note { get; set; }
+}
+
 public sealed class WellnessCheck
 {
     public int Id { get; set; }

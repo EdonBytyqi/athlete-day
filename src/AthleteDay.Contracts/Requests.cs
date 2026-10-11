@@ -180,6 +180,75 @@ public sealed class ProgressReviewRequest : IValidatableObject
     }
 }
 
+/// <summary>One planned session of a training plan.</summary>
+public sealed class PlannedSessionRequest
+{
+    [EnumDataType(typeof(SessionType))]
+    public SessionType Type { get; set; } = SessionType.Strength;
+
+    [Range(5, 300, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.DurationRange))]
+    public int DurationMinutes { get; set; } = 60;
+
+    [Range(1, 10, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.RpeRange))]
+    public int Rpe { get; set; } = 5;
+
+    [StringLength(200, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.TextTooLong))]
+    public string? Note { get; set; }
+}
+
+/// <summary>The sessions of one weekday in the standard week.</summary>
+public sealed class PlanTemplateDayRequest : IValidatableObject
+{
+    [Range(1, 7, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.DayOfWeekRange))]
+    public int DayOfWeek { get; set; } = 1;
+
+    public List<PlannedSessionRequest> Sessions { get; set; } = [];
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => PlanRules.Sessions(Sessions);
+}
+
+/// <summary>The whole standard week (ADR-14); weekdays not listed have no sessions.</summary>
+public sealed class PlanTemplateRequest : IValidatableObject
+{
+    public List<PlanTemplateDayRequest> Days { get; set; } = [];
+
+    // Validating a day checks its weekday and, through the day's own rule, its sessions.
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => Days.SelectMany(PlanRules.Nested);
+}
+
+/// <summary>Replaces one date's sessions; no sessions means the day is cancelled (ADR-14).</summary>
+public sealed class PlanDayChangeRequest : IValidatableObject
+{
+    [StringLength(200, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.TextTooLong))]
+    public string? Reason { get; set; }
+
+    public List<PlannedSessionRequest> Sessions { get; set; } = [];
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) => PlanRules.Sessions(Sessions);
+}
+
+internal static class PlanRules
+{
+    public const int MaxSessionsPerDay = 3;
+
+    /// <summary>At most three sessions a day, each one valid. Checked here so the rules hold however deep the
+    /// validator looks into lists.</summary>
+    public static IEnumerable<ValidationResult> Sessions(IReadOnlyCollection<PlannedSessionRequest> sessions)
+    {
+        if (sessions.Count > MaxSessionsPerDay)
+            yield return new ValidationResult(string.Format(CultureInfo.CurrentCulture, Text.TooManySessions, MaxSessionsPerDay), ["Sessions"]);
+        foreach (var result in sessions.SelectMany(Nested))
+            yield return result;
+    }
+
+    public static IEnumerable<ValidationResult> Nested(object item)
+    {
+        var results = new List<ValidationResult>();
+        Validator.TryValidateObject(item, new ValidationContext(item), results, validateAllProperties: true);
+        return results;
+    }
+}
+
 /// <summary>
 /// A property-level rule, so it reports together with the other field errors
 /// (IValidatableObject only runs once every property is valid).

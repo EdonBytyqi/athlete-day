@@ -64,3 +64,11 @@ public enum GoalStatus
     Reached,
     Behind
 }
+
+/// <summary>Whether a plan day follows the standard week or was changed for that date (ADR-14).</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<PlanDaySource>))]
+public enum PlanDaySource
+{
+    Standard,
+    Changed
+}
