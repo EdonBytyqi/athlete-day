@@ -51,6 +51,7 @@ public abstract class StaffTestContext : BunitContext
         {
             BaseAddress = new Uri("http://api.test/")
         };
+        Services.AddLocalization();
         Services.AddSingleton(Persona);
         Services.AddSingleton(new StaffApi(http, Persona));
     }

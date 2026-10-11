@@ -9,6 +9,7 @@ import { personaInterceptor } from '../api/persona.interceptor';
 import { PersonaService } from '../api/persona.service';
 import { RealtimeService } from '../api/realtime.service';
 import { ToastService } from '../shared/toast.service';
+import { I18n } from '../i18n/i18n.service';
 
 const row = (overrides: Partial<DashboardRow>): DashboardRow => ({
   athleteId: 1,
@@ -244,10 +245,25 @@ describe('DashboardPage', () => {
     expect(TestBed.inject(ToastService).current()?.message).toContain('Ada added as ATH-009');
   });
 
+  it('[AC-57] reloads in the new language so server texts are translated too', async () => {
+    const { el, fixture } = await render();
+
+    TestBed.inject(I18n).setLanguage('de');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const reload = controller.expectOne('/api/dashboard');
+    expect(reload.request.headers.get('Accept-Language')).toBe('de');
+    reload.flush(squad);
+    await fixture.whenStable();
+    expect(el.querySelector('h1')?.textContent).toContain('Kader heute');
+    expect(header(el, 'Belastung heute')).toBeTruthy();
+  });
+
   it('[AC-42] log session opens the staff form with the athlete selected', async () => {
     const { el } = await render();
     const elias = [...el.querySelectorAll('tbody tr')].find((tr) => tr.textContent?.includes('Elias'))!;
 
-    expect(elias.querySelector('a.log-session')?.getAttribute('href')).toMatch(/\/sessions\/new\?athlete=2$/);
+    expect(elias.querySelector('a.log-session')?.getAttribute('href')).toMatch(/\/sessions\/new\?athlete=2&lang=en$/);
   });
 });
