@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Version | 1.8 |
+| Version | 1.9 |
 | Status | Current |
-| Date | 2026-10-11 |
+| Date | 2026-10-12 |
 
 > **How this version came about.** v1.0 was written *after* the first implementation, to capture what the system does and
 > to link every acceptance criterion to a test. From v1.1 on, every change starts here: spec first, then failing tests,
@@ -24,13 +24,13 @@ Athlete Day records one athlete's day across these disciplines and shows each ro
 | Nutrition | Set daily energy and carbohydrate targets |
 | Physio | Keep health notes and training restrictions |
 | Kitchen | Prepare the right portion per athlete |
-| Admin | Check who accessed health-related data |
+| Admin | Check who accessed health-related data; keep the athletes' identity documents |
 
 ## 3. Scope
 
 **In scope:** session logging, wellness checks, load monitoring, readiness flags, nutrition targets, kitchen view,
 physio notes, device CSV import, audit log, live dashboard updates, squad management (add, edit and archive athletes),
-sorting and filtering the squad dashboard, English and German, a light layout that works on phones, tablets and
+sorting and filtering the squad dashboard, athlete documents, English and German, a light layout that works on phones, tablets and
 desktops.
 
 **Out of scope (v1):** real sign-in (demo personas only), Azure deployment, notifications, athlete-facing dashboard,
@@ -61,6 +61,8 @@ medical advice of any kind.
 | Device test direction | Higher is better for CMJ, SJ, GPS_DISTANCE and GPS_HSR; lower is better for SPRINT_30M. |
 | Goal status | *Reached* when the latest result meets the target; *behind* when the goal date has passed without that; otherwise *open*. |
 | Plan day | The standard week's sessions for that weekday, unless the coach changed the date: then exactly the changed sessions (none = cancelled day). Planned load = planned RPE × planned minutes. |
+| Document type | *Medical* (reports, scans): physio only. *Government ID* (passport, ID card): admin only. *Certificate* (licence, anti-doping course) and *General*: coach and physio. A role sees, uploads, downloads and deletes exactly the types it may see. |
+| Document file | PDF, JPEG or PNG, recognised by its first bytes (not by the name or the declared type), 1 byte to 10 MB. Stored in Blob Storage under a random name; the original file name is kept only as metadata. |
 
 ## 5. Functional requirements
 
@@ -315,6 +317,22 @@ fits what happens.*
 | AC-83 | The athlete space has a Plan section: a week view with previous and next week, changed days clearly marked, planned against logged load. The coach edits the standard week and changes or resets single days there. | Angular |
 | AC-84 | In the staff app, a signed-in athlete sees their own week plan, read-only, with changed days marked. | Staff |
 
+### F24 Athlete documents
+
+*As a member of the staff, I want to keep an athlete's documents in one safe place, so the right people find them and
+nobody else sees them.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-85 | Coach, physio and admin upload a document for an athlete: a file, a type and a title (1–100 characters). The file goes to Blob Storage under a random name; the database keeps the metadata (type, title, original file name, content type, size, SHA-256, who uploaded it and when). The answer is 201 with the metadata. | Integration |
+| AC-86 | Need-to-know per document type (section 4): uploading a type the role may not see returns 403 and stores nothing. Nutrition, kitchen and athletes get 403 on every document endpoint. | Unit, Integration |
+| AC-87 | An athlete's document list contains only the types the role may see, newest first. Downloading or deleting a document of another type returns 404, so its existence is not revealed. | Integration |
+| AC-88 | An empty file, a file over 10 MB, a file that is not PDF, JPEG or PNG by its first bytes (whatever its name or declared type), a missing or too long title, or an unknown type returns 400 and stores nothing. | Unit, Integration |
+| AC-89 | A download returns exactly the stored bytes, with the stored content type, as an attachment under the original file name, and with `X-Content-Type-Options: nosniff`. Files are only ever served through the API, never by a direct storage link. | Integration |
+| AC-90 | Deleting a document removes its metadata and its file. Listing, downloading, uploading and deleting are each written to the audit log with the athlete's id. | Integration |
+| AC-91 | The athlete space has a Documents section for coach and physio: the list (type, title, file name, size, date, uploader), an upload form that offers only the types the role may upload, download, and delete after a confirmation. Other roles see a short notice instead. | Angular |
+| AC-92 | The admin keeps identity documents on the Settings page: choose an athlete, then list, upload, download and delete their government IDs. For this the admin may read the athlete list (names and codes only). | Angular, Integration |
+
 ## 6. Non-functional requirements
 
 | ID | Requirement |
@@ -340,3 +358,4 @@ fits what happens.*
 | 1.6 | 2026-10-11 | F16 date range (AC-58–AC-60), F17 week and month comparison (AC-61–AC-62), F18 managed sports list (AC-63–AC-65); date range and sport rules in section 4. Phase 2. |
 | 1.7 | 2026-10-11 | F19 athlete space (AC-66–AC-68), F20 benchmarks and goals (AC-69–AC-71), F21 session notes (AC-72–AC-74), F22 progress reviews (AC-75–AC-77); week, trend, test direction and goal status rules in section 4. Phase 3. |
 | 1.8 | 2026-10-11 | F23 weekly training plans (AC-78–AC-84); plan day rule in section 4. Phase 4. |
+| 1.9 | 2026-10-12 | F24 athlete documents (AC-85–AC-92); document type and file rules in section 4; admin keeps identity documents. Phase 5. |
