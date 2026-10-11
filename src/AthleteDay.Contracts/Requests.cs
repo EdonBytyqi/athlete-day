@@ -134,6 +134,52 @@ public sealed class SportRequest
     public bool Retired { get; set; }
 }
 
+/// <summary>A goal for one device test; the plausible range per test is checked by the API.</summary>
+public sealed class GoalRequest
+{
+    [Range(typeof(decimal), "0.01", "100000", ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.GoalTargetPositive))]
+    public decimal Target { get; set; }
+
+    public DateOnly? TargetDate { get; set; }
+
+    [StringLength(200, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.TextTooLong))]
+    public string? Note { get; set; }
+}
+
+/// <summary>A note on a training session (ADR-12).</summary>
+public sealed class SessionNoteRequest
+{
+    // Qualified on purpose: inside this class, `Text` is the property, not the resource alias.
+    [Required(ErrorMessageResourceType = typeof(Resources.ValidationText), ErrorMessageResourceName = nameof(Resources.ValidationText.NoteRequired))]
+    [StringLength(1000, MinimumLength = 1, ErrorMessageResourceType = typeof(Resources.ValidationText), ErrorMessageResourceName = nameof(Resources.ValidationText.NoteLength))]
+    public string Text { get; set; } = "";
+}
+
+/// <summary>A progress review over the last <see cref="Weeks"/> weeks, ending today (ADR-13).</summary>
+public sealed class ProgressReviewRequest : IValidatableObject
+{
+    [Range(1, 52, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.WeeksRange))]
+    public int Weeks { get; set; } = 4;
+
+    [StringLength(2000, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.TextTooLong))]
+    public string? Observations { get; set; }
+
+    [StringLength(2000, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.TextTooLong))]
+    public string? Achievements { get; set; }
+
+    [StringLength(2000, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.TextTooLong))]
+    public string? Challenges { get; set; }
+
+    [StringLength(2000, ErrorMessageResourceType = typeof(Text), ErrorMessageResourceName = nameof(Text.TextTooLong))]
+    public string? Recommendations { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (new[] { Observations, Achievements, Challenges, Recommendations }.All(string.IsNullOrWhiteSpace))
+            yield return new ValidationResult(Text.ReviewEmpty, [nameof(Observations)]);
+    }
+}
+
 /// <summary>
 /// A property-level rule, so it reports together with the other field errors
 /// (IValidatableObject only runs once every property is valid).

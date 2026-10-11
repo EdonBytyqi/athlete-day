@@ -25,4 +25,8 @@
   <data name="AgeBetween" xml:space="preserve"><value>Das Geburtsjahr muss ein Alter zwischen {0} und {1} ergeben.</value></data>
   <data name="BodyMassRange" xml:space="preserve"><value>Das Körpergewicht muss zwischen 30 und 200 kg liegen.</value></data>
   <data name="SelectSport" xml:space="preserve"><value>Bitte eine Sportart wählen.</value></data>
+  <data name="GoalTargetPositive" xml:space="preserve"><value>Das Ziel muss eine positive Zahl sein.</value></data>
+  <data name="TextTooLong" xml:space="preserve"><value>Dieser Text darf höchstens {1} Zeichen lang sein.</value></data>
+  <data name="WeeksRange" xml:space="preserve"><value>Der Zeitraum muss zwischen {1} und {2} Wochen liegen.</value></data>
+  <data name="ReviewEmpty" xml:space="preserve"><value>Bitte mindestens einen Teil der Beurteilung ausfüllen.</value></data>
 </root>

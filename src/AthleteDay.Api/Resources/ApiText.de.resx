@@ -14,4 +14,7 @@
   <data name="RangeToInFuture" xml:space="preserve"><value>Das Enddatum darf nicht in der Zukunft liegen.</value></data>
   <data name="RangeFromAfterTo" xml:space="preserve"><value>Das Startdatum muss vor oder am Enddatum liegen.</value></data>
   <data name="RangeTooLong" xml:space="preserve"><value>Ein Zeitraum darf höchstens 366 Tage lang sein.</value></data>
+  <data name="UnknownTest" xml:space="preserve"><value>Unbekannter Test '{0}'.</value></data>
+  <data name="GoalOutOfRange" xml:space="preserve"><value>Das Ziel muss für {3} zwischen {0} und {1} {2} liegen.</value></data>
+  <data name="ProgressWeeksRange" xml:space="preserve"><value>weeks muss zwischen 4 und 52 liegen.</value></data>
 </root>

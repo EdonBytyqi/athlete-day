@@ -157,3 +157,110 @@ export interface AthleteRequest {
   sex: Sex;
   bodyMassKg: number;
 }
+
+// ---- Athlete space (spec v1.7) ----
+
+export type Trend = 'Up' | 'Down' | 'Stable';
+export type GoalStatus = 'Open' | 'Reached' | 'Behind';
+export type TrendMetric = 'load' | 'sessions' | 'sleep' | 'soreness' | 'mood';
+
+export interface WeeklyProgress {
+  weekStart: string;
+  totalLoad: number;
+  sessions: number;
+  averageSleep: number | null;
+  averageSoreness: number | null;
+  averageMood: number | null;
+}
+
+export interface TrendItem {
+  metric: TrendMetric;
+  recent: number | null;
+  previous: number | null;
+  trend: Trend;
+}
+
+export interface Progress {
+  athleteId: number;
+  weeks: WeeklyProgress[];
+  trends: TrendItem[];
+}
+
+export interface TestResult {
+  date: string;
+  value: number;
+}
+
+export interface Goal {
+  testType: string;
+  target: number;
+  targetDate: string | null;
+  note: string | null;
+  setBy: string;
+}
+
+export interface Benchmark {
+  testType: string;
+  unit: string;
+  higherIsBetter: boolean;
+  latest: TestResult;
+  best: TestResult;
+  firstInPeriod: TestResult | null;
+  changeInPeriod: number | null;
+  squadAverage: number | null;
+  goal: Goal | null;
+  gapToGoal: number | null;
+  status: GoalStatus | null;
+  history: TestResult[];
+}
+
+export interface SessionNote {
+  id: number;
+  sessionId: number;
+  athleteId: number;
+  sessionDate: string;
+  sessionType: string;
+  sessionLoad: number;
+  text: string;
+  author: string;
+  createdAt: string;
+}
+
+export interface ReviewSnapshot {
+  weeks: WeeklyProgress[];
+  totalLoad: number;
+  sessions: number;
+  averageSleep: number | null;
+  averageSoreness: number | null;
+  averageMood: number | null;
+  benchmarks: Benchmark[];
+}
+
+export interface ProgressReview {
+  id: number;
+  athleteId: number;
+  from: string;
+  to: string;
+  observations: string | null;
+  achievements: string | null;
+  challenges: string | null;
+  recommendations: string | null;
+  author: string;
+  createdAt: string;
+  snapshot: ReviewSnapshot;
+}
+
+export interface ReviewRequest {
+  weeks: number;
+  observations: string | null;
+  achievements: string | null;
+  challenges: string | null;
+  recommendations: string | null;
+}
+
+export interface AthleteSummary {
+  id: number;
+  code: string;
+  displayName: string;
+  sport: string;
+}

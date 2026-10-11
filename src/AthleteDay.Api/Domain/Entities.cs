@@ -41,9 +41,49 @@ public sealed class TrainingSession
     public SessionType Type { get; set; }
     public int DurationMinutes { get; set; }
     public int Rpe { get; set; }
-    public string? Notes { get; set; }
     public required string LoggedBy { get; set; }
     public DateTimeOffset LoggedAt { get; set; }
+}
+
+/// <summary>A coach's note on a training session (ADR-12). Several per session; readable by coach and physio.</summary>
+public sealed class SessionNote
+{
+    public int Id { get; set; }
+    public int SessionId { get; set; }
+    public TrainingSession Session { get; set; } = null!;
+    public int AthleteId { get; set; }
+    public required string Text { get; set; }
+    public required string Author { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
+/// <summary>One goal per device test and athlete (AC-70).</summary>
+public sealed class Goal
+{
+    public int Id { get; set; }
+    public int AthleteId { get; set; }
+    public required string TestType { get; set; }
+    public decimal Target { get; set; }
+    public DateOnly? TargetDate { get; set; }
+    public string? Note { get; set; }
+    public required string SetBy { get; set; }
+    public DateTimeOffset SetAt { get; set; }
+}
+
+/// <summary>A structured review of a period, with the figures as they were when it was written (ADR-13).</summary>
+public sealed class ProgressReview
+{
+    public int Id { get; set; }
+    public int AthleteId { get; set; }
+    public DateOnly From { get; set; }
+    public DateOnly To { get; set; }
+    public string? Observations { get; set; }
+    public string? Achievements { get; set; }
+    public string? Challenges { get; set; }
+    public string? Recommendations { get; set; }
+    public required string Author { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public required string SnapshotJson { get; set; }
 }
 
 public sealed class WellnessCheck

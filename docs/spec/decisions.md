@@ -96,3 +96,24 @@ Short records of the decisions that shape the code. Format: context → decision
   CTEs aggregate sessions and wellness checks over the range. Still one query (NFR-03).
 * **Consequence:** looking at a past day shows the squad as it was then, with the data recorded so far; nothing is
   recalculated in the browser.
+
+## ADR-12 Session notes in their own table, readable by coach and physio only
+
+* **Context:** a session had one free-text `Notes` field, set when it was logged. Coaches want to add notes later,
+  several per session, and know who wrote what (AC-72 – AC-74). Notes about training context are not health data, but
+  they are not for the kitchen, nutrition or athletes either.
+* **Decision:** a `SessionNotes` table (session, athlete, text, author, time). The existing `Notes` values move into it
+  in the migration, and a note entered while logging becomes a `SessionNote` too. Reading needs a new `CoachingNotes`
+  policy (coach and physio) and is audited; the sessions list itself never contains note text.
+* **Consequence:** one place for notes, with history; the response shape of the sessions list stays free of note text
+  for roles that may not read it (NFR-02).
+
+## ADR-13 Progress reviews keep a snapshot of their figures
+
+* **Context:** a review documents development over a period (AC-75). If its figures were recalculated on every read,
+  a late import or a corrected session would silently change what the coach wrote about.
+* **Decision:** when a review is saved, the API computes the period's figures (weekly load, sessions, wellness averages,
+  tests against goals) with the same code as the progress and benchmark endpoints and stores them as JSON with the
+  review. Reviews cannot be edited afterwards; a new review is written instead.
+* **Consequence:** reviews read like signed documents and stay consistent with their text. The JSON is versioned by
+  the DTO shape, so old snapshots must stay readable when the DTO grows (new fields optional).

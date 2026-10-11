@@ -22,6 +22,8 @@ public static class Policies
     public const string WellnessHistory = nameof(WellnessHistory);
     public const string ReadSports = nameof(ReadSports);
     public const string ManageSports = nameof(ManageSports);
+    public const string CoachingNotes = nameof(CoachingNotes);
+    public const string WriteCoaching = nameof(WriteCoaching);
 
     public static AuthorizationBuilder AddAthleteDayPolicies(this AuthorizationBuilder builder) => builder
         .AddPolicy(ReadAthletes, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Nutrition, Roles.Athlete))
@@ -36,5 +38,8 @@ public static class Policies
         .AddPolicy(ManageSquad, p => p.RequireRole(Roles.Coach))
         .AddPolicy(WellnessHistory, p => p.RequireRole(Roles.Coach, Roles.Physio))
         .AddPolicy(ReadSports, p => p.RequireRole(Roles.Coach, Roles.Physio, Roles.Nutrition, Roles.Athlete, Roles.Admin))
-        .AddPolicy(ManageSports, p => p.RequireRole(Roles.Admin));
+        .AddPolicy(ManageSports, p => p.RequireRole(Roles.Admin))
+        // Session notes and progress reviews (ADR-12): the coach writes, coach and physio read.
+        .AddPolicy(CoachingNotes, p => p.RequireRole(Roles.Coach, Roles.Physio))
+        .AddPolicy(WriteCoaching, p => p.RequireRole(Roles.Coach));
 }

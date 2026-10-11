@@ -1,5 +1,7 @@
+using System.Text.Json;
 using AthleteDay.Api.Domain;
 using AthleteDay.Api.Infrastructure;
+using AthleteDay.Api.Reports;
 using AthleteDay.Contracts;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +34,9 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
     public async Task ResetAsync(CancellationToken ct = default)
     {
         await db.AuditEntries.ExecuteDeleteAsync(ct);
+        await db.ProgressReviews.ExecuteDeleteAsync(ct);
+        await db.Goals.ExecuteDeleteAsync(ct);
+        await db.SessionNotes.ExecuteDeleteAsync(ct);
         await db.ImportRowErrors.ExecuteDeleteAsync(ct);
         await db.DeviceMeasurements.ExecuteDeleteAsync(ct);
         await db.ImportJobs.ExecuteDeleteAsync(ct);
@@ -106,14 +111,21 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
             });
 
         AddSeedMeasurements(athletes, today);
+        AddSeedGoals(athletes, today);
 
         await db.SaveChangesAsync(ct);
+
+        // Notes and a review refer to saved sessions and figures, so they come last.
+        await AddSeedSessionNotesAsync(athletes, today, ct);
+        await AddSeedReviewAsync(athletes[0], ct);
+
         logger.LogInformation("Seeded synthetic demo data for {Count} athletes", athletes.Count);
     }
 
     private void AddSessionHistory(Athlete athlete, DateOnly today, Random random)
     {
-        for (var daysAgo = 55; daysAgo >= 0; daysAgo--)
+        // 13 weeks, so the 12-week views of the athlete space are complete.
+        for (var daysAgo = 90; daysAgo >= 0; daysAgo--)
         {
             var date = today.AddDays(-daysAgo);
             var isRestDay = date.DayOfWeek == DayOfWeek.Sunday || (date.DayOfWeek == DayOfWeek.Wednesday && random.Next(2) == 0);
@@ -153,7 +165,8 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
 
     private void AddWellnessHistory(Athlete athlete, DateOnly today, Random random)
     {
-        for (var daysAgo = 27; daysAgo >= 0; daysAgo--)
+        // 12 weeks of morning checks: enough for the 4-weeks-against-4 trends and the weekly sleep line.
+        for (var daysAgo = 83; daysAgo >= 0; daysAgo--)
         {
             // ATH-003 has not done today's check-in yet: the athlete persona fills it in during the demo.
             if (daysAgo == 0 && athlete.Code == "ATH-003") continue;
@@ -174,27 +187,105 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
         }
     }
 
+    /// <summary>
+    /// Twelve weeks of device tests, so progress and benchmarks have a history: a weekly jump test for everyone,
+    /// a sprint every two weeks for the sprint and team-sport athletes, and GPS distances where the sport uses them.
+    /// Values improve slowly with some noise; the same seed gives the same numbers every time.
+    /// </summary>
     private void AddSeedMeasurements(List<Athlete> athletes, DateOnly today)
     {
         var job = new ImportJob
         {
-            Id = Guid.NewGuid(), FileName = "seed-jump-tests.csv", BlobName = "seed", Status = ImportStatus.Completed,
+            Id = Guid.NewGuid(), FileName = "seed-device-tests.csv", BlobName = "seed", Status = ImportStatus.Completed,
             UploadedBy = "seed", UploadedAt = clock.Now, CompletedAt = clock.Now
         };
+        var rows = 0;
+
+        void Add(Athlete athlete, int daysAgo, string test, decimal value, string unit)
+        {
+            db.DeviceMeasurements.Add(new DeviceMeasurement
+            {
+                AthleteId = athlete.Id, Date = today.AddDays(-daysAgo), TestType = test, Value = value, Unit = unit, ImportJobId = job.Id
+            });
+            rows++;
+        }
 
         foreach (var (athlete, index) in athletes.Select((a, i) => (a, i)))
         {
-            for (var week = 3; week >= 1; week--)
+            var random = new Random(100 + index);
+            var code = athlete.Code;
+            for (var week = 11; week >= 0; week--)
             {
-                db.DeviceMeasurements.Add(new DeviceMeasurement
-                {
-                    AthleteId = athlete.Id, Date = today.AddDays(-7 * week), TestType = "CMJ",
-                    Value = 34 + index * 2 + (3 - week) * 0.8m, Unit = "cm", ImportJobId = job.Id
-                });
+                var daysAgo = 7 * week + 2; // tests on a fixed weekday, two days before "today"'s weekday
+                var progress = (11 - week) / 11m;  // 0 → 1 over the twelve weeks
+                Add(athlete, daysAgo, "CMJ", Math.Round(32 + index * 2 + progress * 3 + random.Next(-8, 9) / 10m, 1), "cm");
+
+                if (week % 2 == 0 && code is "ATH-002" or "ATH-003" or "ATH-005")
+                    Add(athlete, daysAgo, "SPRINT_30M", Math.Round(4.45m - index * 0.03m - progress * 0.12m + random.Next(-3, 4) / 100m, 2), "s");
+
+                if (code is "ATH-005" or "ATH-006")
+                    Add(athlete, daysAgo, "GPS_DISTANCE", 7_000 + random.Next(0, 2_500), "m");
             }
         }
 
-        job.TotalRows = job.ImportedRows = athletes.Count * 3;
+        job.TotalRows = job.ImportedRows = rows;
         db.ImportJobs.Add(job);
+    }
+
+    /// <summary>A few goals: one open, one reached and one whose date has passed, so every status shows.</summary>
+    private void AddSeedGoals(List<Athlete> athletes, DateOnly today)
+    {
+        Goal G(Athlete a, string test, decimal target, int? days, string? note) => new()
+        {
+            AthleteId = a.Id, TestType = test, Target = target, TargetDate = days is { } d ? today.AddDays(d) : null,
+            Note = note, SetBy = "lena", SetAt = clock.Now
+        };
+        db.Goals.AddRange(
+            G(athletes[0], "CMJ", 38.0m, 42, "Before the start of the race season"),
+            G(athletes[2], "SPRINT_30M", 4.30m, 30, null),
+            G(athletes[1], "CMJ", 36.0m, null, "Keep it through the camp"),
+            G(athletes[4], "GPS_DISTANCE", 9_800, -3, "Match fitness"));
+    }
+
+    /// <summary>Coach's notes on a few recent sessions (ADR-12).</summary>
+    private async Task AddSeedSessionNotesAsync(List<Athlete> athletes, DateOnly today, CancellationToken ct)
+    {
+        var notes = new (int Athlete, int Nth, string Text)[]
+        {
+            (1, 0, "Camp day: legs heavy after the second on-ice block. Kept the last drill short."),
+            (1, 2, "Strong session, good intent in the sprints."),
+            (2, 1, "Acceleration looked sharp; work on the last 10 m."),
+            (0, 1, "Technique focus on landings. Quality over volume today."),
+            (3, 0, "Low energy, cut the second set. Ask about sleep tomorrow."),
+        };
+        foreach (var (athleteIndex, nth, text) in notes)
+        {
+            var athlete = athletes[athleteIndex];
+            var session = await db.TrainingSessions.Where(s => s.AthleteId == athlete.Id)
+                .OrderByDescending(s => s.Date).Skip(nth).FirstAsync(ct);
+            db.SessionNotes.Add(new SessionNote
+            {
+                SessionId = session.Id, AthleteId = athlete.Id, Text = text, Author = "lena",
+                CreatedAt = session.Date.ToDateTime(new TimeOnly(18, 0)).ToUniversalTime()
+            });
+        }
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>One review with its snapshot, computed like any other (ADR-13).</summary>
+    private async Task AddSeedReviewAsync(Athlete athlete, CancellationToken ct)
+    {
+        var (from, to, snapshot) = await new AthleteFigures(db, clock).SnapshotAsync(athlete.Id, 12, ct);
+        db.ProgressReviews.Add(new ProgressReview
+        {
+            AthleteId = athlete.Id, From = from, To = to,
+            Observations = "Consistent training block with steady weekly load. Sleep mostly above 7 h.",
+            Achievements = "Counter-movement jump up about 3 cm over the block.",
+            Challenges = "Load dropped in the last week; worth a conversation about the reason.",
+            Recommendations = "Keep two jump-focused sessions per week; check in on recovery before the season starts.",
+            Author = "lena", CreatedAt = clock.Now.AddHours(-2),
+            SnapshotJson = JsonSerializer.Serialize(snapshot, new JsonSerializerOptions(JsonSerializerDefaults.Web))
+        });
+        await db.SaveChangesAsync(ct);
     }
 }

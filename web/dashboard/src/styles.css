@@ -422,3 +422,100 @@ dialog::backdrop { background: rgb(15 20 25 / 0.55); }
   .sport-actions { width: 100%; }
   .sport-actions button { flex: 1; }
 }
+
+/* ---- athlete space (AC-66 – AC-77) ---- */
+.space-head { align-items: flex-start; }
+.space-tools { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.athlete-picker { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.athlete-picker input { width: 9rem; }
+.athlete-picker select { min-width: 13rem; }
+.tabs-inline { display: flex; gap: 0.25rem; flex-wrap: wrap; margin: 0 0 1rem; border-bottom: 1px solid var(--border); }
+.tabs-inline a {
+  padding: 0.55rem 0.9rem; color: var(--muted); text-decoration: none; font-weight: 500;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tabs-inline a:hover { color: var(--accent); }
+.tabs-inline a.active { color: var(--accent-strong); border-bottom-color: var(--accent); font-weight: 600; }
+.section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.section-head h2 { margin: 0; }
+.section-head p { margin: 0.15rem 0 0; }
+h3.sub { font-size: 0.95rem; margin: 1.25rem 0 0.4rem; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); gap: 0.75rem; }
+.kpi {
+  display: grid; gap: 0.15rem; padding: 0.75rem 0.9rem; border-radius: var(--radius);
+  background: var(--surface-tint); border: 1px solid var(--border); border-left-width: 4px;
+}
+.kpi-label { font-size: 0.8rem; color: var(--muted); }
+.kpi-value { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi-note { font-size: 0.82rem; font-weight: 600; }
+.kpi-before { font-size: 0.75rem; }
+.trend { font-size: 1.1rem; margin-left: 0.2rem; }
+.kpi.meaning-good { border-left-color: var(--ok); }
+.kpi.meaning-good .kpi-note, .kpi.meaning-good .trend { color: var(--ok); }
+.kpi.meaning-attention { border-left-color: var(--warn); }
+.kpi.meaning-attention .kpi-note, .kpi.meaning-attention .trend { color: var(--warn); }
+.kpi.meaning-change { border-left-color: var(--accent); }
+.kpi.meaning-change .kpi-note, .kpi.meaning-change .trend { color: var(--accent-strong); }
+.kpi.meaning-stable { border-left-color: var(--accent-baby); }
+.kpi.meaning-stable .kpi-note { color: var(--muted); }
+.chart .line.sleep { stroke: var(--chronic); stroke-width: 2.5; fill: none; }
+
+.benchmarks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); gap: 1rem; }
+.benchmark { margin: 0; display: grid; gap: 0.5rem; align-content: start; border-top: 4px solid var(--accent-baby); }
+.benchmark.status-reached { border-top-color: var(--ok); }
+.benchmark.status-behind { border-top-color: var(--warn); }
+.benchmark-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.benchmark-head h3 { margin: 0; font-size: 1rem; }
+.gap { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--accent-strong); }
+.benchmark.status-reached .gap { color: var(--ok); }
+.benchmark.status-behind .gap { color: var(--warn); }
+.benchmark-chart { width: 100%; height: auto; display: block; }
+.benchmark-chart .grid { stroke: var(--border); }
+.benchmark-chart .axis { fill: var(--muted); font-size: 10px; }
+.benchmark-chart .line.results { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.benchmark-chart .result { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+.benchmark-chart .goal-line { stroke: var(--ok); stroke-width: 2; stroke-dasharray: 6 4; }
+.benchmark-chart .squad-line { stroke: var(--chronic); stroke-width: 1.5; stroke-dasharray: 2 4; }
+.key.goal { background: var(--ok); }
+.figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem 1rem; margin: 0; }
+.figures dt { font-size: 0.75rem; color: var(--muted); }
+.figures dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.goal-form { display: grid; gap: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); }
+.goal-form label, .review-form label { display: grid; gap: 0.25rem; font-size: 0.85rem; font-weight: 600; }
+.goal-form input, .note-form textarea, .review-form textarea {
+  font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem 0.6rem;
+}
+.goal-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.session-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.session { margin: 0; }
+.session-line { margin: 0 0 0.4rem; }
+.session-note { margin: 0.4rem 0; padding: 0.5rem 0.75rem; border-left: 3px solid var(--accent-baby); background: var(--surface-tint); border-radius: 0 8px 8px 0; }
+.session-note p { margin: 0 0 0.2rem; }
+.session-note footer { font-size: 0.78rem; }
+.note-form { display: flex; gap: 0.5rem; align-items: flex-end; margin-top: 0.5rem; }
+.note-form textarea { flex: 1; min-width: 0; resize: vertical; }
+
+.review-form { display: grid; gap: 0.75rem; }
+.review-form h3 { margin: 0; }
+.review-weeks { align-items: center; }
+.review { display: grid; gap: 0.35rem; }
+.review h3 { margin: 0; }
+.review h4 { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+.review p { margin: 0; }
+.snapshot { margin-top: 0.5rem; padding: 0.75rem; border-radius: var(--radius); background: var(--surface-tint); }
+.snapshot .figures { grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); }
+
+@media (max-width: 820px) {
+  .space-tools, .athlete-picker { width: 100%; }
+  .athlete-picker label { flex: 1; min-width: 0; }
+  .athlete-picker input, .athlete-picker select { width: 100%; min-width: 0; }
+  .space-tools .button { width: 100%; text-align: center; }
+  .tabs-inline { flex-wrap: nowrap; overflow-x: auto; }
+  .tabs-inline a { flex: none; display: flex; align-items: center; }
+  .weeks, .review-weeks { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .note-form { flex-direction: column; align-items: stretch; }
+}
+.goal-note { display: block; font-weight: 400; font-size: 0.85rem; }
