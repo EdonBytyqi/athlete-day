@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.3 |
+| Version | 1.4 |
 | Status | Current |
 | Date | 2026-10-11 |
 
@@ -55,7 +55,8 @@ medical advice of any kind.
 
 ## 5. Functional requirements
 
-Each acceptance criterion (AC) is verified by at least one automated test tagged with its ID.
+Each acceptance criterion (AC) is verified by at least one automated test tagged with its ID. Levels: *Unit*, *Integration*
+(real API and SQL Server), *Angular* (dashboard component tests) and *Staff* (Blazor component tests with bUnit).
 `dotnet test --filter Category=Spec` fails if an AC has no test or a test names an unknown AC.
 
 ### F1 Access and roles
@@ -196,6 +197,18 @@ Each acceptance criterion (AC) is verified by at least one automated test tagged
 | AC-48 | An unknown athlete returns 404. | Integration |
 | AC-49 | The athlete page shows the history as a table with flagged days highlighted, for coach and physio; other roles do not request it. | Angular |
 
+### F14 Athlete sign-in in the staff app (demo)
+
+*As an athlete, I want to pick my own name in the staff app, so I can send my morning check, whoever I am in the squad.*
+
+Demo only: in production the athlete signs in with Entra ID and the identity already says who they are (ADR-03).
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-50 | In the staff app, choosing the athlete role shows a second list with the current squad (archived athletes excluded, athletes added later included); picking an athlete signs in as that athlete, so their code is the identity sent to the API. | Staff |
+| AC-51 | The morning check greets the signed-in athlete by name and submits for that athlete; picking another athlete switches the form to them. Without a chosen athlete, the form asks to choose one and cannot be sent. | Staff |
+| AC-52 | Every athlete in the squad, including one added after start-up, can submit their own morning check, and it appears on the dashboard. | Integration |
+
 ## 6. Non-functional requirements
 
 | ID | Requirement |
@@ -214,3 +227,4 @@ Each acceptance criterion (AC) is verified by at least one automated test tagged
 | 1.1 | 2026-10-11 | F11 squad management (AC-32–AC-37) and F12 dashboard usability (AC-38–AC-42); age, sex, code and archive rules in section 4. |
 | 1.2 | 2026-10-11 | AC-32: concurrent adds get different codes. AC-36: the audit entry for a new athlete carries its id. Both found in review. |
 | 1.3 | 2026-10-11 | F13 wellness history (AC-43–AC-49); contract: `GET /api/athletes/{athleteId}/wellness`, schema `WellnessDayDto`. Written 2026-10-10 as v1.1 on a parallel branch and renumbered when rebased onto v1.2. |
+| 1.4 | 2026-10-11 | F14 athlete sign-in in the staff app (AC-50–AC-52). Numbered after F13 / v1.3 (wellness history), which is open as a separate PR. Adds the verification level *Staff* (bUnit component tests). |
