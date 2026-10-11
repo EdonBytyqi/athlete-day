@@ -23,18 +23,9 @@ public static class DeviceCsvValidator
     public const int MaxRows = 10_000;
     public static readonly string[] ExpectedHeader = ["athlete_code", "date", "test_type", "value", "unit"];
 
-    private sealed record TestSpec(string Unit, decimal Min, decimal Max);
+    private static IReadOnlyDictionary<string, DeviceTest> Tests => DeviceTests.All;
 
-    private static readonly Dictionary<string, TestSpec> Tests = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["CMJ"] = new("cm", 10, 90),           // counter-movement jump height
-        ["SJ"] = new("cm", 10, 90),            // squat jump height
-        ["SPRINT_30M"] = new("s", 3.0m, 8.0m),
-        ["GPS_DISTANCE"] = new("m", 0, 30_000),
-        ["GPS_HSR"] = new("m", 0, 5_000)       // high-speed running distance
-    };
-
-    public static IReadOnlyCollection<string> SupportedTests => Tests.Keys;
+    public static IReadOnlyCollection<string> SupportedTests => [.. Tests.Keys];
 
     public static DeviceCsvResult Validate(string csv, IReadOnlySet<string> knownAthleteCodes, DateOnly today)
     {
@@ -151,7 +142,7 @@ public static class DeviceCsvValidator
         if (!decimal.TryParse(valueText, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign,
                 CultureInfo.InvariantCulture, out var value))
             return Format(Text.NotANumber, valueText);
-        if (value < spec.Min || value > spec.Max)
+        if (!spec.IsPlausible(value))
             return Format(Text.OutOfRange, value, spec.Unit, spec.Min, spec.Max, test);
 
         column = "unit";

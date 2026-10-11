@@ -9,6 +9,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Sport> Sports => Set<Sport>();
     public DbSet<Athlete> Athletes => Set<Athlete>();
     public DbSet<TrainingSession> TrainingSessions => Set<TrainingSession>();
+    public DbSet<SessionNote> SessionNotes => Set<SessionNote>();
+    public DbSet<Goal> Goals => Set<Goal>();
+    public DbSet<ProgressReview> ProgressReviews => Set<ProgressReview>();
     public DbSet<WellnessCheck> WellnessChecks => Set<WellnessCheck>();
     public DbSet<NutritionTarget> NutritionTargets => Set<NutritionTarget>();
     public DbSet<PhysioNote> PhysioNotes => Set<PhysioNote>();
@@ -51,9 +54,33 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
         b.Entity<TrainingSession>(e =>
         {
-            e.Property(s => s.Notes).HasMaxLength(500);
             // Covers the dashboard report: sessions per athlete within a date window.
             e.HasIndex(s => new { s.AthleteId, s.Date }).IncludeProperties(s => new { s.Rpe, s.DurationMinutes });
+        });
+
+        b.Entity<SessionNote>(e =>
+        {
+            e.Property(n => n.Text).HasMaxLength(1000);
+            e.HasOne(n => n.Session).WithMany().HasForeignKey(n => n.SessionId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<Athlete>().WithMany().HasForeignKey(n => n.AthleteId).OnDelete(DeleteBehavior.NoAction);
+            e.HasIndex(n => new { n.AthleteId, n.CreatedAt });
+        });
+
+        b.Entity<Goal>(e =>
+        {
+            e.Property(g => g.TestType).HasMaxLength(32);
+            e.Property(g => g.Target).HasPrecision(9, 2);
+            e.HasOne<Athlete>().WithMany().HasForeignKey(g => g.AthleteId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(g => new { g.AthleteId, g.TestType }).IsUnique();
+        });
+
+        b.Entity<ProgressReview>(e =>
+        {
+            foreach (var text in new[] { nameof(ProgressReview.Observations), nameof(ProgressReview.Achievements), nameof(ProgressReview.Challenges), nameof(ProgressReview.Recommendations) })
+                e.Property(text).HasMaxLength(2000);
+            e.Property(r => r.SnapshotJson).HasMaxLength(-1); // nvarchar(max)
+            e.HasOne<Athlete>().WithMany().HasForeignKey(r => r.AthleteId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(r => new { r.AthleteId, r.CreatedAt });
         });
 
         b.Entity<WellnessCheck>(e =>

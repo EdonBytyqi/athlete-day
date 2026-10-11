@@ -47,3 +47,20 @@ public enum Sex
     Male,
     NotStated
 }
+
+/// <summary>Last 4 weeks against the 4 before (spec section 4).</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<Trend>))]
+public enum Trend
+{
+    Up,
+    Down,
+    Stable
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<GoalStatus>))]
+public enum GoalStatus
+{
+    Open,
+    Reached,
+    Behind
+}

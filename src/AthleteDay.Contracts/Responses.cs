@@ -125,3 +125,75 @@ public sealed record AuditEntryDto(
     string Action,
     string Resource,
     int? AthleteId);
+
+// ---- Athlete space (spec v1.7) --------------------------------------------------------------------------
+
+/// <summary>One week, Monday to Sunday. Wellness averages are null in a week without morning checks.</summary>
+public sealed record WeeklyProgressDto(
+    DateOnly WeekStart,
+    int TotalLoad,
+    int Sessions,
+    decimal? AverageSleep,
+    double? AverageSoreness,
+    double? AverageMood);
+
+/// <summary>A metric ("load", "sessions", "sleep", "soreness", "mood"): last 4 weeks against the 4 before.</summary>
+public sealed record TrendDto(string Metric, double? Recent, double? Previous, Trend Trend);
+
+public sealed record ProgressDto(int AthleteId, IReadOnlyList<WeeklyProgressDto> Weeks, IReadOnlyList<TrendDto> Trends);
+
+public sealed record TestResultDto(DateOnly Date, decimal Value);
+
+public sealed record GoalDto(string TestType, decimal Target, DateOnly? TargetDate, string? Note, string SetBy);
+
+/// <summary>
+/// One device test of an athlete. Gap to goal: positive = still to go, zero or negative = reached.
+/// History holds the results within the requested period.
+/// </summary>
+public sealed record BenchmarkDto(
+    string TestType,
+    string Unit,
+    bool HigherIsBetter,
+    TestResultDto Latest,
+    TestResultDto Best,
+    TestResultDto? FirstInPeriod,
+    decimal? ChangeInPeriod,
+    decimal? SquadAverage,
+    GoalDto? Goal,
+    decimal? GapToGoal,
+    GoalStatus? Status,
+    IReadOnlyList<TestResultDto> History);
+
+public sealed record SessionNoteDto(
+    int Id,
+    int SessionId,
+    int AthleteId,
+    DateOnly SessionDate,
+    SessionType SessionType,
+    int SessionLoad,
+    string Text,
+    string Author,
+    DateTimeOffset CreatedAt) : IAthleteScoped;
+
+/// <summary>The figures of a review's period, stored when the review is written (ADR-13).</summary>
+public sealed record ReviewSnapshotDto(
+    IReadOnlyList<WeeklyProgressDto> Weeks,
+    int TotalLoad,
+    int Sessions,
+    decimal? AverageSleep,
+    double? AverageSoreness,
+    double? AverageMood,
+    IReadOnlyList<BenchmarkDto> Benchmarks);
+
+public sealed record ProgressReviewDto(
+    int Id,
+    int AthleteId,
+    DateOnly From,
+    DateOnly To,
+    string? Observations,
+    string? Achievements,
+    string? Challenges,
+    string? Recommendations,
+    string Author,
+    DateTimeOffset CreatedAt,
+    ReviewSnapshotDto Snapshot) : IAthleteScoped;

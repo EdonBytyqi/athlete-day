@@ -62,11 +62,18 @@ public static class StaffInputEndpoints
             Type = request.Type,
             DurationMinutes = request.DurationMinutes,
             Rpe = request.Rpe,
-            Notes = request.Notes,
             LoggedBy = user.UserName(),
             LoggedAt = clock.Now
         };
         db.TrainingSessions.Add(session);
+        // A note typed while logging is a session note like any other (ADR-12).
+        if (!string.IsNullOrWhiteSpace(request.Notes))
+        {
+            db.SessionNotes.Add(new SessionNote
+            {
+                Session = session, AthleteId = athlete.Id, Text = request.Notes.Trim(), Author = user.UserName(), CreatedAt = clock.Now
+            });
+        }
         await db.SaveChangesAsync(ct);
         await notifier.DataChangedAsync("session", ct);
 

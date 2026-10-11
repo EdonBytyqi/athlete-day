@@ -19,6 +19,7 @@ var sqlConnection = builder.Configuration.GetConnectionString("Sql")
 builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(sqlConnection, sql => sql.EnableRetryOnFailure()));
 builder.Services.AddSingleton(new SqlConnectionFactory(sqlConnection));
 builder.Services.AddScoped<DashboardReport>();
+builder.Services.AddScoped<AthleteFigures>();
 builder.Services.AddScoped<DemoDataSeeder>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<AppClock>();
@@ -88,7 +89,8 @@ app.MapGroup("/api")
     .MapStaffInputEndpoints()
     .MapReportEndpoints()
     .MapImportEndpoints()
-    .MapSportEndpoints();
+    .MapSportEndpoints()
+    .MapAthleteSpaceEndpoints();
 
 await PrepareDatabaseAsync(app);
 

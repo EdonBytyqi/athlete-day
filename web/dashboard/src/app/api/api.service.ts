@@ -4,6 +4,13 @@ import { TranslationKey } from '../i18n/catalogue';
 import { I18n } from '../i18n/i18n.service';
 import {
   AthleteDetails,
+  AthleteSummary,
+  Benchmark,
+  Goal,
+  Progress,
+  ProgressReview,
+  ReviewRequest,
+  SessionNote,
   AthleteRequest,
   AuditEntry,
   DashboardRow,
@@ -20,6 +27,44 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
+
+  athletes() {
+    return this.http.get<AthleteSummary[]>('/api/athletes');
+  }
+
+  // ---- athlete space (spec v1.7) ----
+
+  progress(athleteId: number, weeks: number) {
+    return this.http.get<Progress>(`/api/athletes/${athleteId}/progress`, { params: { weeks } });
+  }
+
+  benchmarks(athleteId: number, weeks = 12) {
+    return this.http.get<Benchmark[]>(`/api/athletes/${athleteId}/benchmarks`, { params: { weeks } });
+  }
+
+  setGoal(athleteId: number, testType: string, goal: { target: number; targetDate: string | null; note: string | null }) {
+    return this.http.put<Goal>(`/api/athletes/${athleteId}/goals/${testType}`, goal);
+  }
+
+  removeGoal(athleteId: number, testType: string) {
+    return this.http.delete<void>(`/api/athletes/${athleteId}/goals/${testType}`);
+  }
+
+  sessionNotes(athleteId: number) {
+    return this.http.get<SessionNote[]>(`/api/athletes/${athleteId}/session-notes`);
+  }
+
+  addSessionNote(sessionId: number, text: string) {
+    return this.http.post<SessionNote>(`/api/sessions/${sessionId}/notes`, { text });
+  }
+
+  reviews(athleteId: number) {
+    return this.http.get<ProgressReview[]>(`/api/athletes/${athleteId}/reviews`);
+  }
+
+  addReview(athleteId: number, review: ReviewRequest) {
+    return this.http.post<ProgressReview>(`/api/athletes/${athleteId}/reviews`, review);
+  }
 
   athlete(id: number) {
     return this.http.get<AthleteDetails>(`/api/athletes/${id}`);

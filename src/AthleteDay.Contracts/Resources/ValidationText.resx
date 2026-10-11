@@ -25,4 +25,8 @@
   <data name="AgeBetween" xml:space="preserve"><value>The birth year must give an age between {0} and {1}.</value></data>
   <data name="BodyMassRange" xml:space="preserve"><value>Body mass must be between 30 and 200 kg.</value></data>
   <data name="SelectSport" xml:space="preserve"><value>Choose a sport.</value></data>
+  <data name="GoalTargetPositive" xml:space="preserve"><value>The target must be a positive number.</value></data>
+  <data name="TextTooLong" xml:space="preserve"><value>This text can be at most {1} characters.</value></data>
+  <data name="WeeksRange" xml:space="preserve"><value>The period must be between {1} and {2} weeks.</value></data>
+  <data name="ReviewEmpty" xml:space="preserve"><value>Write at least one part of the review.</value></data>
 </root>

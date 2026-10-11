@@ -147,6 +147,49 @@ namespace AthleteDay.Api.Data.Migrations
                     b.ToTable("DeviceMeasurements");
                 });
 
+            modelBuilder.Entity("AthleteDay.Api.Domain.Goal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AthleteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("SetAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("SetBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("Target")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("decimal(9,2)");
+
+                    b.Property<DateOnly?>("TargetDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("TestType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AthleteId", "TestType")
+                        .IsUnique();
+
+                    b.ToTable("Goals");
+                });
+
             modelBuilder.Entity("AthleteDay.Api.Domain.ImportJob", b =>
                 {
                     b.Property<Guid>("Id")
@@ -309,6 +352,95 @@ namespace AthleteDay.Api.Data.Migrations
                     b.ToTable("PhysioNotes");
                 });
 
+            modelBuilder.Entity("AthleteDay.Api.Domain.ProgressReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Achievements")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("AthleteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Challenges")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("From")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Observations")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Recommendations")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasMaxLength(-1)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("To")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AthleteId", "CreatedAt");
+
+                    b.ToTable("ProgressReviews");
+                });
+
+            modelBuilder.Entity("AthleteDay.Api.Domain.SessionNote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AthleteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("SessionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId");
+
+                    b.HasIndex("AthleteId", "CreatedAt");
+
+                    b.ToTable("SessionNotes");
+                });
+
             modelBuilder.Entity("AthleteDay.Api.Domain.Sport", b =>
                 {
                     b.Property<int>("Id")
@@ -357,10 +489,6 @@ namespace AthleteDay.Api.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("Rpe")
                         .HasColumnType("int");
@@ -433,6 +561,15 @@ namespace AthleteDay.Api.Data.Migrations
                     b.Navigation("Athlete");
                 });
 
+            modelBuilder.Entity("AthleteDay.Api.Domain.Goal", b =>
+                {
+                    b.HasOne("AthleteDay.Api.Domain.Athlete", null)
+                        .WithMany()
+                        .HasForeignKey("AthleteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AthleteDay.Api.Domain.ImportRowError", b =>
                 {
                     b.HasOne("AthleteDay.Api.Domain.ImportJob", null)
@@ -462,6 +599,32 @@ namespace AthleteDay.Api.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Athlete");
+                });
+
+            modelBuilder.Entity("AthleteDay.Api.Domain.ProgressReview", b =>
+                {
+                    b.HasOne("AthleteDay.Api.Domain.Athlete", null)
+                        .WithMany()
+                        .HasForeignKey("AthleteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AthleteDay.Api.Domain.SessionNote", b =>
+                {
+                    b.HasOne("AthleteDay.Api.Domain.Athlete", null)
+                        .WithMany()
+                        .HasForeignKey("AthleteId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("AthleteDay.Api.Domain.TrainingSession", "Session")
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Session");
                 });
 
             modelBuilder.Entity("AthleteDay.Api.Domain.TrainingSession", b =>
