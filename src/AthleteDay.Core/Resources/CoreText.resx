@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="NoWellnessCheck" xml:space="preserve"><value>No wellness check today</value></data>
+  <data name="SleepUnder" xml:space="preserve"><value>Sleep under {0} h ({1} h)</value></data>
+  <data name="HighSoreness" xml:space="preserve"><value>High soreness ({0}/5)</value></data>
+  <data name="LowMood" xml:space="preserve"><value>Low mood ({0}/5)</value></data>
+  <data name="LoadWellAbove" xml:space="preserve"><value>7-day load well above 28-day average (ratio {0})</value></data>
+  <data name="LoadWellBelow" xml:space="preserve"><value>7-day load well below 28-day average (ratio {0})</value></data>
+  <data name="PhysioRestriction" xml:space="preserve"><value>Physio restriction: {0}</value></data>
+  <data name="RestrictionModified" xml:space="preserve"><value>Modified</value></data>
+  <data name="RestrictionNoTraining" xml:space="preserve"><value>NoTraining</value></data>
+  <data name="FileEmpty" xml:space="preserve"><value>The file is empty.</value></data>
+  <data name="ExpectedHeader" xml:space="preserve"><value>Expected header '{0}'.</value></data>
+  <data name="TooManyRows" xml:space="preserve"><value>More than {0} rows; the rest of the file was not read.</value></data>
+  <data name="DuplicateRow" xml:space="preserve"><value>Duplicate of an earlier row (same athlete, date and test).</value></data>
+  <data name="ColumnCount" xml:space="preserve"><value>Expected {0} columns, found {1}.</value></data>
+  <data name="UnknownAthleteCode" xml:space="preserve"><value>Unknown athlete code '{0}'.</value></data>
+  <data name="BadDate" xml:space="preserve"><value>'{0}' is not a date in the format yyyy-MM-dd.</value></data>
+  <data name="UnknownTest" xml:space="preserve"><value>Unknown test type '{0}'. Supported: {1}.</value></data>
+  <data name="DecimalComma" xml:space="preserve"><value>'{0}' uses a decimal comma; use '.' as the decimal separator.</value></data>
+  <data name="NotANumber" xml:space="preserve"><value>'{0}' is not a number.</value></data>
+  <data name="OutOfRange" xml:space="preserve"><value>{0} {1} is outside the plausible range {2}-{3} {1} for {4}.</value></data>
+  <data name="UnitMismatch" xml:space="preserve"><value>Unit '{0}' does not match {1}; expected '{2}'.</value></data>
+  <data name="AthleteCodeMissing" xml:space="preserve"><value>Athlete code is missing.</value></data>
+  <data name="DateInFuture" xml:space="preserve"><value>Date is in the future.</value></data>
+</root>

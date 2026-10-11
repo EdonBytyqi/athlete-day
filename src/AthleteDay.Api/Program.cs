@@ -66,6 +66,12 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+// Server texts (validation, readiness reasons, import errors) follow Accept-Language: German for de, de-CH …,
+// English otherwise (ADR-09). Numbers in these texts stay invariant, so only the UI culture matters.
+app.UseRequestLocalization(o => o
+    .SetDefaultCulture("en")
+    .AddSupportedCultures("en", "de")
+    .AddSupportedUICultures("en", "de"));
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

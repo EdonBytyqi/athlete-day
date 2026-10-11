@@ -1,3 +1,4 @@
+using System.Globalization;
 using AthleteDay.Api.Data;
 using AthleteDay.Api.Domain;
 using AthleteDay.Api.Infrastructure;
@@ -32,6 +33,8 @@ public sealed class ImportProcessor(
 
         try
         {
+            // Row errors are stored as text, in the uploader's language (ADR-09). The change only lasts for this call.
+            CultureInfo.CurrentUICulture = UploaderCulture(evt.Culture);
             var csv = await files.ReadTextAsync(evt.BlobName, ct);
             var athletes = await db.Athletes.AsNoTracking().ToDictionaryAsync(a => a.Code, a => a.Id, ct);
             var result = DeviceCsvValidator.Validate(csv, athletes.Keys.ToHashSet(), clock.Today);
@@ -76,6 +79,12 @@ public sealed class ImportProcessor(
         }
 
         await notifier.DataChangedAsync("import", ct);
+    }
+
+    private static CultureInfo UploaderCulture(string? name)
+    {
+        try { return name is { Length: > 0 } ? CultureInfo.GetCultureInfo(name) : CultureInfo.InvariantCulture; }
+        catch (CultureNotFoundException) { return CultureInfo.InvariantCulture; }
     }
 
     private static string Truncate(string value, int max) => value.Length <= max ? value : value[..max];

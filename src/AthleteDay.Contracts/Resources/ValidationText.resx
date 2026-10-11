@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="SelectAthlete" xml:space="preserve"><value>Select an athlete.</value></data>
+  <data name="DateNotInFuture" xml:space="preserve"><value>Date cannot be in the future.</value></data>
+  <data name="DurationRange" xml:space="preserve"><value>Duration must be between 5 and 300 minutes.</value></data>
+  <data name="RpeRange" xml:space="preserve"><value>RPE must be between 1 and 10.</value></data>
+  <data name="NotesLength" xml:space="preserve"><value>Notes can be at most {1} characters.</value></data>
+  <data name="SleepRange" xml:space="preserve"><value>Sleep must be between 0 and 14 hours.</value></data>
+  <data name="SorenessRange" xml:space="preserve"><value>Soreness must be between 1 and 5.</value></data>
+  <data name="MoodRange" xml:space="preserve"><value>Mood must be between 1 and 5.</value></data>
+  <data name="EnergyRange" xml:space="preserve"><value>Energy must be between 1200 and 7000 kcal.</value></data>
+  <data name="CarbsRange" xml:space="preserve"><value>Carbohydrates must be between 2 and 12 g/kg.</value></data>
+  <data name="KitchenNoteLength" xml:space="preserve"><value>The kitchen note can be at most {1} characters.</value></data>
+  <data name="NoteRequired" xml:space="preserve"><value>A note is required.</value></data>
+  <data name="NoteLength" xml:space="preserve"><value>The note must be {2} to {1} characters.</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>Enter a name.</value></data>
+  <data name="NameLength" xml:space="preserve"><value>Name must be 2 to 60 characters.</value></data>
+  <data name="SportRequired" xml:space="preserve"><value>Enter a sport.</value></data>
+  <data name="SportLength" xml:space="preserve"><value>Sport must be 2 to 60 characters.</value></data>
+  <data name="BirthYearRequired" xml:space="preserve"><value>Enter the birth year.</value></data>
+  <data name="AgeBetween" xml:space="preserve"><value>The birth year must give an age between {0} and {1}.</value></data>
+  <data name="BodyMassRange" xml:space="preserve"><value>Body mass must be between 30 and 200 kg.</value></data>
+</root>

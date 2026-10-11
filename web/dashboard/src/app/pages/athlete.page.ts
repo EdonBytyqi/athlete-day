@@ -2,115 +2,147 @@ import { Component, computed, effect, inject, input, signal, untracked } from '@
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService, describeError } from '../api/api.service';
-import { AthleteDetails, LoadTrend, Measurement, PhysioNote, Sex, TrainingSession, WellnessDay } from '../api/models';
+import { AthleteDetails, LoadTrend, Measurement, PhysioNote, Sex, TrainingRestriction, TrainingSession, WellnessDay } from '../api/models';
 import { PersonaService } from '../api/persona.service';
 import { RealtimeService } from '../api/realtime.service';
+import { TranslationKey } from '../i18n/catalogue';
+import { I18n } from '../i18n/i18n.service';
 import { logSessionUrl } from '../shared/staff-url';
 import { TrendChart } from '../shared/trend-chart';
-
-const SEX_LABELS: Record<Sex, string> = { Female: 'female', Male: 'male', NotStated: 'sex not stated' };
 
 @Component({
   selector: 'app-athlete-page',
   imports: [RouterLink, TrendChart],
   template: `
-    <a routerLink="/dashboard" class="back">← Squad</a>
+    <a routerLink="/dashboard" class="back">{{ t('athlete.back') }}</a>
 
     @if (error(); as message) {
       <p class="banner error" role="alert">{{ message }}</p>
-    } @else if (trend(); as t) {
+    } @else if (trend(); as load) {
       <header class="page-head">
         <div>
           @if (details(); as d) {
             <h1>{{ d.displayName }}</h1>
-            <p class="muted">{{ d.code }} · {{ d.sport }} · {{ age(d) }} · {{ sexLabels[d.sex] }} · {{ d.bodyMassKg }} kg</p>
+            <p class="muted">
+              {{ d.code }} · {{ d.sport }} · {{ age(d) }} · {{ t(sexText(d.sex)) }} ·
+              {{ t('athlete.kg', { value: i18n.number(d.bodyMassKg, 1, 0) }) }}
+            </p>
           } @else {
-            <h1>{{ t.code }}</h1>
+            <h1>{{ load.code }}</h1>
           }
-          <p class="muted">Training load over the last 28 days</p>
+          <p class="muted">{{ t('athlete.trendLead') }}</p>
         </div>
         @if (isCoach()) {
-          <a class="button" [href]="logSessionUrl(t.athleteId)" target="_blank" rel="noopener">Log session ↗</a>
+          <a class="button" [href]="logSessionUrl(load.athleteId)" target="_blank" rel="noopener">{{ t('athlete.logSession') }}</a>
         }
       </header>
 
       <section class="panel">
-        <app-trend-chart [points]="t.points" />
-        <p class="footnote">A monitoring aid for planning, not an injury predictor.</p>
+        <app-trend-chart [points]="load.points" />
+        <p class="footnote">{{ t('athlete.monitoringAid') }}</p>
       </section>
 
       <div class="two-col">
         <section class="panel">
-          <h2>Recent sessions</h2>
-          <table class="grid-table compact">
-            <thead><tr><th>Date</th><th>Type</th><th class="num">Min</th><th class="num">RPE</th><th class="num">Load</th></tr></thead>
-            <tbody>
-              @for (s of sessions(); track s.id) {
-                <tr><td>{{ s.date }}</td><td>{{ s.type }}</td><td class="num">{{ s.durationMinutes }}</td><td class="num">{{ s.rpe }}</td><td class="num">{{ s.load }}</td></tr>
-              }
-            </tbody>
-          </table>
-        </section>
-
-        <section class="panel">
-          <h2>Device measurements</h2>
-          @if (measurements().length) {
+          <h2>{{ t('athlete.recentSessions') }}</h2>
+          <div class="table-scroll">
             <table class="grid-table compact">
-              <thead><tr><th>Date</th><th>Test</th><th class="num">Value</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>{{ t('athlete.col.date') }}</th><th>{{ t('athlete.col.type') }}</th>
+                  <th class="num">{{ t('athlete.col.minutes') }}</th><th class="num">{{ t('athlete.col.rpe') }}</th>
+                  <th class="num">{{ t('athlete.col.load') }}</th>
+                </tr>
+              </thead>
               <tbody>
-                @for (m of measurements(); track $index) {
-                  <tr><td>{{ m.date }}</td><td>{{ m.testType }}</td><td class="num">{{ m.value }} {{ m.unit }}</td></tr>
+                @for (s of sessions(); track s.id) {
+                  <tr>
+                    <td class="nowrap">{{ i18n.date(s.date) }}</td><td>{{ t(sessionType(s.type)) }}</td>
+                    <td class="num">{{ s.durationMinutes }}</td><td class="num">{{ s.rpe }}</td>
+                    <td class="num">{{ i18n.number(s.load) }}</td>
+                  </tr>
                 }
               </tbody>
             </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>{{ t('athlete.measurements') }}</h2>
+          @if (measurements().length) {
+            <div class="table-scroll">
+              <table class="grid-table compact">
+                <thead>
+                  <tr><th>{{ t('athlete.col.date') }}</th><th>{{ t('athlete.col.test') }}</th><th class="num">{{ t('athlete.col.value') }}</th></tr>
+                </thead>
+                <tbody>
+                  @for (m of measurements(); track $index) {
+                    <tr>
+                      <td class="nowrap">{{ i18n.date(m.date) }}</td><td>{{ m.testType }}</td>
+                      <td class="num">{{ i18n.number(m.value, 2, 0) }} {{ m.unit }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           } @else {
-            <p class="muted">No imported measurements yet.</p>
+            <p class="muted">{{ t('athlete.noMeasurements') }}</p>
           }
         </section>
       </div>
 
       @if (canSeeWellness()) {
         <section class="panel">
-          <h2>Morning checks · last 14 days</h2>
+          <h2>{{ t('athlete.wellnessTitle') }}</h2>
           @if (wellness().length) {
-            <table class="grid-table compact wellness-history">
-              <thead><tr><th>Date</th><th class="num">Sleep</th><th class="num">Soreness</th><th class="num">Mood</th><th>Flags</th></tr></thead>
-              <tbody>
-                @for (d of wellness(); track d.date) {
-                  <tr [class.flagged]="d.flags.length > 0">
-                    <td>{{ d.date }}</td>
-                    <td class="num">{{ d.sleepHours }} h</td>
-                    <td class="num">{{ d.soreness }}/5</td>
-                    <td class="num">{{ d.mood }}/5</td>
-                    <td>{{ d.flags.join(' · ') || '–' }}</td>
+            <div class="table-scroll">
+              <table class="grid-table compact wellness-history">
+                <thead>
+                  <tr>
+                    <th>{{ t('athlete.col.date') }}</th><th class="num">{{ t('athlete.col.sleep') }}</th>
+                    <th class="num">{{ t('athlete.col.soreness') }}</th><th class="num">{{ t('athlete.col.mood') }}</th>
+                    <th>{{ t('athlete.col.flags') }}</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (d of wellness(); track d.date) {
+                    <tr [class.flagged]="d.flags.length > 0">
+                      <td class="nowrap">{{ i18n.date(d.date) }}</td>
+                      <td class="num">{{ i18n.number(d.sleepHours, 1, 0) }} h</td>
+                      <td class="num">{{ d.soreness }}/5</td>
+                      <td class="num">{{ d.mood }}/5</td>
+                      <td>{{ d.flags.join(' · ') || '–' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           } @else {
-            <p class="muted">No morning checks in the last 14 days.</p>
+            <p class="muted">{{ t('athlete.noWellness') }}</p>
           }
         </section>
       }
 
       <section class="panel">
-        <h2>Physio notes</h2>
+        <h2>{{ t('athlete.physioNotes') }}</h2>
         @if (isPhysio()) {
           @for (n of notes(); track n.id) {
             <article class="note">
-              <div class="muted">{{ n.date }} · {{ n.author }} · restriction: {{ n.restriction }}</div>
+              <div class="muted">
+                {{ t('athlete.noteMeta', { date: i18n.date(n.date), author: n.author, restriction: t(restrictionLabel(n.restriction)) }) }}
+              </div>
               <p>{{ n.note }}</p>
             </article>
           } @empty {
-            <p class="muted">No notes.</p>
+            <p class="muted">{{ t('athlete.noNotes') }}</p>
           }
-          <p class="footnote">Every time you open these notes, it is written to the audit log.</p>
+          <p class="footnote">{{ t('athlete.notesAudited') }}</p>
         } @else {
-          <p class="muted">Health notes are visible to physios only. You see the restriction level on the squad page.</p>
+          <p class="muted">{{ t('athlete.notesPhysioOnly') }}</p>
         }
       </section>
     } @else {
-      <p class="muted">Loading…</p>
+      <p class="muted">{{ t('common.loading') }}</p>
     }
   `,
 })
@@ -118,6 +150,8 @@ export class AthletePage {
   private readonly api = inject(ApiService);
   private readonly persona = inject(PersonaService);
   private readonly realtime = inject(RealtimeService);
+  protected readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
 
   readonly id = input.required<string>();
 
@@ -130,23 +164,39 @@ export class AthletePage {
   protected readonly wellness = signal<WellnessDay[]>([]);
   protected readonly isPhysio = computed(() => this.persona.current().role === 'Physio');
   protected readonly isCoach = computed(() => this.persona.current().role === 'Coach');
-  protected readonly sexLabels = SEX_LABELS;
-  protected readonly logSessionUrl = logSessionUrl;
   private readonly thisYear = new Date().getFullYear();
   // Spec F13 AC-46/AC-49: wellness history is for coach and physio only.
   protected readonly canSeeWellness = computed(() => ['Coach', 'Physio'].includes(this.persona.current().role));
 
-  protected age(d: AthleteDetails): string {
-    return d.birthYear === null ? 'age unknown' : `${this.thisYear - d.birthYear} years`;
-  }
-
   constructor() {
+    // Reload on a language switch too: wellness flags are server texts in the request's language.
     effect(() => {
       const athleteId = Number(this.id());
       const role = this.persona.current().role;
+      this.i18n.lang();
       this.realtime.version();
       untracked(() => this.load(athleteId, role));
     });
+  }
+
+  protected logSessionUrl(athleteId: number): string {
+    return logSessionUrl(athleteId, this.i18n.lang());
+  }
+
+  protected age(d: AthleteDetails): string {
+    return d.birthYear === null ? this.t('athlete.ageUnknown') : this.t('athlete.years', { n: this.thisYear - d.birthYear });
+  }
+
+  protected sexText(sex: Sex): TranslationKey {
+    return `athlete.sexText.${sex}`;
+  }
+
+  protected sessionType(type: string): TranslationKey {
+    return `sessionType.${type}` as TranslationKey;
+  }
+
+  protected restrictionLabel(restriction: TrainingRestriction): TranslationKey {
+    return `restriction.${restriction}`;
   }
 
   private load(athleteId: number, role: string): void {
@@ -165,7 +215,7 @@ export class AthletePage {
       },
       error: (e) => {
         this.trend.set(null);
-        this.error.set(describeError(e, role));
+        this.error.set(describeError(e, role, this.t));
       },
     });
 

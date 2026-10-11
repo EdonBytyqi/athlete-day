@@ -1,5 +1,6 @@
 using AthleteDay.Contracts;
-using static System.FormattableString;
+using System.Globalization;
+using Text = AthleteDay.Core.Resources.CoreText;
 
 namespace AthleteDay.Core;
 
@@ -20,11 +21,11 @@ public static class ReadinessEvaluator
     {
         var flags = new List<string>();
         if (wellness.SleepHours < MinSleepHours)
-            flags.Add(Invariant($"Sleep under {MinSleepHours:0} h ({wellness.SleepHours:0.#} h)"));
+            flags.Add(Format(Text.SleepUnder, MinSleepHours.ToString("0", CultureInfo.InvariantCulture), wellness.SleepHours.ToString("0.#", CultureInfo.InvariantCulture)));
         if (wellness.Soreness >= HighSoreness)
-            flags.Add(Invariant($"High soreness ({wellness.Soreness}/5)"));
+            flags.Add(Format(Text.HighSoreness, wellness.Soreness));
         if (wellness.Mood <= LowMood)
-            flags.Add(Invariant($"Low mood ({wellness.Mood}/5)"));
+            flags.Add(Format(Text.LowMood, wellness.Mood));
         return flags;
     }
 
@@ -33,17 +34,17 @@ public static class ReadinessEvaluator
         var reasons = new List<string>();
 
         if (wellness is null)
-            reasons.Add("No wellness check today");
+            reasons.Add(Text.NoWellnessCheck);
         else
             reasons.AddRange(WellnessFlags(wellness));
 
         if (ratio > HighRatio)
-            reasons.Add(Invariant($"7-day load well above 28-day average (ratio {ratio:0.00})"));
+            reasons.Add(Format(Text.LoadWellAbove, ratio.Value.ToString("0.00", CultureInfo.InvariantCulture)));
         else if (ratio < LowRatio)
-            reasons.Add(Invariant($"7-day load well below 28-day average (ratio {ratio:0.00})"));
+            reasons.Add(Format(Text.LoadWellBelow, ratio.Value.ToString("0.00", CultureInfo.InvariantCulture)));
 
         if (restriction != TrainingRestriction.None)
-            reasons.Add(Invariant($"Physio restriction: {restriction}"));
+            reasons.Add(Format(Text.PhysioRestriction, RestrictionName(restriction)));
 
         var status = reasons.Count switch
         {
@@ -54,4 +55,15 @@ public static class ReadinessEvaluator
 
         return new ReadinessDto(status, reasons);
     }
+
+    // Texts come from Resources/CoreText(.de).resx in the current UI culture; numbers stay invariant ("5.5 h").
+    private static string Format(string template, params object[] args) =>
+        string.Format(CultureInfo.InvariantCulture, template, args);
+
+    private static string RestrictionName(TrainingRestriction restriction) => restriction switch
+    {
+        TrainingRestriction.Modified => Text.RestrictionModified,
+        TrainingRestriction.NoTraining => Text.RestrictionNoTraining,
+        _ => restriction.ToString()
+    };
 }

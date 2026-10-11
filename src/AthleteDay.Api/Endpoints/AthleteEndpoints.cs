@@ -3,6 +3,7 @@ using AthleteDay.Api.Auth;
 using AthleteDay.Api.Data;
 using AthleteDay.Api.Domain;
 using AthleteDay.Api.Infrastructure;
+using AthleteDay.Api.Resources;
 using AthleteDay.Api.Realtime;
 using AthleteDay.Api.Reports;
 using AthleteDay.Contracts;
@@ -88,7 +89,7 @@ public static class AthleteEndpoints
                     if (window is < 1 or > 28)
                         return TypedResults.ValidationProblem(new Dictionary<string, string[]>
                         {
-                            ["days"] = ["days must be between 1 and 28."]
+                            ["days"] = [ApiText.DaysRange]
                         });
 
                     if (!await db.Athletes.AnyAsync(a => a.Id == athleteId, ct)) return TypedResults.NotFound();

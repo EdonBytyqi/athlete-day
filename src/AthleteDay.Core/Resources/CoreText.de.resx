@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="NoWellnessCheck" xml:space="preserve"><value>Heute kein Morgencheck</value></data>
+  <data name="SleepUnder" xml:space="preserve"><value>Schlaf unter {0} h ({1} h)</value></data>
+  <data name="HighSoreness" xml:space="preserve"><value>Starker Muskelkater ({0}/5)</value></data>
+  <data name="LowMood" xml:space="preserve"><value>Tiefe Stimmung ({0}/5)</value></data>
+  <data name="LoadWellAbove" xml:space="preserve"><value>7-Tage-Belastung deutlich über dem 28-Tage-Schnitt (Verhältnis {0})</value></data>
+  <data name="LoadWellBelow" xml:space="preserve"><value>7-Tage-Belastung deutlich unter dem 28-Tage-Schnitt (Verhältnis {0})</value></data>
+  <data name="PhysioRestriction" xml:space="preserve"><value>Physio-Einschränkung: {0}</value></data>
+  <data name="RestrictionModified" xml:space="preserve"><value>angepasstes Training</value></data>
+  <data name="RestrictionNoTraining" xml:space="preserve"><value>kein Training</value></data>
+  <data name="FileEmpty" xml:space="preserve"><value>Die Datei ist leer.</value></data>
+  <data name="ExpectedHeader" xml:space="preserve"><value>Erwartete Kopfzeile '{0}'.</value></data>
+  <data name="TooManyRows" xml:space="preserve"><value>Mehr als {0} Zeilen; der Rest der Datei wurde nicht gelesen.</value></data>
+  <data name="DuplicateRow" xml:space="preserve"><value>Doppelte Zeile (gleicher Athletencode, gleiches Datum, gleicher Test).</value></data>
+  <data name="ColumnCount" xml:space="preserve"><value>{0} Spalten erwartet, {1} gefunden.</value></data>
+  <data name="UnknownAthleteCode" xml:space="preserve"><value>Unbekannter Athletencode '{0}'.</value></data>
+  <data name="BadDate" xml:space="preserve"><value>'{0}' ist kein Datum im Format yyyy-MM-dd.</value></data>
+  <data name="UnknownTest" xml:space="preserve"><value>Unbekannter Testtyp '{0}'. Unterstützt: {1}.</value></data>
+  <data name="DecimalComma" xml:space="preserve"><value>'{0}' verwendet ein Dezimalkomma; bitte '.' als Dezimaltrennzeichen verwenden.</value></data>
+  <data name="NotANumber" xml:space="preserve"><value>'{0}' ist keine Zahl.</value></data>
+  <data name="OutOfRange" xml:space="preserve"><value>{0} {1} liegt ausserhalb des plausiblen Bereichs {2}–{3} {1} für {4}.</value></data>
+  <data name="UnitMismatch" xml:space="preserve"><value>Die Einheit '{0}' passt nicht zu {1}; erwartet wird '{2}'.</value></data>
+  <data name="AthleteCodeMissing" xml:space="preserve"><value>Der Athletencode fehlt.</value></data>
+  <data name="DateInFuture" xml:space="preserve"><value>Das Datum liegt in der Zukunft.</value></data>
+</root>

@@ -8,4 +8,16 @@
     <InternalsVisibleTo Include="AthleteDay.UnitTests" />
   </ItemGroup>
 
+  <!-- Translations (ADR-09): English in CoreText.resx, German in CoreText.de.resx, typed access through AthleteDay.Core.Resources.CoreText. -->
+  <ItemGroup>
+    <EmbeddedResource Update="Resources/CoreText.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>AthleteDay.Core.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>CoreText</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)CoreText.Designer.cs</StronglyTypedFileName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

@@ -3,9 +3,11 @@ using AthleteDay.Api.Data;
 using AthleteDay.Api.Domain;
 using AthleteDay.Api.Imports;
 using AthleteDay.Api.Infrastructure;
+using AthleteDay.Api.Resources;
 using AthleteDay.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Security.Claims;
 
 namespace AthleteDay.Api.Endpoints;
@@ -53,9 +55,9 @@ public static class ImportEndpoints
         AppClock clock, CancellationToken ct)
     {
         if (file.Length == 0 || file.Length > MaxFileBytes)
-            return Invalid("The file must be between 1 byte and 2 MB.");
+            return Invalid(ApiText.FileSize);
         if (!Path.GetExtension(file.FileName).Equals(".csv", StringComparison.OrdinalIgnoreCase))
-            return Invalid("Only .csv files are accepted.");
+            return Invalid(ApiText.CsvOnly);
 
         var job = new ImportJob
         {
@@ -75,7 +77,8 @@ public static class ImportEndpoints
         }
         db.ImportJobs.Add(job);
         await db.SaveChangesAsync(ct);
-        await queue.PublishAsync(new ImportFileUploaded(job.Id, job.BlobName), ct);
+        // The worker runs outside this request, so the event carries the uploader's language for the row errors.
+        await queue.PublishAsync(new ImportFileUploaded(job.Id, job.BlobName, CultureInfo.CurrentUICulture.Name), ct);
 
         return TypedResults.Accepted($"/api/imports/{job.Id}", ToDto(job, []));
     }

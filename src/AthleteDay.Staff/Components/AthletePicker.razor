@@ -1,9 +1,9 @@
 @inject StaffApi Api
 
 <label>
-    Athlete
+    @L["Athlete"]
     <select value="@Value" @onchange="OnChanged">
-        <option value="0">Select…</option>
+        <option value="0">@L["Select"]</option>
         @foreach (var a in _athletes)
         {
             <option value="@a.Id">@a.Code · @a.DisplayName (@a.Sport)</option>

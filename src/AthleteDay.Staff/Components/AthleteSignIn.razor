@@ -6,9 +6,9 @@
 @if (Persona.Is(Roles.Athlete))
 {
     <label class="persona">
-        <span>Athlete</span>
+        <span>@L["AthleteSignInLabel"]</span>
         <select value="@(Persona.SignedInAthlete?.Code ?? "")" @onchange="OnChosen">
-            <option value="">Choose your name…</option>
+            <option value="">@L["ChooseYourName"]</option>
             @foreach (var a in _squad)
             {
                 <option value="@a.Code">@a.DisplayName (@a.Code)</option>

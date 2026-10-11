@@ -30,7 +30,7 @@ public sealed class LanguageTests : StaffTestContext
     {
         using var _ = UseCulture("de-CH");
         var cut = Render<LogSession>();
-        cut.WaitForAssertion(() => Assert.Contains("Ada (ATH-007)", cut.Markup));
+        cut.WaitForAssertion(() => Assert.Contains("ATH-007", cut.Markup)); // the athlete list has loaded
 
         Assert.Contains("Trainingseinheit erfassen", cut.Find("h1").TextContent);
         Assert.Contains("Dauer (Minuten)", cut.Markup);

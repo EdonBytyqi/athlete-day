@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="SelectAthlete" xml:space="preserve"><value>Bitte eine Athletin oder einen Athleten wählen.</value></data>
+  <data name="DateNotInFuture" xml:space="preserve"><value>Das Datum darf nicht in der Zukunft liegen.</value></data>
+  <data name="DurationRange" xml:space="preserve"><value>Die Dauer muss zwischen 5 und 300 Minuten liegen.</value></data>
+  <data name="RpeRange" xml:space="preserve"><value>Die RPE muss zwischen 1 und 10 liegen.</value></data>
+  <data name="NotesLength" xml:space="preserve"><value>Notizen dürfen höchstens {1} Zeichen lang sein.</value></data>
+  <data name="SleepRange" xml:space="preserve"><value>Der Schlaf muss zwischen 0 und 14 Stunden liegen.</value></data>
+  <data name="SorenessRange" xml:space="preserve"><value>Der Muskelkater muss zwischen 1 und 5 liegen.</value></data>
+  <data name="MoodRange" xml:space="preserve"><value>Die Stimmung muss zwischen 1 und 5 liegen.</value></data>
+  <data name="EnergyRange" xml:space="preserve"><value>Die Energie muss zwischen 1200 und 7000 kcal liegen.</value></data>
+  <data name="CarbsRange" xml:space="preserve"><value>Die Kohlenhydrate müssen zwischen 2 und 12 g/kg liegen.</value></data>
+  <data name="KitchenNoteLength" xml:space="preserve"><value>Die Notiz für die Küche darf höchstens {1} Zeichen lang sein.</value></data>
+  <data name="NoteRequired" xml:space="preserve"><value>Eine Notiz ist erforderlich.</value></data>
+  <data name="NoteLength" xml:space="preserve"><value>Die Notiz muss {2} bis {1} Zeichen lang sein.</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>Bitte einen Namen eingeben.</value></data>
+  <data name="NameLength" xml:space="preserve"><value>Der Name muss 2 bis 60 Zeichen lang sein.</value></data>
+  <data name="SportRequired" xml:space="preserve"><value>Bitte eine Sportart eingeben.</value></data>
+  <data name="SportLength" xml:space="preserve"><value>Die Sportart muss 2 bis 60 Zeichen lang sein.</value></data>
+  <data name="BirthYearRequired" xml:space="preserve"><value>Bitte das Geburtsjahr eingeben.</value></data>
+  <data name="AgeBetween" xml:space="preserve"><value>Das Geburtsjahr muss ein Alter zwischen {0} und {1} ergeben.</value></data>
+  <data name="BodyMassRange" xml:space="preserve"><value>Das Körpergewicht muss zwischen 30 und 200 kg liegen.</value></data>
+</root>

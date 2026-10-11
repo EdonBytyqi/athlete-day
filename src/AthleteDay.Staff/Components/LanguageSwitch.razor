@@ -1,0 +1,22 @@
+@using System.Globalization
+@inject NavigationManager Navigation
+
+@* Blazor WebAssembly loads culture data at start-up, so switching reloads the page with ?lang= (ADR-09). *@
+<div class="lang-switch" role="group" aria-label="@L["Language"]">
+    @foreach (var (code, label) in Languages)
+    {
+        <button type="button" aria-pressed="@(Current == code ? "true" : "false")" @onclick="() => Switch(code)">@label</button>
+    }
+</div>
+
+@code {
+    private static readonly (string Code, string Label)[] Languages = [("en", "EN"), ("de", "DE")];
+
+    private static string Current => CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "de" ? "de" : "en";
+
+    private void Switch(string code)
+    {
+        if (code == Current) return;
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("lang", code), forceLoad: true);
+    }
+}

@@ -1,5 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { TranslationKey } from '../i18n/catalogue';
+import { I18n } from '../i18n/i18n.service';
 import {
   AthleteDetails,
   AthleteRequest,
@@ -91,14 +93,15 @@ export class ApiService {
 }
 
 /** Turns an HTTP error into a sentence for the screen. A 403 is expected behaviour, not a bug. */
-export function describeError(error: unknown, role: string): string {
+export function describeError(error: unknown, role: string, t: I18n['t']): string {
   if (error instanceof HttpErrorResponse) {
-    if (error.status === 403) return `Not available for the ${role} role. That is by design: need-to-know access.`;
-    if (error.status === 401) return 'No identity was sent with the request.';
-    if (error.status === 0) return 'The API is not reachable. Is it running on http://localhost:5080?';
+    if (error.status === 403) return t('errors.forbidden', { role: t(`roles.${role}` as TranslationKey) });
+    if (error.status === 401) return t('errors.unauthorized');
+    if (error.status === 0) return t('errors.unreachable');
+    // Validation messages already come in the request's language (Accept-Language).
     const fieldErrors = error.error?.errors as Record<string, string[]> | undefined;
     if (fieldErrors) return Object.values(fieldErrors).flat().join(' ');
-    return `The API answered ${error.status} ${error.statusText}.`;
+    return t('errors.status', { status: error.status, text: error.statusText });
   }
-  return 'Something went wrong.';
+  return t('errors.generic');
 }

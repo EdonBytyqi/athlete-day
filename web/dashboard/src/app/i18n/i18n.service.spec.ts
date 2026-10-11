@@ -25,7 +25,8 @@ describe('I18n', () => {
 
     i18n.setLanguage('de');
     expect(i18n.date('2026-10-11')).toBe('11.10.2026');
-    expect(i18n.number(1234.5, 1)).toBe('1’234.5');
+    // The Swiss grouping mark is ' or ’ depending on the browser's locale data (CLDR version); both are correct.
+    expect(i18n.number(1234.5, 1)).toMatch(/^1['’]234\.5$/);
   });
 
   it('[AC-53] translates keys with parameters and remembers the choice', () => {

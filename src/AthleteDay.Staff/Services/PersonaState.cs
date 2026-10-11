@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Net.Http.Headers;
 using AthleteDay.Contracts;
 
 namespace AthleteDay.Staff.Services;
@@ -47,7 +49,7 @@ public sealed class PersonaState
     public bool Is(string role) => Current.Role == role;
 }
 
-/// <summary>Adds the demo identity headers to every API call.</summary>
+/// <summary>Adds the demo identity and the current language to every API call.</summary>
 public sealed class DemoHeadersHandler(PersonaState persona) : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -56,6 +58,10 @@ public sealed class DemoHeadersHandler(PersonaState persona) : DelegatingHandler
         request.Headers.Remove(DemoHeaders.Role);
         request.Headers.Add(DemoHeaders.User, persona.Current.User);
         request.Headers.Add(DemoHeaders.Role, persona.Current.Role);
+        // Server texts (validation, errors) come back in the app's language (ADR-09).
+        request.Headers.AcceptLanguage.Clear();
+        request.Headers.AcceptLanguage.Add(new StringWithQualityHeaderValue(
+            CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "de" ? "de" : "en"));
         return base.SendAsync(request, cancellationToken);
     }
 }

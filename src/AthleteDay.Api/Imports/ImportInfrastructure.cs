@@ -7,7 +7,8 @@ using Azure.Storage.Queues;
 namespace AthleteDay.Api.Imports;
 
 /// <summary>The event published when a device file has landed in storage.</summary>
-public sealed record ImportFileUploaded(Guid JobId, string BlobName);
+/// <param name="Culture">The uploader's UI culture (e.g. "de-CH"), so row errors are written in their language. Null in older events.</param>
+public sealed record ImportFileUploaded(Guid JobId, string BlobName, string? Culture = null);
 
 /// <summary>A received event. Call <see cref="CompleteAsync"/> once it is handled, or it is delivered again.</summary>
 public sealed record ReceivedImportEvent(ImportFileUploaded Event, Func<Task> CompleteAsync);

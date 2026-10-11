@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="BrandSub" xml:space="preserve"><value>Erfassung</value></data>
+  <data name="SignedInAs" xml:space="preserve"><value>Angemeldet als</value></data>
+  <data name="Language" xml:space="preserve"><value>Sprache</value></data>
+  <data name="NavOverview" xml:space="preserve"><value>Übersicht</value></data>
+  <data name="NavLogSession" xml:space="preserve"><value>Einheit erfassen</value></data>
+  <data name="NavMorningCheck" xml:space="preserve"><value>Morgencheck</value></data>
+  <data name="NavNutrition" xml:space="preserve"><value>Ernährungsziel</value></data>
+  <data name="NavPhysio" xml:space="preserve"><value>Physio-Notiz</value></data>
+  <data name="NavLabel" xml:space="preserve"><value>Formulare</value></data>
+  <data name="Footer" xml:space="preserve"><value>Nur synthetische Daten · Demo-Identitäten, keine echte Anmeldung</value></data>
+  <data name="PageTitle" xml:space="preserve"><value>{0} · Athlete Day</value></data>
+  <data name="Persona_lena" xml:space="preserve"><value>Lena · Athletiktrainerin</value></data>
+  <data name="Persona_athlete" xml:space="preserve"><value>Athletin/Athlet</value></data>
+  <data name="Persona_mia" xml:space="preserve"><value>Mia · Ernährungswissenschaftlerin</value></data>
+  <data name="Persona_jonas" xml:space="preserve"><value>Jonas · Physiotherapeut</value></data>
+  <data name="Persona_luca" xml:space="preserve"><value>Luca · Küche</value></data>
+  <data name="Role_Coach" xml:space="preserve"><value>Coach</value></data>
+  <data name="Role_Athlete" xml:space="preserve"><value>Athletin/Athlet</value></data>
+  <data name="Role_Nutrition" xml:space="preserve"><value>Ernährung</value></data>
+  <data name="Role_Physio" xml:space="preserve"><value>Physio</value></data>
+  <data name="Role_Kitchen" xml:space="preserve"><value>Küche</value></data>
+  <data name="Role_Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="AthleteSignInLabel" xml:space="preserve"><value>Athletin/Athlet</value></data>
+  <data name="ChooseYourName" xml:space="preserve"><value>Namen wählen…</value></data>
+  <data name="HomeTitle" xml:space="preserve"><value>Schnelle Erfassung für die Leute in der Halle</value></data>
+  <data name="HomeLead" xml:space="preserve"><value>Jede Disziplin erfasst hier ihren Teil vom Tag einer Athletin oder eines Athleten. Das Dashboard (Angular) führt alles zusammen, und jede Rolle sieht nur, was sie braucht.</value></data>
+  <data name="CardCoachText" xml:space="preserve"><value>Einheit erfassen: Art, Dauer und RPE. Belastung = RPE × Minuten.</value></data>
+  <data name="CardAthleteText" xml:space="preserve"><value>Namen wählen, dann drei Fragen beantworten: Schlaf, Muskelkater und Stimmung. Nur für dich selbst.</value></data>
+  <data name="CardNutritionText" xml:space="preserve"><value>Tägliche Ziele für Energie und Kohlenhydrate, dazu eine Notiz für die Küche.</value></data>
+  <data name="CardPhysioText" xml:space="preserve"><value>Gesundheitsnotizen und Trainingseinschränkungen. Die Notizen bleiben beim Physio.</value></data>
+  <data name="KitchenNotice" xml:space="preserve"><value>Die Küche hat keine Formulare. Ihre Ansicht ist die Küchenseite im Dashboard: Portionen und Kohlenhydrate, nichts über die Gesundheit.</value></data>
+  <data name="Date" xml:space="preserve"><value>Datum</value></data>
+  <data name="Athlete" xml:space="preserve"><value>Athletin/Athlet</value></data>
+  <data name="Select" xml:space="preserve"><value>Auswählen…</value></data>
+  <data name="LogSessionTitle" xml:space="preserve"><value>Trainingseinheit erfassen</value></data>
+  <data name="SessionTypeLabel" xml:space="preserve"><value>Art</value></data>
+  <data name="DurationMinutes" xml:space="preserve"><value>Dauer (Minuten)</value></data>
+  <data name="RpeLabel" xml:space="preserve"><value>RPE (wie streng war es?)</value></data>
+  <data name="NotesOptional" xml:space="preserve"><value>Notizen (optional, keine Gesundheitsangaben)</value></data>
+  <data name="SessionLoad" xml:space="preserve"><value>Belastung der Einheit:</value></data>
+  <data name="SaveSession" xml:space="preserve"><value>Einheit speichern</value></data>
+  <data name="SessionSaved" xml:space="preserve"><value>Gespeichert: {0} für {1}, {2} min mit RPE {3} = {4} AU. Das Dashboard aktualisiert sich live.</value></data>
+  <data name="SessionType_Strength" xml:space="preserve"><value>Kraft</value></data>
+  <data name="SessionType_Speed" xml:space="preserve"><value>Schnelligkeit</value></data>
+  <data name="SessionType_Endurance" xml:space="preserve"><value>Ausdauer</value></data>
+  <data name="SessionType_OnIce" xml:space="preserve"><value>Auf dem Eis</value></data>
+  <data name="SessionType_Technique" xml:space="preserve"><value>Technik</value></data>
+  <data name="SessionType_Recovery" xml:space="preserve"><value>Regeneration</value></data>
+  <data name="Rpe_1" xml:space="preserve"><value>sehr leicht</value></data>
+  <data name="Rpe_2" xml:space="preserve"><value>leicht</value></data>
+  <data name="Rpe_3" xml:space="preserve"><value>mässig</value></data>
+  <data name="Rpe_4" xml:space="preserve"><value>etwas streng</value></data>
+  <data name="Rpe_5" xml:space="preserve"><value>streng</value></data>
+  <data name="Rpe_7" xml:space="preserve"><value>sehr streng</value></data>
+  <data name="Rpe_9" xml:space="preserve"><value>extrem streng</value></data>
+  <data name="Rpe_10" xml:space="preserve"><value>maximal</value></data>
+  <data name="MorningCheckTitle" xml:space="preserve"><value>Morgencheck</value></data>
+  <data name="GoodMorning" xml:space="preserve"><value>Guten Morgen, {0}</value></data>
+  <data name="ChooseNameFirst" xml:space="preserve"><value>Wähle zuerst oben rechts deinen Namen. Der Check wird für die gewählte Person gespeichert.</value></data>
+  <data name="WellnessLead" xml:space="preserve"><value>Drei kurze Fragen. Coach und Physio sehen die Antworten, die Küche nicht.</value></data>
+  <data name="SleepLastNight" xml:space="preserve"><value>Schlaf letzte Nacht (Stunden)</value></data>
+  <data name="Soreness" xml:space="preserve"><value>Muskelkater</value></data>
+  <data name="SorenessNone" xml:space="preserve"><value>keiner</value></data>
+  <data name="SorenessVery" xml:space="preserve"><value>sehr stark</value></data>
+  <data name="Mood" xml:space="preserve"><value>Stimmung</value></data>
+  <data name="MoodVeryLow" xml:space="preserve"><value>sehr tief</value></data>
+  <data name="MoodGreat" xml:space="preserve"><value>sehr gut</value></data>
+  <data name="SendCheckIn" xml:space="preserve"><value>Check senden</value></data>
+  <data name="CheckInSaved" xml:space="preserve"><value>Danke! Dein Check ist gespeichert, und deine Bereitschaft im Dashboard ist aktualisiert.</value></data>
+  <data name="NutritionTitle" xml:space="preserve"><value>Tägliches Ernährungsziel</value></data>
+  <data name="NutritionLead" xml:space="preserve"><value>Die Küche sieht die daraus folgende Portionsgrösse und die Kohlenhydrate in Gramm, dazu deine Notiz.</value></data>
+  <data name="EnergyKcal" xml:space="preserve"><value>Energie (kcal)</value></data>
+  <data name="CarbsPerKg" xml:space="preserve"><value>Kohlenhydrate (g pro kg)</value></data>
+  <data name="KitchenNote" xml:space="preserve"><value>Notiz für die Küche (nur Vorlieben, keine medizinischen Angaben)</value></data>
+  <data name="KitchenNotePlaceholder" xml:space="preserve"><value>z. B. vegetarisch</value></data>
+  <data name="SaveTarget" xml:space="preserve"><value>Ziel speichern</value></data>
+  <data name="TargetSaved" xml:space="preserve"><value>Gespeichert: {0} kcal, {1} g Kohlenhydrate für den Tag.</value></data>
+  <data name="PhysioTitle" xml:space="preserve"><value>Physio-Notiz</value></data>
+  <data name="PhysioLead" xml:space="preserve"><value>Den Notiztext sehen nur Physios, und jeder Zugriff wird protokolliert. Der Coach sieht nur die Stufe der Einschränkung, damit das Training angepasst werden kann.</value></data>
+  <data name="TrainingRestriction" xml:space="preserve"><value>Trainingseinschränkung</value></data>
+  <data name="Restriction_None" xml:space="preserve"><value>Keine</value></data>
+  <data name="Restriction_Modified" xml:space="preserve"><value>Angepasst</value></data>
+  <data name="Restriction_NoTraining" xml:space="preserve"><value>Kein Training</value></data>
+  <data name="Note" xml:space="preserve"><value>Notiz</value></data>
+  <data name="SaveNote" xml:space="preserve"><value>Notiz speichern</value></data>
+  <data name="NoteSaved" xml:space="preserve"><value>Notiz gespeichert. Einschränkung: {0}.</value></data>
+  <data name="NotForRole" xml:space="preserve"><value>Nicht für die Rolle {0}.</value></data>
+  <data name="RoleGateText" xml:space="preserve"><value>Dieses Formular gehört zur Rolle {0}. Wechsle oben rechts die Persona, um es auszuprobieren. Die API setzt dieselbe Regel durch; das Ausblenden ist nur Komfort, nicht der Schutz.</value></data>
+  <data name="ApiUnreachable" xml:space="preserve"><value>Die API ist unter {0} nicht erreichbar. Läuft sie?</value></data>
+  <data name="NotAllowed" xml:space="preserve"><value>Die Rolle {0} darf das nicht. Das ist so gewollt.</value></data>
+  <data name="ApiAnswered" xml:space="preserve"><value>Die API antwortete mit {0} {1}.</value></data>
+  <data name="NotFoundTitle" xml:space="preserve"><value>Nicht gefunden</value></data>
+  <data name="NotFoundText" xml:space="preserve"><value>Diese Seite gibt es leider nicht.</value></data>
+</root>

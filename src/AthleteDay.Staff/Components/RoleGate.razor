@@ -8,9 +8,8 @@
 else
 {
     <div class="notice">
-        <strong>Not for the @Persona.Current.Role role.</strong>
-        This form belongs to the @Role. Switch persona at the top right to try it.
-        The API enforces the same rule, so hiding the form is a convenience, not the protection.
+        <strong>@L["NotForRole", L[$"Role_{Persona.Current.Role}"]]</strong>
+        @L["RoleGateText", L[$"Role_{Role}"]]
     </div>
 }
 

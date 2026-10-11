@@ -1,4 +1,5 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
+import { I18n } from '../i18n/i18n.service';
 
 let nextId = 0;
 
@@ -10,7 +11,7 @@ let nextId = 0;
     <button
       type="button"
       class="info-tip"
-      [attr.aria-label]="'About ' + label()"
+      [attr.aria-label]="t('squad.tip.about', { label: label() })"
       [attr.aria-describedby]="id"
       (keydown.escape)="dismissed.set(true)"
       (blur)="dismissed.set(false)"
@@ -26,4 +27,5 @@ export class InfoTip {
 
   protected readonly id = `info-tip-${++nextId}`;
   protected readonly dismissed = signal(false);
+  protected readonly t = inject(I18n).t;
 }

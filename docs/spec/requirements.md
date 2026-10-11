@@ -53,7 +53,7 @@ medical advice of any kind.
 | Sex | Female, Male or Not stated |
 | Athlete code | `ATH-` plus a three-digit number, assigned by the system (highest existing number + 1) and never changed |
 | Archived athlete | Hidden from every list and form and accepts no new data; its history is kept and it can be restored |
-| Language | English (default) or German. Formats: English as en-GB (11 Oct 2026, 1,234.5), German as de-CH (11.10.2026, 1’234.5). |
+| Language | English (default) or German. Formats: English as en-GB (11 Oct 2026, 1,234.5), German as de-CH (11.10.2026, 1’234.5; the grouping mark is ' or ’ depending on the browser's locale data). |
 
 ## 5. Functional requirements
 

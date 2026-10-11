@@ -9,16 +9,33 @@
     <link rel="preload" id="webassembly" />
     <link rel="stylesheet" href="css/app.css" />
     <script type="importmap"></script>
+    <script>
+        // English or German (ADR-09): ?lang=de|en wins and is remembered; otherwise the last choice; default English.
+        window.athleteDay = {
+            language() {
+                const fromUrl = new URLSearchParams(location.search).get('lang');
+                let lang = fromUrl === 'de' || fromUrl === 'en' ? fromUrl : null;
+                try {
+                    if (lang) localStorage.setItem('athlete-day.lang', lang);
+                    else lang = localStorage.getItem('athlete-day.lang') === 'de' ? 'de' : 'en';
+                } catch {
+                    lang = lang ?? 'en';
+                }
+                document.documentElement.lang = lang;
+                return lang;
+            }
+        };
+    </script>
 </head>
 
 <body>
     <div id="app">
-        <div class="boot">Loading staff input…</div>
+        <div class="boot">Loading … · Wird geladen …</div>
     </div>
 
     <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="." class="reload">Reload</a>
+        An unhandled error has occurred. · Ein unerwarteter Fehler ist aufgetreten.
+        <a href="." class="reload">Reload · Neu laden</a>
         <span class="dismiss">&times;</span>
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
