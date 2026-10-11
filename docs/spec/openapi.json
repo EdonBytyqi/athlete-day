@@ -26,6 +26,196 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Athletes"
+        ],
+        "summary": "Add an athlete; the system assigns the next free code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AthleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AthleteDetailsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/athletes/archived": {
+      "get": {
+        "tags": [
+          "Athletes"
+        ],
+        "summary": "Archived athletes, most recently archived first",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AthleteDetailsDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/athletes/{athleteId}": {
+      "get": {
+        "tags": [
+          "Athletes"
+        ],
+        "summary": "Name, sport, birth year, sex and body mass of an athlete",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AthleteDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Athletes"
+        ],
+        "summary": "Edit an athlete\u0027s details; the code never changes",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AthleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AthleteDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Athletes"
+        ],
+        "summary": "Archive an athlete: hidden everywhere, history kept, can be restored",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/athletes/{athleteId}/restore": {
+      "post": {
+        "tags": [
+          "Athletes"
+        ],
+        "summary": "Bring an archived athlete back into the squad",
+        "parameters": [
+          {
+            "name": "athleteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AthleteDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
       }
     },
     "/api/athletes/{athleteId}/load-trend": {
@@ -529,6 +719,65 @@
   },
   "components": {
     "schemas": {
+      "AthleteDetailsDto": {
+        "required": [
+          "id",
+          "code",
+          "displayName",
+          "sport",
+          "birthYear",
+          "sex",
+          "bodyMassKg",
+          "archivedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "code": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "sport": {
+            "type": "string"
+          },
+          "birthYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "sex": {
+            "$ref": "#/components/schemas/Sex"
+          },
+          "bodyMassKg": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "archivedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
       "AthleteDto": {
         "required": [
           "id",
@@ -554,6 +803,48 @@
           },
           "sport": {
             "type": "string"
+          }
+        }
+      },
+      "AthleteRequest": {
+        "required": [
+          "displayName",
+          "sport",
+          "birthYear"
+        ],
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "maxLength": 60,
+            "minLength": 2,
+            "type": "string"
+          },
+          "sport": {
+            "maxLength": 60,
+            "minLength": 2,
+            "type": "string"
+          },
+          "birthYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "sex": {
+            "$ref": "#/components/schemas/Sex"
+          },
+          "bodyMassKg": {
+            "maximum": 200,
+            "minimum": 30,
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },
@@ -601,6 +892,8 @@
           "code",
           "displayName",
           "sport",
+          "age",
+          "sex",
           "todayLoad",
           "acuteLoad",
           "chronicLoad",
@@ -628,6 +921,18 @@
           },
           "sport": {
             "type": "string"
+          },
+          "age": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "sex": {
+            "$ref": "#/components/schemas/Sex"
           },
           "todayLoad": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -1226,6 +1531,13 @@
           "OnIce",
           "Technique",
           "Recovery"
+        ]
+      },
+      "Sex": {
+        "enum": [
+          "Female",
+          "Male",
+          "NotStated"
         ]
       },
       "TrainingRestriction": {

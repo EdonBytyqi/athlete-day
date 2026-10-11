@@ -11,6 +11,13 @@ public sealed class Athlete
     public required string DisplayName { get; set; }
     public required string Sport { get; set; }
     public decimal BodyMassKg { get; set; }
+
+    /// <summary>Only the year (data minimisation); null for athletes created before it was recorded.</summary>
+    public int? BirthYear { get; set; }
+    public Sex Sex { get; set; } = Sex.NotStated;
+
+    /// <summary>Set when a coach archives the athlete. Archived athletes are hidden by a global query filter.</summary>
+    public DateTimeOffset? ArchivedAt { get; set; }
 }
 
 public sealed class TrainingSession

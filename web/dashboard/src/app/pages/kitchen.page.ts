@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ApiService, describeError } from '../api/api.service';
 import { KitchenRow } from '../api/models';
 import { PersonaService } from '../api/persona.service';
@@ -6,7 +6,6 @@ import { RealtimeService } from '../api/realtime.service';
 
 @Component({
   selector: 'app-kitchen-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="page-head">
       <div>

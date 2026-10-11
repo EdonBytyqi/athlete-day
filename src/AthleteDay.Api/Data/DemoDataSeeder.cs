@@ -12,16 +12,16 @@ namespace AthleteDay.Api.Data;
 /// </summary>
 public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<DemoDataSeeder> logger)
 {
-    private sealed record Profile(string Code, string Name, string Sport, decimal Mass, int Kcal, decimal Carbs, string? KitchenNote);
+    private sealed record Profile(string Code, string Name, string Sport, int Age, Sex Sex, decimal Mass, int Kcal, decimal Carbs, string? KitchenNote);
 
     private static readonly Profile[] Profiles =
     [
-        new("ATH-001", "Nora", "Alpine skiing", 66.0m, 3200, 6.0m, null),
-        new("ATH-002", "Elias", "Ice hockey", 86.0m, 3900, 6.5m, "No pork"),
-        new("ATH-003", "Lea", "Sprint", 61.0m, 2600, 5.0m, "Vegetarian"),
-        new("ATH-004", "Noah", "Rowing", 84.0m, 4200, 8.0m, null),
-        new("ATH-005", "Mila", "Football", 63.0m, 2700, 5.5m, "Lactose-free options"),
-        new("ATH-006", "Jan", "Biathlon", 72.0m, 3600, 7.0m, null)
+        new("ATH-001", "Nora", "Alpine skiing", 24, Sex.Female, 66.0m, 3200, 6.0m, null),
+        new("ATH-002", "Elias", "Ice hockey", 21, Sex.Male, 86.0m, 3900, 6.5m, "No pork"),
+        new("ATH-003", "Lea", "Sprint", 19, Sex.Female, 61.0m, 2600, 5.0m, "Vegetarian"),
+        new("ATH-004", "Noah", "Rowing", 27, Sex.Male, 84.0m, 4200, 8.0m, null),
+        new("ATH-005", "Mila", "Football", 22, Sex.Female, 63.0m, 2700, 5.5m, "Lactose-free options"),
+        new("ATH-006", "Jan", "Biathlon", 30, Sex.Male, 72.0m, 3600, 7.0m, null)
     ];
 
     private static readonly SessionType[] Rotation =
@@ -37,7 +37,7 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
         await db.NutritionTargets.ExecuteDeleteAsync(ct);
         await db.WellnessChecks.ExecuteDeleteAsync(ct);
         await db.TrainingSessions.ExecuteDeleteAsync(ct);
-        await db.Athletes.ExecuteDeleteAsync(ct);
+        await db.Athletes.IgnoreQueryFilters().ExecuteDeleteAsync(ct);
         // Keep demo athletes at ids 1–6 so links like /athletes/2 survive a reset.
         // (Only when rows were ever inserted; on a brand-new table RESEED 0 would make the first id 0.)
         await db.Database.ExecuteSqlRawAsync("""
@@ -50,10 +50,13 @@ public sealed class DemoDataSeeder(AppDbContext db, AppClock clock, ILogger<Demo
 
     public async Task SeedAsync(CancellationToken ct = default)
     {
-        if (await db.Athletes.AnyAsync(ct)) return;
+        if (await db.Athletes.IgnoreQueryFilters().AnyAsync(ct)) return;
 
         var today = clock.Today;
-        var athletes = Profiles.Select(p => new Athlete { Code = p.Code, DisplayName = p.Name, Sport = p.Sport, BodyMassKg = p.Mass }).ToList();
+        var athletes = Profiles.Select(p => new Athlete
+        {
+            Code = p.Code, DisplayName = p.Name, Sport = p.Sport, BodyMassKg = p.Mass, BirthYear = today.Year - p.Age, Sex = p.Sex
+        }).ToList();
         db.Athletes.AddRange(athletes);
         await db.SaveChangesAsync(ct);
 

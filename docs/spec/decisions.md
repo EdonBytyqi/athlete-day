@@ -40,3 +40,22 @@ Short records of the decisions that shape the code. Format: context → decision
 * **Context:** the acute:chronic workload ratio is debated in sports science.
 * **Decision:** show acute and chronic load and a ratio band as reasons for a conversation, never as an injury risk score (AC-15).
 * **Consequence:** wording in UI and docs avoids prediction claims.
+
+## ADR-07 Archive athletes instead of deleting them
+
+* **Context:** a coach must be able to remove an athlete from the squad (AC-35), but sessions, wellness checks, physio
+  notes and measurements belong to the athlete's history, and a slip of the mouse during a session must be recoverable.
+* **Decision:** `DELETE /api/athletes/{id}` sets `ArchivedAt`. An EF Core global query filter hides archived athletes from
+  every query, so forms, imports and lookups treat them as unknown; the Dapper report filters them in its SQL. Restore
+  and the archive list opt out of the filter explicitly.
+* **Consequence:** no data is lost by accident and the UI can offer *Undo*. A real erasure request (right to be
+  forgotten) would be a separate, audited admin action that deletes the history too; it is out of scope for v1.1.
+
+## ADR-08 Birth year instead of birth date
+
+* **Context:** the dashboard sorts by age (AC-38), and age matters for training and nutrition, but an exact birth date
+  is more personal data than the team needs.
+* **Decision:** store only the birth year and show the age reached this year. Sex is stored as Female, Male or Not
+  stated. Both appear on the dashboard (coach, physio, nutrition) and never in the kitchen view.
+* **Consequence:** data minimisation under the Swiss FADP / DSG; the age can be off by one before the birthday, which
+  is precise enough for squad planning.

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ApiService, describeError } from '../api/api.service';
 import { ImportJob } from '../api/models';
@@ -7,7 +7,6 @@ import { RealtimeService } from '../api/realtime.service';
 
 @Component({
   selector: 'app-imports-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe],
   template: `
     <header class="page-head">

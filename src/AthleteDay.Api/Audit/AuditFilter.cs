@@ -2,6 +2,7 @@ using AthleteDay.Api.Auth;
 using AthleteDay.Api.Data;
 using AthleteDay.Api.Domain;
 using AthleteDay.Api.Infrastructure;
+using AthleteDay.Contracts;
 
 namespace AthleteDay.Api.Audit;
 
@@ -20,9 +21,11 @@ public sealed class AuditFilter(string resource) : IEndpointFilter
         if (status is < 200 or >= 300)
             return result;
 
+        // The route names the athlete (…/athletes/{athleteId}); a create has no id in the route yet, so take it
+        // from the response instead.
         int? athleteId = http.Request.RouteValues.TryGetValue("athleteId", out var raw) && int.TryParse(raw?.ToString(), out var id)
             ? id
-            : null;
+            : result is IValueHttpResult { Value: IAthleteScoped scoped } ? scoped.AthleteId : null;
 
         var db = http.RequestServices.GetRequiredService<AppDbContext>();
         var clock = http.RequestServices.GetRequiredService<AppClock>();

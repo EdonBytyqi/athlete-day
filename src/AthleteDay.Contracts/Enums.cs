@@ -39,3 +39,11 @@ public enum ImportStatus
     Completed,
     Failed
 }
+
+[JsonConverter(typeof(JsonStringEnumConverter<Sex>))]
+public enum Sex
+{
+    Female,
+    Male,
+    NotStated
+}

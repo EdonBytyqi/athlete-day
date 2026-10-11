@@ -30,6 +30,12 @@ namespace AthleteDay.Api.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTimeOffset?>("ArchivedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("BirthYear")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("BodyMassKg")
                         .HasPrecision(5, 1)
                         .HasColumnType("decimal(5,1)");
@@ -43,6 +49,11 @@ namespace AthleteDay.Api.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Sex")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("Sport")
                         .IsRequired()

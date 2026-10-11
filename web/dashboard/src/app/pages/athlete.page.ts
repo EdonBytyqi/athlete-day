@@ -1,15 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService, describeError } from '../api/api.service';
-import { LoadTrend, Measurement, PhysioNote, TrainingSession } from '../api/models';
+import { AthleteDetails, LoadTrend, Measurement, PhysioNote, Sex, TrainingSession } from '../api/models';
 import { PersonaService } from '../api/persona.service';
 import { RealtimeService } from '../api/realtime.service';
+import { logSessionUrl } from '../shared/staff-url';
 import { TrendChart } from '../shared/trend-chart';
+
+const SEX_LABELS: Record<Sex, string> = { Female: 'female', Male: 'male', NotStated: 'sex not stated' };
 
 @Component({
   selector: 'app-athlete-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, TrendChart],
   template: `
     <a routerLink="/dashboard" class="back">← Squad</a>
@@ -19,9 +21,17 @@ import { TrendChart } from '../shared/trend-chart';
     } @else if (trend(); as t) {
       <header class="page-head">
         <div>
-          <h1>{{ t.code }}</h1>
+          @if (details(); as d) {
+            <h1>{{ d.displayName }}</h1>
+            <p class="muted">{{ d.code }} · {{ d.sport }} · {{ age(d) }} · {{ sexLabels[d.sex] }} · {{ d.bodyMassKg }} kg</p>
+          } @else {
+            <h1>{{ t.code }}</h1>
+          }
           <p class="muted">Training load over the last 28 days</p>
         </div>
+        @if (isCoach()) {
+          <a class="button" [href]="logSessionUrl(t.athleteId)" target="_blank" rel="noopener">Log session ↗</a>
+        }
       </header>
 
       <section class="panel">
@@ -87,12 +97,21 @@ export class AthletePage {
 
   readonly id = input.required<string>();
 
+  protected readonly details = signal<AthleteDetails | null>(null);
   protected readonly trend = signal<LoadTrend | null>(null);
   protected readonly sessions = signal<TrainingSession[]>([]);
   protected readonly measurements = signal<Measurement[]>([]);
   protected readonly notes = signal<PhysioNote[]>([]);
   protected readonly error = signal<string | null>(null);
   protected readonly isPhysio = computed(() => this.persona.current().role === 'Physio');
+  protected readonly isCoach = computed(() => this.persona.current().role === 'Coach');
+  protected readonly sexLabels = SEX_LABELS;
+  protected readonly logSessionUrl = logSessionUrl;
+  private readonly thisYear = new Date().getFullYear();
+
+  protected age(d: AthleteDetails): string {
+    return d.birthYear === null ? 'age unknown' : `${this.thisYear - d.birthYear} years`;
+  }
 
   constructor() {
     effect(() => {
@@ -105,11 +124,13 @@ export class AthletePage {
 
   private load(athleteId: number, role: string): void {
     forkJoin({
+      details: this.api.athlete(athleteId),
       trend: this.api.loadTrend(athleteId),
       sessions: this.api.sessions(athleteId),
       measurements: this.api.measurements(athleteId),
     }).subscribe({
       next: (r) => {
+        this.details.set(r.details);
         this.trend.set(r.trend);
         this.sessions.set(r.sessions);
         this.measurements.set(r.measurements);

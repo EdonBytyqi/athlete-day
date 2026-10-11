@@ -1,0 +1,203 @@
+<header class="page-head">
+  <div>
+    <h1>Today's squad</h1>
+    <p class="muted">Load, readiness and nutrition per athlete. Updates live when staff log data.</p>
+  </div>
+  @if (rows(); as list) {
+    <div class="stats">
+      <div class="stat"><strong>{{ list.length }}</strong><span>athletes</span></div>
+      <div class="stat warn"><strong>{{ checkIns() }}</strong><span>to check in</span></div>
+      <div class="stat"><strong>{{ missing() }}</strong><span>no morning check</span></div>
+    </div>
+  }
+</header>
+
+@if (hint(); as text) {
+  <p class="hint-bar">{{ text }}</p>
+}
+
+@if (error(); as message) {
+  <p class="banner error" role="alert">{{ message }}</p>
+} @else if (rows(); as list) {
+  <div class="toolbar">
+    <label class="search">
+      <span class="visually-hidden">Search athletes</span>
+      <input
+        type="search"
+        placeholder="Search name or code…"
+        [value]="query()"
+        (input)="query.set($any($event.target).value)"
+      />
+    </label>
+    <div class="chips" role="group" aria-label="Filter by sport">
+      <button type="button" class="chip" [attr.aria-pressed]="sport() === null" (click)="sport.set(null)">All sports</button>
+      @for (s of sports(); track s) {
+        <button type="button" class="chip" [attr.aria-pressed]="sport() === s" (click)="toggleSport(s)">{{ s }}</button>
+      }
+    </div>
+    @if (isCoach()) {
+      <button type="button" class="add-athlete" (click)="editing.set('new')">+ Add athlete</button>
+    }
+  </div>
+
+  @if (list.length === 0) {
+    <div class="empty">
+      <p>No athletes in the squad yet.</p>
+      @if (isCoach()) {
+        <button type="button" (click)="editing.set('new')">Add the first athlete</button>
+      }
+    </div>
+  } @else if (visible().length === 0) {
+    <div class="empty">
+      <p>
+        No athletes match
+        @if (query().trim()) { “{{ query().trim() }}” }
+        @if (sport(); as s) { in {{ s }} }.
+      </p>
+      <button type="button" class="secondary" (click)="clearFilters()">Clear filters</button>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="grid-table squad">
+        <caption class="visually-hidden">
+          Squad, sorted by {{ sortLabels[sort().key] }} ({{ sort().direction === 'asc' ? 'ascending' : 'descending' }})
+          @if (filtered()) { , filtered }
+        </caption>
+        <thead>
+          <tr>
+            <th [attr.aria-sort]="ariaSort('name')"><button type="button" class="sort" (click)="sortBy('name')">Athlete</button></th>
+            <th [attr.aria-sort]="ariaSort('sport')"><button type="button" class="sort" (click)="sortBy('sport')">Sport</button></th>
+            <th class="num" [attr.aria-sort]="ariaSort('age')"><button type="button" class="sort" (click)="sortBy('age')">Age</button></th>
+            <th [attr.aria-sort]="ariaSort('sex')"><button type="button" class="sort" (click)="sortBy('sex')">Sex</button></th>
+            <th class="num" [attr.aria-sort]="ariaSort('todayLoad')">
+              <button type="button" class="sort" (click)="sortBy('todayLoad')">Load today</button>
+              <app-info-tip label="Load today" text="Today's training load: how hard each session felt (RPE 1–10) × its minutes, added up. In arbitrary units (AU)." />
+            </th>
+            <th class="num">
+              Week average
+              <app-info-tip label="Week average" text="Average daily load over the last 7 days, rest days counted as 0." />
+            </th>
+            <th class="num">
+              Month average
+              <app-info-tip label="Month average" text="Average daily load over the last 28 days, rest days counted as 0." />
+            </th>
+            <th class="num">
+              Week vs month
+              <app-info-tip label="Week vs month" text="Week average ÷ month average. 0.8–1.3 is the usual range; outside it, this week is much lighter or harder than usual. A reason to talk, not an injury prediction." />
+            </th>
+            <th [attr.aria-sort]="ariaSort('readiness')"><button type="button" class="sort" (click)="sortBy('readiness')">Readiness</button></th>
+            <th>Morning check</th>
+            <th>Nutrition today</th>
+            @if (isCoach()) {
+              <th class="sticky-end"><span class="visually-hidden">Actions</span></th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of visible(); track r.athleteId) {
+            <tr [class.flagged]="r.readiness.status === 'CheckIn'">
+              <td>
+                <a [routerLink]="['/athletes', r.athleteId]" class="athlete">
+                  <strong>{{ r.displayName }}</strong>
+                  <span class="muted">{{ r.code }}</span>
+                </a>
+                @if (r.restriction !== 'None') {
+                  <span class="tag warn">Restriction: {{ r.restriction }}</span>
+                }
+              </td>
+              <td>{{ r.sport }}</td>
+              <td class="num">{{ r.age ?? '–' }}</td>
+              <td>{{ sexLabels[r.sex] }}</td>
+              <td class="num">{{ r.todayLoad }}</td>
+              <td class="num">{{ r.acuteLoad | number: '1.0-0' }}</td>
+              <td class="num">{{ r.chronicLoad | number: '1.0-0' }}</td>
+              <td class="num">{{ r.acuteChronicRatio === null ? '–' : (r.acuteChronicRatio | number: '1.2-2') }}</td>
+              <td class="readiness"><app-readiness-badge [status]="r.readiness.status" [reasons]="r.readiness.reasons" /></td>
+              <td>
+                @if (r.wellness; as w) {
+                  <span class="muted stacked">
+                    <span>Sleep {{ w.sleepHours }} h</span>
+                    <span>Soreness {{ w.soreness }}/5</span>
+                    <span>Mood {{ w.mood }}/5</span>
+                  </span>
+                } @else {
+                  <span class="muted">–</span>
+                }
+              </td>
+              <td>
+                @if (r.nutrition; as n) {
+                  <span class="stacked"><span>{{ n.energyKcal }} kcal</span><span>{{ n.carbsG }} g carbs</span></span>
+                } @else {
+                  <span class="muted">not set</span>
+                }
+              </td>
+              @if (isCoach()) {
+                <td class="sticky-end">
+                  <!-- A native popover sits in the top layer, so the scrolling table never clips it. -->
+                  <div class="row-actions">
+                    <button
+                      type="button"
+                      class="menu-button"
+                      [attr.popovertarget]="'row-menu-' + r.athleteId"
+                      [attr.aria-label]="'Actions for ' + r.displayName"
+                    >
+                      ⋯
+                    </button>
+                    <div class="menu" popover [id]="'row-menu-' + r.athleteId" #menu>
+                      <a class="log-session" [href]="logSessionUrl(r.athleteId)" target="_blank" rel="noopener" (click)="closeMenu(menu)">Log session ↗</a>
+                      <a class="details" [routerLink]="['/athletes', r.athleteId]" (click)="closeMenu(menu)">Details and trend</a>
+                      <button type="button" class="edit" (click)="closeMenu(menu); edit(r)">Edit</button>
+                      <button type="button" class="archive" (click)="closeMenu(menu); archiving.set(r)">Archive</button>
+                    </div>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <p class="footnote">
+    Load = session RPE × minutes (AU). The 7-day vs 28-day comparison is a monitoring aid to start a
+    conversation, not an injury predictor; the acute:chronic workload ratio is debated in sports science.
+  </p>
+
+  @if (isCoach()) {
+    <details class="archived panel" (toggle)="onArchiveToggle($event)">
+      <summary>Archived athletes</summary>
+      @if (archived(); as list) {
+        @for (a of list; track a.id) {
+          <div class="archived-row">
+            <span><strong>{{ a.displayName }}</strong> <span class="muted">{{ a.code }} · {{ a.sport }}</span></span>
+            <button type="button" class="secondary" (click)="restore(a.id, a.displayName)">Restore</button>
+          </div>
+        } @empty {
+          <p class="muted">Nobody is archived. Archived athletes keep their history and can be restored here.</p>
+        }
+      } @else {
+        <p class="muted">Loading…</p>
+      }
+    </details>
+  }
+} @else {
+  <p class="muted">Loading…</p>
+}
+
+@if (editing() !== null) {
+  <app-athlete-form [athlete]="editingAthlete()" [sports]="sports()" (saved)="saved($event)" (cancelled)="editing.set(null)" />
+}
+
+@if (archiving(); as row) {
+  <app-modal-dialog kind="confirm" [heading]="'Archive ' + row.displayName + '?'" (closed)="archiving.set(null)">
+    <p>
+      {{ row.displayName }} disappears from the squad, the staff forms and the kitchen list. Their history is kept, and
+      you can undo this.
+    </p>
+    <div class="dialog-actions">
+      <button type="button" class="secondary" (click)="archiving.set(null)">Cancel</button>
+      <button type="button" class="danger confirm-archive" (click)="confirmArchive()">Archive</button>
+    </div>
+  </app-modal-dialog>
+}
