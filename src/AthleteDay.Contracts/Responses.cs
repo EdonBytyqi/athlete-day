@@ -1,5 +1,11 @@
 namespace AthleteDay.Contracts;
 
+/// <summary>A response about one athlete. The audit log reads the id from it when the route has none (e.g. a create).</summary>
+public interface IAthleteScoped
+{
+    int AthleteId { get; }
+}
+
 public sealed record AthleteDto(int Id, string Code, string DisplayName, string Sport);
 
 /// <summary>Master data for squad management (coach) and the athlete page. Never part of the kitchen view.</summary>
@@ -11,7 +17,10 @@ public sealed record AthleteDetailsDto(
     int? BirthYear,
     Sex Sex,
     decimal BodyMassKg,
-    DateTimeOffset? ArchivedAt);
+    DateTimeOffset? ArchivedAt) : IAthleteScoped
+{
+    int IAthleteScoped.AthleteId => Id;
+}
 
 public sealed record TrainingSessionDto(
     int Id,
@@ -22,7 +31,7 @@ public sealed record TrainingSessionDto(
     int DurationMinutes,
     int Rpe,
     int Load,
-    string LoggedBy);
+    string LoggedBy) : IAthleteScoped;
 
 public sealed record WellnessSummaryDto(DateOnly Date, decimal SleepHours, int Soreness, int Mood);
 
@@ -66,7 +75,7 @@ public sealed record PhysioNoteDto(
     DateOnly Date,
     TrainingRestriction Restriction,
     string Note,
-    string Author);
+    string Author) : IAthleteScoped;
 
 public sealed record MeasurementDto(DateOnly Date, string TestType, decimal Value, string Unit, Guid ImportJobId);
 

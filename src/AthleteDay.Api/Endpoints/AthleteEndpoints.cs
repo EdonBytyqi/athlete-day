@@ -108,15 +108,28 @@ public static class AthleteEndpoints
     private static async Task<Created<AthleteDetailsDto>> AddAthlete(
         AthleteRequest request, AppDbContext db, IDashboardNotifier notifier, CancellationToken ct)
     {
-        var athlete = new Athlete
+        // "Read the highest code, then insert" must not interleave, or two coaches get the same code.
+        // An application lock serialises it for the length of the transaction. The execution strategy
+        // (retry on transient failures) requires the transaction to run inside it.
+        var athlete = await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            Code = await NextCodeAsync(db, ct),
-            DisplayName = request.DisplayName.Trim(),
-            Sport = request.Sport.Trim()
-        };
-        Apply(request, athlete);
-        db.Athletes.Add(athlete);
-        await db.SaveChangesAsync(ct);
+            db.ChangeTracker.Clear(); // a retried attempt starts clean
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
+            await db.Database.ExecuteSqlRawAsync(
+                "EXEC sp_getapplock @Resource = 'AthleteCode', @LockMode = 'Exclusive', @LockOwner = 'Transaction';", ct);
+
+            var added = new Athlete
+            {
+                Code = await NextCodeAsync(db, ct),
+                DisplayName = request.DisplayName.Trim(),
+                Sport = request.Sport.Trim()
+            };
+            Apply(request, added);
+            db.Athletes.Add(added);
+            await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+            return added;
+        });
         await notifier.DataChangedAsync("athlete", ct);
 
         return TypedResults.Created($"/api/athletes/{athlete.Id}", ToDetails(athlete));
