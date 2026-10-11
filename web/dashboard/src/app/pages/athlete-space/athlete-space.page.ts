@@ -7,7 +7,7 @@ import { TranslationKey } from '../../i18n/catalogue';
 import { I18n } from '../../i18n/i18n.service';
 import { logSessionUrl } from '../../shared/staff-url';
 
-const SECTIONS = ['performance', 'sessions', 'reviews'] as const;
+const SECTIONS = ['plan', 'performance', 'sessions', 'reviews'] as const;
 
 /**
  * One place per athlete (AC-66): header, a searchable selector grouped by sport, and the sections as child routes.
@@ -69,6 +69,7 @@ const SECTIONS = ['performance', 'sessions', 'reviews'] as const;
 
     <nav class="sections tabs-inline" [attr.aria-label]="t('space.sectionsLabel')">
       <a [routerLink]="['/athletes', id()]" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ t('space.sections.overview') }}</a>
+      <a [routerLink]="['/athletes', id(), 'plan']" routerLinkActive="active">{{ t('space.sections.plan') }}</a>
       <a [routerLink]="['/athletes', id(), 'performance']" routerLinkActive="active">{{ t('space.sections.performance') }}</a>
       <a [routerLink]="['/athletes', id(), 'sessions']" routerLinkActive="active">{{ t('space.sections.sessions') }}</a>
       <a [routerLink]="['/athletes', id(), 'reviews']" routerLinkActive="active">{{ t('space.sections.reviews') }}</a>

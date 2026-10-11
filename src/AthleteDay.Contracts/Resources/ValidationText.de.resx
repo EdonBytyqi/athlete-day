@@ -29,4 +29,6 @@
   <data name="TextTooLong" xml:space="preserve"><value>Dieser Text darf höchstens {1} Zeichen lang sein.</value></data>
   <data name="WeeksRange" xml:space="preserve"><value>Der Zeitraum muss zwischen {1} und {2} Wochen liegen.</value></data>
   <data name="ReviewEmpty" xml:space="preserve"><value>Bitte mindestens einen Teil der Beurteilung ausfüllen.</value></data>
+  <data name="TooManySessions" xml:space="preserve"><value>Ein Tag kann höchstens {0} Einheiten haben.</value></data>
+  <data name="DayOfWeekRange" xml:space="preserve"><value>Der Wochentag muss zwischen 1 (Montag) und 7 (Sonntag) liegen.</value></data>
 </root>

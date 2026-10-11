@@ -139,3 +139,13 @@ input, select, textarea, .pill { background: var(--surface); }
     .form { padding: 1rem; }
     .actions button { width: 100%; }
 }
+
+/* ---- my week (AC-84) ---- */
+.plan-week { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.plan-day { padding: .8rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.plan-day h2 { font-size: 1rem; margin: 0 0 .3rem; }
+.plan-day ul { margin: .2rem 0; padding-left: 1.1rem; }
+.plan-day p { margin: .2rem 0 0; }
+.plan-day.changed { border-left: 4px solid var(--warn); }
+.plan-reason { color: var(--warn); font-weight: 600; font-size: .9rem; }
+.muted { color: var(--muted); }

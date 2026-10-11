@@ -352,6 +352,79 @@ namespace AthleteDay.Api.Data.Migrations
                     b.ToTable("PhysioNotes");
                 });
 
+            modelBuilder.Entity("AthleteDay.Api.Domain.PlanDayChange", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AthleteId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ChangedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AthleteId", "Date")
+                        .IsUnique();
+
+                    b.ToTable("PlanDayChanges");
+                });
+
+            modelBuilder.Entity("AthleteDay.Api.Domain.PlanTemplateSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AthleteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rpe")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AthleteId", "DayOfWeek", "Position");
+
+                    b.ToTable("PlanTemplateSessions");
+                });
+
             modelBuilder.Entity("AthleteDay.Api.Domain.ProgressReview", b =>
                 {
                     b.Property<int>("Id")
@@ -599,6 +672,63 @@ namespace AthleteDay.Api.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Athlete");
+                });
+
+            modelBuilder.Entity("AthleteDay.Api.Domain.PlanDayChange", b =>
+                {
+                    b.HasOne("AthleteDay.Api.Domain.Athlete", null)
+                        .WithMany()
+                        .HasForeignKey("AthleteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("AthleteDay.Api.Domain.PlanDayChangeSession", "Sessions", b1 =>
+                        {
+                            b1.Property<int>("PlanDayChangeId")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<int>("DurationMinutes")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Note")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
+                            b1.Property<int>("Position")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Rpe")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Type")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("nvarchar(32)");
+
+                            b1.HasKey("PlanDayChangeId", "Id");
+
+                            b1.ToTable("PlanDayChangeSessions", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlanDayChangeId");
+                        });
+
+                    b.Navigation("Sessions");
+                });
+
+            modelBuilder.Entity("AthleteDay.Api.Domain.PlanTemplateSession", b =>
+                {
+                    b.HasOne("AthleteDay.Api.Domain.Athlete", null)
+                        .WithMany()
+                        .HasForeignKey("AthleteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AthleteDay.Api.Domain.ProgressReview", b =>

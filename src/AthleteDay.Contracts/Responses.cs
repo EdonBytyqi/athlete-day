@@ -197,3 +197,25 @@ public sealed record ProgressReviewDto(
     string Author,
     DateTimeOffset CreatedAt,
     ReviewSnapshotDto Snapshot) : IAthleteScoped;
+
+// ---- Training plans (spec v1.8, ADR-14) ------------------------------------------------------------------
+
+public sealed record PlannedSessionDto(SessionType Type, int DurationMinutes, int Rpe, string? Note, int PlannedLoad);
+
+/// <summary>Weekdays are numbered 1 (Monday) to 7 (Sunday).</summary>
+public sealed record PlanTemplateDayDto(int DayOfWeek, IReadOnlyList<PlannedSessionDto> Sessions);
+
+/// <summary>The standard week: always seven days, some of them without sessions.</summary>
+public sealed record PlanTemplateDto(int AthleteId, IReadOnlyList<PlanTemplateDayDto> Days);
+
+public sealed record PlanDayDto(
+    DateOnly Date,
+    int DayOfWeek,
+    PlanDaySource Source,
+    string? Reason,
+    IReadOnlyList<PlannedSessionDto> Sessions,
+    int PlannedLoad,
+    int LoggedLoad,
+    int LoggedSessions);
+
+public sealed record WeekPlanDto(int AthleteId, DateOnly WeekStart, IReadOnlyList<PlanDayDto> Days, int PlannedLoad, int LoggedLoad);

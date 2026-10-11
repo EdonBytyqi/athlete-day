@@ -12,6 +12,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<SessionNote> SessionNotes => Set<SessionNote>();
     public DbSet<Goal> Goals => Set<Goal>();
     public DbSet<ProgressReview> ProgressReviews => Set<ProgressReview>();
+    public DbSet<PlanTemplateSession> PlanTemplateSessions => Set<PlanTemplateSession>();
+    public DbSet<PlanDayChange> PlanDayChanges => Set<PlanDayChange>();
     public DbSet<WellnessCheck> WellnessChecks => Set<WellnessCheck>();
     public DbSet<NutritionTarget> NutritionTargets => Set<NutritionTarget>();
     public DbSet<PhysioNote> PhysioNotes => Set<PhysioNote>();
@@ -81,6 +83,20 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             e.Property(r => r.SnapshotJson).HasMaxLength(-1); // nvarchar(max)
             e.HasOne<Athlete>().WithMany().HasForeignKey(r => r.AthleteId).OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(r => new { r.AthleteId, r.CreatedAt });
+        });
+
+        b.Entity<PlanTemplateSession>(e =>
+        {
+            e.HasOne<Athlete>().WithMany().HasForeignKey(t => t.AthleteId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(t => new { t.AthleteId, t.DayOfWeek, t.Position });
+        });
+
+        b.Entity<PlanDayChange>(e =>
+        {
+            e.HasOne<Athlete>().WithMany().HasForeignKey(c => c.AthleteId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(c => new { c.AthleteId, c.Date }).IsUnique();
+            // The sessions belong to the change and live and die with it.
+            e.OwnsMany(c => c.Sessions, s => s.ToTable("PlanDayChangeSessions"));
         });
 
         b.Entity<WellnessCheck>(e =>

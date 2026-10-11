@@ -97,4 +97,20 @@
   <data name="ApiAnswered" xml:space="preserve"><value>The API answered {0} {1}.</value></data>
   <data name="NotFoundTitle" xml:space="preserve"><value>Not found</value></data>
   <data name="NotFoundText" xml:space="preserve"><value>Sorry, the content you are looking for does not exist.</value></data>
+  <data name="NavMyWeek" xml:space="preserve"><value>My week</value></data>
+  <data name="MyWeekTitle" xml:space="preserve"><value>My training week</value></data>
+  <data name="MyWeekLead" xml:space="preserve"><value>Your plan from Monday to Sunday. Days your coach changed are marked.</value></data>
+  <data name="WeekOf" xml:space="preserve"><value>Week of {0}</value></data>
+  <data name="ChangedDay" xml:space="preserve"><value>Changed: {0}</value></data>
+  <data name="ChangedNoReason" xml:space="preserve"><value>Changed for this day</value></data>
+  <data name="RestDay" xml:space="preserve"><value>Rest day</value></data>
+  <data name="PlannedLoad" xml:space="preserve"><value>Planned load: {0} AU</value></data>
+  <data name="PlannedSession" xml:space="preserve"><value>{0} · {1} min · RPE {2}</value></data>
+  <data name="Day_1" xml:space="preserve"><value>Monday</value></data>
+  <data name="Day_2" xml:space="preserve"><value>Tuesday</value></data>
+  <data name="Day_3" xml:space="preserve"><value>Wednesday</value></data>
+  <data name="Day_4" xml:space="preserve"><value>Thursday</value></data>
+  <data name="Day_5" xml:space="preserve"><value>Friday</value></data>
+  <data name="Day_6" xml:space="preserve"><value>Saturday</value></data>
+  <data name="Day_7" xml:space="preserve"><value>Sunday</value></data>
 </root>

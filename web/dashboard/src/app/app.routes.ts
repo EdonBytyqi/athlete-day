@@ -10,6 +10,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/athlete-space/athlete-space.page').then((m) => m.AthleteSpacePage),
     children: [
       { path: '', loadComponent: () => import('./pages/athlete-space/overview.section').then((m) => m.OverviewSection) },
+      { path: 'plan', loadComponent: () => import('./pages/athlete-space/plan.section').then((m) => m.PlanSection) },
       { path: 'performance', loadComponent: () => import('./pages/athlete-space/performance.section').then((m) => m.PerformanceSection) },
       { path: 'sessions', loadComponent: () => import('./pages/athlete-space/sessions.section').then((m) => m.SessionsSection) },
       { path: 'reviews', loadComponent: () => import('./pages/athlete-space/reviews.section').then((m) => m.ReviewsSection) },

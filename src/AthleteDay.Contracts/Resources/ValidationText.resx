@@ -29,4 +29,6 @@
   <data name="TextTooLong" xml:space="preserve"><value>This text can be at most {1} characters.</value></data>
   <data name="WeeksRange" xml:space="preserve"><value>The period must be between {1} and {2} weeks.</value></data>
   <data name="ReviewEmpty" xml:space="preserve"><value>Write at least one part of the review.</value></data>
+  <data name="TooManySessions" xml:space="preserve"><value>A day can have at most {0} sessions.</value></data>
+  <data name="DayOfWeekRange" xml:space="preserve"><value>The weekday must be between 1 (Monday) and 7 (Sunday).</value></data>
 </root>
