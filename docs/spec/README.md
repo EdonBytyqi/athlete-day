@@ -1,6 +1,8 @@
 # Spec-driven development in this repo
 
 The specification is the source of truth. Code follows the spec, and CI checks that it does.
+The full guide, with a worked example and a proposal for AI automation (RAG, n8n), is
+[SPEC-DRIVEN-DEVELOPMENT.md](SPEC-DRIVEN-DEVELOPMENT.md).
 
 | File | What it is |
 |---|---|

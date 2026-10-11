@@ -14,6 +14,14 @@ event-driven import with a row-by-row validation report.
 | **Kitchen view: no health data** | **Device import: validation report** |
 | ![Kitchen](docs/screenshots/kitchen.png) | ![Imports](docs/screenshots/imports.png) |
 
+## Documentation
+
+| Document | For |
+|---|---|
+| [Reviewer guide](docs/REVIEWER-GUIDE.md) | Reviewing the code: how to run it, reading order, main flows, security, known limitations |
+| [Spec-driven development](docs/spec/SPEC-DRIVEN-DEVELOPMENT.md) | How a change goes from requirement to merged code, and how AI automation could support it |
+| [Requirements](docs/spec/requirements.md) · [OpenAPI contract](docs/spec/openapi.json) · [Decisions](docs/spec/decisions.md) | The specification itself |
+
 ## Stack
 
 | Layer | Technology |
