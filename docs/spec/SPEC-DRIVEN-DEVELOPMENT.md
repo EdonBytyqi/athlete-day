@@ -118,7 +118,8 @@ These are the places where AI review could help ([section 8.4](#84-spec-aware-pu
 
 ## 6. Worked example: v1.1 squad management
 
-PR #3 added squad management and dashboard usability, the first feature that followed the workflow from the start.
+Squad management and dashboard usability (spec v1.1) went through the full workflow. In the git history it is the
+three commits below, merged with a merge commit so their order stays visible.
 
 | Step | Commit | Content |
 |---|---|---|

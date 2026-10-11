@@ -281,7 +281,7 @@ create audit noise.
 ## 7. Spec, tests and CI
 
 The spec is the source of truth ([`docs/spec/README.md`](spec/README.md)). Since v1.1, every change is three commits on a
-feature branch: **spec → failing tests → code**. The squad management feature (PR #3) is the first full example.
+feature branch: **spec → failing tests → code**. The squad management feature (spec v1.1 and v1.2 in the git history) is a full example.
 
 | Level | Where | What it covers | Count |
 |---|---|---|---|
