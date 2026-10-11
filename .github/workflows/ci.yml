@@ -20,6 +20,8 @@ jobs:
         run: dotnet test tests/AthleteDay.UnitTests --no-build -c Release --filter Category=Spec
       - name: Unit tests
         run: dotnet test tests/AthleteDay.UnitTests --no-build -c Release --filter "Category!=Spec"
+      - name: Staff app component tests (bUnit)
+        run: dotnet test tests/AthleteDay.Staff.Tests --no-build -c Release
       # Testcontainers starts a throwaway SQL Server 2022 container on the runner.
       # Includes the OpenAPI contract check against docs/spec/openapi.json.
       - name: Integration and contract tests (real SQL Server)

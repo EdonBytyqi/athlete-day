@@ -12,13 +12,16 @@
     </div>
     <label class="persona">
         <span>Signed in as</span>
-        <select value="@Persona.Current.User" @onchange="e => Persona.Switch(e.Value!.ToString()!)">
+        @* A signed-in athlete still shows as the "Athlete" entry; the second list says which one. *@
+        <select value="@(Persona.Is(Roles.Athlete) ? PersonaState.AthleteChooser : Persona.Current.User)"
+                @onchange="e => Persona.Switch(e.Value!.ToString()!)">
             @foreach (var p in PersonaState.All)
             {
                 <option value="@p.User">@p.Label</option>
             }
         </select>
     </label>
+    <AthleteSignIn />
 </header>
 
 <nav class="tabs" aria-label="Forms">

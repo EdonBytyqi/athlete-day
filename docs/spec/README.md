@@ -25,7 +25,7 @@ Each step is its own commit on a feature branch, so the history shows the order.
 
 * **Traceability** (`tests/AthleteDay.UnitTests/SpecTraceabilityTests.cs`, `Category=Spec`):
   fails if an AC in `requirements.md` has no test, or if a test references an AC that is not in the spec.
-* **Tagging tests:** C# tests use `[Trait("AC", "AC-05")]`; Angular tests put the ID in the name: `it('[AC-03] …')`.
+* **Tagging tests:** C# tests (unit, integration and the bUnit staff tests) use `[Trait("AC", "AC-05")]`; Angular tests put the ID in the name: `it('[AC-03] …')`.
 * **Contract** (`OpenApiContractTests`, AC-29): fails if the API's OpenAPI document differs from `openapi.json`.
   After you change the contract on purpose and implement it, refresh the file with:
   ```powershell

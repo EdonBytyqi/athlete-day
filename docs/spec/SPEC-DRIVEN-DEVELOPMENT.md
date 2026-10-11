@@ -36,7 +36,7 @@ how it does it.
 | Requirements | [`requirements.md`](requirements.md) | Roles, scope, domain rules (definitions and thresholds), functional requirements with numbered ACs, non-functional requirements, change log |
 | HTTP contract | [`openapi.json`](openapi.json) | Every endpoint and schema of the API, exactly as the running API publishes it |
 | Decisions | [`decisions.md`](decisions.md) | Architecture decision records (ADRs): context → decision → consequence |
-| Tests | `tests/`, `web/dashboard/src/**/*.spec.ts` | Each test names the AC(s) it verifies |
+| Tests | `tests/` (unit, integration, staff app), `web/dashboard/src/**/*.spec.ts` | Each test names the AC(s) it verifies |
 
 ```mermaid
 flowchart LR
