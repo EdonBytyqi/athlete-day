@@ -227,4 +227,4 @@ Demo only: in production the athlete signs in with Entra ID and the identity alr
 | 1.1 | 2026-10-11 | F11 squad management (AC-32–AC-37) and F12 dashboard usability (AC-38–AC-42); age, sex, code and archive rules in section 4. |
 | 1.2 | 2026-10-11 | AC-32: concurrent adds get different codes. AC-36: the audit entry for a new athlete carries its id. Both found in review. |
 | 1.3 | 2026-10-11 | F13 wellness history (AC-43–AC-49); contract: `GET /api/athletes/{athleteId}/wellness`, schema `WellnessDayDto`. Written 2026-10-10 as v1.1 on a parallel branch and renumbered when rebased onto v1.2. |
-| 1.4 | 2026-10-11 | F14 athlete sign-in in the staff app (AC-50–AC-52). Numbered after F13 / v1.3 (wellness history), which is open as a separate PR. Adds the verification level *Staff* (bUnit component tests). |
+| 1.4 | 2026-10-11 | F14 athlete sign-in in the staff app (AC-50–AC-52). Adds the verification level *Staff* (bUnit component tests). |
