@@ -1,10 +1,11 @@
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { ApiService, describeError } from '../../api/api.service';
-import { LoadTrend, PhysioNote, Progress, Trend, TrendItem, TrendMetric, TrainingRestriction, WellnessDay } from '../../api/models';
+import { Insight, LoadTrend, PhysioNote, Progress, Trend, TrendItem, TrendMetric, TrainingRestriction, WellnessDay } from '../../api/models';
 import { PersonaService } from '../../api/persona.service';
 import { RealtimeService } from '../../api/realtime.service';
 import { TranslationKey } from '../../i18n/catalogue';
 import { I18n } from '../../i18n/i18n.service';
+import { InsightList } from '../../shared/insight-list';
 import { TrendChart } from '../../shared/trend-chart';
 import { WeeklyChart } from '../../shared/weekly-chart';
 
@@ -28,14 +29,20 @@ export function meaningOf(metric: TrendMetric, trend: Trend): Meaning {
 
 const ARROWS: Record<Trend, string> = { Up: '↑', Down: '↓', Stable: '→' };
 
-/** Overview of the athlete space (AC-68, AC-49): key figures, weekly chart, daily trend, wellness and physio notes. */
+/** Overview of the athlete space (AC-68, AC-49, AC-99): insights, key figures, weekly chart, daily trend, wellness and physio notes. */
 @Component({
   selector: 'app-overview-section',
-  imports: [TrendChart, WeeklyChart],
+  imports: [InsightList, TrendChart, WeeklyChart],
   template: `
     @if (error(); as message) {
       <p class="banner error" role="alert">{{ message }}</p>
     }
+
+    <section class="panel insights">
+      <h2>{{ t('insights.title') }}</h2>
+      <p class="muted">{{ t('insights.lead') }}</p>
+      <app-insight-list [insights]="insights()" />
+    </section>
 
     <section class="panel">
       <div class="section-head">
@@ -147,6 +154,7 @@ export class OverviewSection {
   protected readonly trend = signal<LoadTrend | null>(null);
   protected readonly wellness = signal<WellnessDay[]>([]);
   protected readonly notes = signal<PhysioNote[]>([]);
+  protected readonly insights = signal<Insight[]>([]);
   protected readonly error = signal<string | null>(null);
   protected readonly isPhysio = computed(() => this.persona.current().role === 'Physio');
   // Spec F13 AC-46/AC-49: wellness history is for coach and physio only.
@@ -218,6 +226,7 @@ export class OverviewSection {
 
   private loadRest(athleteId: number, role: string): void {
     this.api.loadTrend(athleteId).subscribe({ next: (t) => this.trend.set(t), error: () => this.trend.set(null) });
+    this.api.insights(athleteId).subscribe({ next: (i) => this.insights.set(i), error: () => this.insights.set([]) });
 
     if (role === 'Coach' || role === 'Physio') {
       this.api.wellness(athleteId).subscribe({ next: (w) => this.wellness.set(w), error: () => this.wellness.set([]) });

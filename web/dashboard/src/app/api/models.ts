@@ -324,3 +324,42 @@ export interface AthleteDocument {
   uploadedBy: string;
   uploadedAt: string;
 }
+
+// ---- Versus mode and insights (spec v1.10) ----
+
+export type VersusWinner = 'A' | 'B' | 'Even' | 'NotRanked';
+
+export interface VersusMetric {
+  key: string;
+  unit: string | null;
+  a: number | null;
+  b: number | null;
+  winner: VersusWinner;
+}
+
+export interface Versus {
+  from: string;
+  to: string;
+  a: AthleteSummary;
+  b: AthleteSummary;
+  metrics: VersusMetric[];
+}
+
+export type InsightKind =
+  | 'LoadSpike'
+  | 'SleepFalling'
+  | 'SorenessRising'
+  | 'GoalAtRisk'
+  | 'PersonalBest'
+  | 'LoadDrop'
+  | 'MissingCheckIns'
+  | 'PlanOffTrack';
+
+export type InsightTone = 'Attention' | 'Positive' | 'Info';
+
+export interface Insight {
+  kind: InsightKind;
+  tone: InsightTone;
+  testType: string | null;
+  figures: Record<string, number>;
+}

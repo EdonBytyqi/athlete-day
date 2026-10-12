@@ -60,7 +60,13 @@ public static class PlanEndpoints
             case Access.Denied: return TypedResults.Forbid();
         }
 
-        var monday = ProgressCalculator.WeekStart(start ?? clock.Today);
+        return TypedResults.Ok(await WeekAsync(db, athleteId, start ?? clock.Today, ct));
+    }
+
+    /// <summary>The plan week containing <paramref name="anyDay"/>, planned against logged; also used by the insights.</summary>
+    internal static async Task<WeekPlanDto> WeekAsync(AppDbContext db, int athleteId, DateOnly anyDay, CancellationToken ct)
+    {
+        var monday = ProgressCalculator.WeekStart(anyDay);
         var sunday = monday.AddDays(6);
         var changes = await db.PlanDayChanges.AsNoTracking()
             .Where(c => c.AthleteId == athleteId && c.Date >= monday && c.Date <= sunday)
@@ -70,12 +76,12 @@ public static class PlanEndpoints
             .Select(s => new DailyLoad(s.Date, s.Rpe * s.DurationMinutes))
             .ToListAsync(ct);
 
-        return TypedResults.Ok(PlanCalculator.BuildWeek(
+        return PlanCalculator.BuildWeek(
             athleteId, monday,
             await TemplateAsync(db, athleteId, ct),
             changes.ToDictionary(c => c.Date, c => new DayChange(c.Reason,
                 c.Sessions.OrderBy(s => s.Position).Select(s => PlanCalculator.Planned(s.Type, s.DurationMinutes, s.Rpe, s.Note)).ToList())),
-            logged));
+            logged);
     }
 
     private static async Task<Results<Ok<PlanTemplateDto>, NotFound, ForbidHttpResult>> GetTemplate(

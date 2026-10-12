@@ -142,3 +142,17 @@ Short records of the decisions that shape the code. Format: context → decision
 * **Consequence:** one place for the rule and one audit trail. Large downloads cost API bandwidth, which is fine at
   squad scale. Blob names carry no personal data. In production the container would add malware scanning (e.g.
   Defender for Storage) and soft delete; both are configuration, not code.
+
+## ADR-16 Insights are rules with their figures, not generated text
+
+* **Context:** coaches want hints ("sleep is dropping", "new personal best") without reading every chart. A language
+  model could write them, but it would send health data to an outside service and could state things the data does
+  not support (AC-97 – AC-99).
+* **Decision:** a fixed set of rules in `AthleteDay.Core` (`InsightRules`), each with a documented threshold (spec
+  section 4). An insight carries its kind, a tone and the figures that triggered it; the client turns that into a
+  sentence in English or German. Versus mode follows the same idea: the ranking rules are data (direction per metric),
+  not judgement.
+* **Consequence:** every insight is explainable and unit-tested, no data leaves the system, and both languages say the
+  same thing. New insights need code and a spec change; the rules are deliberately conservative to avoid alarm fatigue.
+  A generated summary could be added later on top of these figures (see SPEC-DRIVEN-DEVELOPMENT.md), not instead of
+  them.

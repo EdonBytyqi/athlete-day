@@ -20,4 +20,5 @@
   <data name="DocumentType" xml:space="preserve"><value>Choose a document type: Medical, GovernmentId, Certificate or General.</value></data>
   <data name="DocumentTitle" xml:space="preserve"><value>Enter a title of 1 to 100 characters.</value></data>
   <data name="DocumentFile" xml:space="preserve"><value>Choose a PDF, JPEG or PNG file of up to 10 MB.</value></data>
+  <data name="VersusSameAthlete" xml:space="preserve"><value>Choose two different athletes.</value></data>
 </root>

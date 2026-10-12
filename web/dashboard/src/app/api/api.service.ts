@@ -17,6 +17,7 @@ import {
   AuditEntry,
   DashboardRow,
   ImportJob,
+  Insight,
   KitchenRow,
   LoadTrend,
   Measurement,
@@ -25,6 +26,7 @@ import {
   PlanTemplate,
   Sport,
   TrainingSession,
+  Versus,
   WeekPlan,
   WellnessDay,
 } from './models';
@@ -69,6 +71,16 @@ export class ApiService {
 
   addReview(athleteId: number, review: ReviewRequest) {
     return this.http.post<ProgressReview>(`/api/athletes/${athleteId}/reviews`, review);
+  }
+
+  // ---- Versus mode and insights (spec v1.10) ----
+
+  versus(a: number, b: number, from: string, to: string) {
+    return this.http.get<Versus>('/api/versus', { params: { a, b, from, to } });
+  }
+
+  insights(athleteId: number) {
+    return this.http.get<Insight[]>(`/api/athletes/${athleteId}/insights`);
   }
 
   // ---- athlete documents (spec v1.9) ----

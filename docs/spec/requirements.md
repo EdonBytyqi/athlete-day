@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.9 |
+| Version | 1.10 |
 | Status | Current |
 | Date | 2026-10-12 |
 
@@ -30,7 +30,7 @@ Athlete Day records one athlete's day across these disciplines and shows each ro
 
 **In scope:** session logging, wellness checks, load monitoring, readiness flags, nutrition targets, kitchen view,
 physio notes, device CSV import, audit log, live dashboard updates, squad management (add, edit and archive athletes),
-sorting and filtering the squad dashboard, athlete documents, English and German, a light layout that works on phones, tablets and
+sorting and filtering the squad dashboard, athlete documents, comparing two athletes, rule-based insights, English and German, a light layout that works on phones, tablets and
 desktops.
 
 **Out of scope (v1):** real sign-in (demo personas only), Azure deployment, notifications, athlete-facing dashboard,
@@ -62,6 +62,8 @@ medical advice of any kind.
 | Goal status | *Reached* when the latest result meets the target; *behind* when the goal date has passed without that; otherwise *open*. |
 | Plan day | The standard week's sessions for that weekday, unless the coach changed the date: then exactly the changed sessions (none = cancelled day). Planned load = planned RPE × planned minutes. |
 | Document type | *Medical* (reports, scans): physio only. *Government ID* (passport, ID card): admin only. *Certificate* (licence, anti-doping course) and *General*: coach and physio. A role sees, uploads, downloads and deletes exactly the types it may see. |
+| Versus ranking | Per metric, the better of two athletes: higher sleep and mood, lower soreness, more check-in days, and the device test direction for test results (best result in the period). Load, sessions, average load and load ratio are not ranked: more is not better. Equal values are *even*; a value missing on either side is not ranked. |
+| Insight | A finding computed from the athlete's own data, with the figures behind it. *Load spike*: ratio > 1.3; *load drop*: ratio < 0.8 (ratio as of today). *Sleep falling*: the 7-day sleep average is at least 0.5 h below the average of the 21 days before; *soreness rising*: the 7-day soreness average is at least 0.5 above the 21 days before (each needs 3 checks in both windows). *Missing check-ins*: fewer than 4 wellness checks in the last 7 days. *Personal best*: a device result of the last 14 days better than every earlier result of that test, with at least 2 earlier results. *Goal at risk*: an open goal whose date is within the next 21 days and whose latest result does not meet it. *Plan off track*: in the last complete week, logged load differs from planned load by more than 25 % (only when load was planned). Order: attention (spike, sleep, soreness, goal), then positive (personal best), then info (drop, check-ins, plan). |
 | Document file | PDF, JPEG or PNG, recognised by its first bytes (not by the name or the declared type), 1 byte to 10 MB. Stored in Blob Storage under a random name; the original file name is kept only as metadata. |
 
 ## 5. Functional requirements
@@ -333,6 +335,27 @@ nobody else sees them.*
 | AC-91 | The athlete space has a Documents section for coach and physio: the list (type, title, file name, size, date, uploader), an upload form that offers only the types the role may upload, download, and delete after a confirmation. Other roles see a short notice instead. | Angular |
 | AC-92 | The admin keeps identity documents on the Settings page: choose an athlete, then list, upload, download and delete their government IDs. For this the admin may read the athlete list (names and codes only). | Angular, Integration |
 
+### F25 Versus mode
+
+*As a coach, I want to put two athletes side by side, so I can see who is ahead where and talk about it.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-93 | Coach, physio and nutrition compare two different athletes over a period (the date range rules of section 4; default the last 28 days). For each athlete: total load, sessions, average daily load, load ratio at the end of the period, average sleep, soreness and mood, check-in days, and the best result of each device test in the period. Other roles get 403; the same athlete twice or an invalid period returns 400; an unknown or archived athlete returns 404. | Unit, Integration |
+| AC-94 | Each metric says which athlete is better by the Versus ranking (section 4): A, B, even, or not ranked. | Unit |
+| AC-95 | Reading a comparison writes an audit entry for each of the two athletes. | Integration |
+| AC-96 | The Versus page lets the user choose two athletes (grouped by sport) and a period of 7, 28 or 90 days, and shows the metrics side by side with the better value highlighted. *Compare* in the athlete space opens it with that athlete chosen. | Angular |
+
+### F26 Insights
+
+*As a coach, I want the app to point me to what changed for an athlete, with the numbers, so I don't miss it.*
+
+| ID | Acceptance criterion | Verified by |
+|---|---|---|
+| AC-97 | The insight rules of section 4 are computed from load, wellness, device tests, goals and the training plan. Each insight has a kind, a tone (attention, positive, info), the test type where it applies, and the figures that triggered it. | Unit |
+| AC-98 | An athlete's current insights are read by coach, physio and nutrition, in the order of section 4; other roles get 403; reads are audited. | Integration |
+| AC-99 | The Overview section of the athlete space lists the insights as plain sentences with their figures, in English or German, marked by tone; it says so when there are none. | Angular |
+
 ## 6. Non-functional requirements
 
 | ID | Requirement |
@@ -359,3 +382,4 @@ nobody else sees them.*
 | 1.7 | 2026-10-11 | F19 athlete space (AC-66–AC-68), F20 benchmarks and goals (AC-69–AC-71), F21 session notes (AC-72–AC-74), F22 progress reviews (AC-75–AC-77); week, trend, test direction and goal status rules in section 4. Phase 3. |
 | 1.8 | 2026-10-11 | F23 weekly training plans (AC-78–AC-84); plan day rule in section 4. Phase 4. |
 | 1.9 | 2026-10-12 | F24 athlete documents (AC-85–AC-92); document type and file rules in section 4; admin keeps identity documents. Phase 5. |
+| 1.10 | 2026-10-12 | F25 Versus mode (AC-93–AC-96), F26 insights (AC-97–AC-99); Versus ranking and insight rules in section 4. Phase 6. |

@@ -25,14 +25,16 @@ public sealed class AuditFilter(string resource) : IEndpointFilter
             return result;
 
         // The route names the athlete (…/athletes/{athleteId}); a create has no id in the route yet, so take it
-        // from the response instead.
-        int? athleteId = http.Request.RouteValues.TryGetValue("athleteId", out var raw) && int.TryParse(raw?.ToString(), out var id)
-            ? id
-            : outcome is IValueHttpResult { Value: IAthleteScoped scoped } ? scoped.AthleteId : null;
+        // from the response instead. A response about several athletes (a comparison) gets one entry per athlete.
+        IReadOnlyList<int?> athleteIds =
+            http.Request.RouteValues.TryGetValue("athleteId", out var raw) && int.TryParse(raw?.ToString(), out var id) ? [id]
+            : outcome is IValueHttpResult { Value: IAthleteScoped scoped } ? [scoped.AthleteId]
+            : outcome is IValueHttpResult { Value: IAthletesScoped several } ? several.AthleteIds.Select(i => (int?)i).ToList()
+            : [null];
 
         var db = http.RequestServices.GetRequiredService<AppDbContext>();
         var clock = http.RequestServices.GetRequiredService<AppClock>();
-        db.AuditEntries.Add(new AuditEntry
+        db.AuditEntries.AddRange(athleteIds.Select(athleteId => new AuditEntry
         {
             At = clock.Now,
             User = http.User.UserName(),
@@ -40,7 +42,7 @@ public sealed class AuditFilter(string resource) : IEndpointFilter
             Action = http.Request.Method == HttpMethods.Get ? "Viewed" : "Changed",
             Resource = resource,
             AthleteId = athleteId
-        });
+        }));
         await db.SaveChangesAsync(http.RequestAborted);
 
         return result;
